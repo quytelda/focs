@@ -114,27 +114,26 @@ static bool __insert_element(struct linked_list * list, struct element * current
 	return true;
 }
 
-static bool __delete_element(struct linked_list * list, size_t pos)
+static struct element * __delete_element(struct linked_list * list, size_t pos)
 {
 	struct element * current;
 
 	if(pos >= list->length)
-		return false;
+		return NULL;
 
 	if(pos == 0) {
-		__pop_front(list);
+		current = __pop_front(list);
 	} else if(pos == list->length) {
-		__pop_back(list);
+		current = __pop_back(list);
 	} else {
 		current = __lookup_element(list, pos);
-
 		current->prev->next = current->next;
 		current->next->prev = current->prev;
 
 		(list->length)--;
 	}
 
-	return true;
+	return current;
 }
 
 struct linked_list * linklist_alloc(void)
