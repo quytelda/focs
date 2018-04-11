@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-std=gnu99 -I . -fpic -Wall -pthread
+CFLAGS=-std=c99 -I . -fpic -Wall -pedantic -lpthread
 
 BIN=focs.so
 SRCS=list/linked_list.c sync/rwlock.c
