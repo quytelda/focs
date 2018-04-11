@@ -2,7 +2,7 @@ CC=gcc
 CFLAGS=-std=gnu99 -I . -fpic -Wall -pthread
 
 BIN=focs.so
-SRCS=list/linked_list.c
+SRCS=list/linked_list.c sync/rwlock.c
 OBJS=$(SRCS:.c=.o)
 
 .PHONY: clean debug
