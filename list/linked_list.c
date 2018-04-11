@@ -33,17 +33,6 @@ static struct element * __lookup_element(struct linked_list * list, size_t pos)
 	return current;
 }
 
-static void __map(struct linked_list * list, union data (* fn)(union data data))
-{
-	struct element * current;
-
-	current = list->head;
-	for(int i = 0; i < list->length; i++) {
-		current->data = fn(current->data);
-		current = current->next;
-	}
-}
-
 static void __push_front(struct linked_list * list, struct element * current)
 {
 	if(list->head)
