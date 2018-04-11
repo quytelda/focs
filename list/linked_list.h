@@ -17,6 +17,9 @@
  * along with focs.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef __LINKED_LIST_H
+#define __LINKED_LIST_H
+
 #include "include/focs.h"
 
 struct element {
@@ -38,3 +41,4 @@ struct linked_list {
 
 struct linked_list * linklist_alloc(void);
 void linklist_free(struct linked_list * ls);
+#endif /* __LINKED_LIST_H */
