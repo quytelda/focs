@@ -1,8 +1,9 @@
 CC=gcc
-CFLAGS=-std=c99 -I . -fpic -Wall -pedantic -lpthread
+SRC_DIR=src/
+CFLAGS=-std=c99 -I $(SRC_DIR) -fpic -Wall -pedantic -lpthread
 
 BIN=focs.so
-SRCS=list/linked_list.c sync/rwlock.c
+SRCS=$(addprefix $(SRC_DIR), list/linked_list.c sync/rwlock.c)
 OBJS=$(SRCS:.c=.o)
 
 .PHONY: clean debug
