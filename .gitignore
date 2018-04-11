@@ -1,0 +1,20 @@
+# normal rules
+.*
+*.bz2
+*.gz
+*.lz4
+*.lzma
+*.lzo
+*.o
+*.patch
+*.so
+*.tar
+*.xz
+
+# dotfiles
+!.gitignore
+
+# temporary files
+*.orig
+*~
+\#*#
