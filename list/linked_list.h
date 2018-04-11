@@ -21,6 +21,7 @@
 #define __LINKED_LIST_H
 
 #include "include/focs.h"
+#include "sync/rwlock.h"
 
 struct element {
 	struct element * next;
@@ -32,8 +33,9 @@ struct element {
 struct linked_list {
 	struct element * head;
 	struct element * tail;
-
 	size_t length;
+
+	struct rwlock rwlock;
 };
 
 #define linklist_foreach(list, current)					\

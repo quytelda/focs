@@ -156,6 +156,8 @@ void linklist_free(struct linked_list * list)
 	struct element * current;
 	struct element * next;
 
+	rwlock_writer_entry(&list->rwlock);
+
 	list->length = 0;
 
 	for(current = list->head; current; current = next) {
@@ -164,4 +166,6 @@ void linklist_free(struct linked_list * list)
 	}
 
 	free_null(list);
+
+	rwlock_writer_exit(&list->rwlock);
 }
