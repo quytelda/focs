@@ -39,6 +39,6 @@ struct linked_list {
 #define linklist_foreach(list, current)					\
 	for(current = list->head; current; current = current->next)
 
-struct linked_list * linklist_alloc(void);
+int linklist_alloc(struct linked_list * list);
 void linklist_free(struct linked_list * ls);
 #endif /* __LINKED_LIST_H */

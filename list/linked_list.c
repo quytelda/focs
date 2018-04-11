@@ -136,16 +136,19 @@ static struct element * __delete_element(struct linked_list * list, size_t pos)
 	return current;
 }
 
-struct linked_list * linklist_alloc(void)
+int linklist_alloc(struct linked_list * list)
 {
-	struct linked_list * ls;
+	int err;
 
-	ls = malloc(sizeof(*ls));
-	ls->head = NULL;
-	ls->tail = NULL;
-	ls->length = 0;
+	list = calloc(1, sizeof(*list));
+	err = rwlock_alloc(&list->rwlock);
+	if(err)
+		goto exit;
 
-	return ls;
+exit:
+
+	free_null(list);
+	return err;
 }
 
 void linklist_free(struct linked_list * list)
