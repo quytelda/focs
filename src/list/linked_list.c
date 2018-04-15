@@ -83,7 +83,11 @@ static struct element * __pop_front(struct linked_list * list)
 
 	current = list->head;
 	list->head = current->next;
-	list->head->prev = NULL;
+
+	if(list->head)
+		list->head->prev = NULL;
+	else
+		list->tail = NULL;
 
 	(list->length)--;
 
@@ -114,7 +118,11 @@ static struct element * __pop_back(struct linked_list * list)
 
 	current = list->tail;
 	list->tail = current->prev;
-	list->tail->next = NULL;
+
+	if(list->tail)
+		list->tail->next = NULL;
+	else
+		list->head = NULL;
 
 	(list->length)--;
 
