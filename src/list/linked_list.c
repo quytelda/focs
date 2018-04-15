@@ -78,7 +78,7 @@ static struct element * __pop_head(struct linked_list * list)
 {
 	struct element * current;
 
-	if(!list->head)
+	if(list->length == 0)
 		return NULL;
 
 	current = list->head;
@@ -113,7 +113,7 @@ static struct element * __pop_tail(struct linked_list * list)
 {
 	struct element * current;
 
-	if(!list->tail)
+	if(list->length == 0)
 		return NULL;
 
 	current = list->tail;
