@@ -27,13 +27,14 @@ struct element {
 	struct element * next;
 	struct element * prev;
 
-	union data data;
+	void * data;
 };
 
 struct linked_list {
 	struct element * head;
 	struct element * tail;
 	size_t length;
+	size_t data_size;
 
 	struct rwlock rwlock;
 };
@@ -41,23 +42,23 @@ struct linked_list {
 #define linklist_foreach(list, current)					\
 	for(current = list->head; current; current = current->next)
 
-int linklist_alloc(struct linked_list ** list);
+int linklist_alloc(struct linked_list ** list, size_t data_size);
 void linklist_free(struct linked_list ** list);
 
 bool linklist_null(struct linked_list * list);
-void linklist_push_head(struct linked_list * list, union data data);
-void linklist_push_tail(struct linked_list * list, union data data);
-union data linklist_pop_head(struct linked_list * list);
-union data linklist_pop_tail(struct linked_list * list);
-void linklist_insert(struct linked_list * list, union data data, size_t pos);
-union data linklist_delete(struct linked_list * list, size_t pos);
-union data linklist_fetch(struct linked_list * list, size_t pos);
+void linklist_push_head(struct linked_list * list, void * data);
+void linklist_push_tail(struct linked_list * list, void * data);
+void * linklist_pop_head(struct linked_list * list);
+void * linklist_pop_tail(struct linked_list * list);
+void linklist_insert(struct linked_list * list, void * data, size_t pos);
+void * linklist_delete(struct linked_list * list, size_t pos);
+void * linklist_fetch(struct linked_list * list, size_t pos);
 void linklist_map(struct linked_list * list,
-		  union data (* fn)(union data input));
-union data linklist_foldr(struct linked_list * list,
-			  union data (* fn)(union data a, union data b),
-			  union data init);
-union data linklist_foldl(struct linked_list * list,
-			  union data (* fn)(union data a, union data b),
-			  union data init);
+		  void * (* fn)(void * data));
+void * linklist_foldr(struct linked_list * list,
+			  void * (* fn)(void * a, void * b),
+			  void * init);
+void * linklist_foldl(struct linked_list * list,
+			  void * (* fn)(void * a, void * b),
+			  void * init);
 #endif /* __LINKED_LIST_H */

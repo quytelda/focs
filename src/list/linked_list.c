@@ -20,6 +20,32 @@
 
 #include "list/linked_list.h"
 
+static struct element * __element_init(struct linked_list * list, void * data)
+{
+	struct  element * elem;
+
+	elem = malloc(sizeof(*elem));
+	if(!elem)
+		goto exit;
+
+	elem->data = malloc(list->data_size);
+	if(!elem->data)
+		goto exit;
+
+	memcpy(elem->data, data, list->data_size);
+
+	return elem;
+
+exit:
+	if(elem)
+		free(elem);
+
+	if(elem->data)
+		free(elem->data);
+
+	return NULL;
+}
+
 static struct element * __lookup_element(struct linked_list * list, size_t pos)
 {
 	struct element * current;
@@ -136,7 +162,7 @@ static struct element * __delete_element(struct linked_list * list, size_t pos)
 	return current;
 }
 
-int linklist_alloc(struct linked_list ** list)
+int linklist_alloc(struct linked_list ** list, size_t data_size)
 {
 	int err;
 
@@ -146,6 +172,7 @@ int linklist_alloc(struct linked_list ** list)
 		goto exit;
 	}
 
+	(*list)->data_size = data_size;
 	err = rwlock_alloc(&(*list)->rwlock);
 	if(err)
 		goto exit;
@@ -168,6 +195,7 @@ void linklist_free(struct linked_list ** list)
 
 	for(current = (*list)->head; current; current = next) {
 		next = current->next;
+		free(current->data);
 		free(current);
 	}
 
@@ -187,31 +215,29 @@ bool linklist_null(struct linked_list * list)
 	return null;
 }
 
-void linklist_push_head(struct linked_list * list, union data data)
+void linklist_push_head(struct linked_list * list, void * data)
 {
 	struct element * current;
 
-	current = malloc(sizeof(*current));
-	current->data = data;
+	current = __element_init(list, data);
 
 	rwlock_writer_entry(&list->rwlock);
 	__push_front(list, current);
 	rwlock_writer_exit(&list->rwlock);
 }
 
-void linklist_push_tail(struct linked_list * list, union data data)
+void linklist_push_tail(struct linked_list * list, void * data)
 {
 	struct element * current;
 
-	current = malloc(sizeof(*current));
-	current->data = data;
+	current = __element_init(list, data);
 
 	rwlock_writer_entry(&list->rwlock);
 	__push_back(list, current);
 	rwlock_writer_exit(&list->rwlock);
 }
 
-union data linklist_pop_head(struct linked_list * list)
+void * linklist_pop_head(struct linked_list * list)
 {
 	struct element * current;
 
@@ -222,7 +248,7 @@ union data linklist_pop_head(struct linked_list * list)
 	return current->data;
 }
 
-union data linklist_pop_tail(struct linked_list * list)
+void * linklist_pop_tail(struct linked_list * list)
 {
 	struct element * current;
 
@@ -233,19 +259,18 @@ union data linklist_pop_tail(struct linked_list * list)
 	return current->data;
 }
 
-void linklist_insert(struct linked_list * list, union data data, size_t pos)
+void linklist_insert(struct linked_list * list, void * data, size_t pos)
 {
 	struct element * current;
 
-	current = malloc(sizeof(*current));
-	current->data = data;
+	current = __element_init(list, data);
 
 	rwlock_writer_entry(&list->rwlock);
 	__insert_element(list, current, pos);
 	rwlock_writer_exit(&list->rwlock);
 }
 
-union data linklist_delete(struct linked_list * list, size_t pos)
+void * linklist_delete(struct linked_list * list, size_t pos)
 {
 	struct element * current;
 
@@ -256,7 +281,7 @@ union data linklist_delete(struct linked_list * list, size_t pos)
 	return current->data;
 }
 
-union data linklist_fetch(struct linked_list * list, size_t pos)
+void * linklist_fetch(struct linked_list * list, size_t pos)
 {
 	struct element * current;
 
@@ -268,7 +293,7 @@ union data linklist_fetch(struct linked_list * list, size_t pos)
 }
 
 void linklist_map(struct linked_list * list,
-		  union data (* fn)(union data input))
+		  void * (* fn)(void * data))
 {
 	struct element * current;
 
@@ -282,12 +307,12 @@ void linklist_map(struct linked_list * list,
  * linklist_foldr() - Right associative fold for linked lists.
  * fn(list[0], fn(list[1], fn(list[2], ...)))
  */
-union data linklist_foldr(struct linked_list * list,
-			  union data (* fn)(union data a, union data b),
-			  union data init)
+void * linklist_foldr(struct linked_list * list,
+			  void * (* fn)(void * a, void * b),
+			  void * init)
 {
 	struct element * current;
-	union data sum = init;
+	void * sum = init;
 
 	rwlock_writer_entry(&list->rwlock);
 	linklist_foreach(list, current)
@@ -301,12 +326,12 @@ union data linklist_foldr(struct linked_list * list,
  * linklist_foldl() - Left associative fold for linked lists.
  * fn(fn(fn(..., list[0]), list[1]), list[2])
  */
-union data linklist_foldl(struct linked_list * list,
-			  union data (* fn)(union data a, union data b),
-			  union data init)
+void * linklist_foldl(struct linked_list * list,
+			  void * (* fn)(void * a, void * b),
+			  void * init)
 {
 	struct element * current;
-	union data sum = init;
+	void * sum = init;
 
 	rwlock_writer_entry(&list->rwlock);
 	linklist_foreach(list, current)
