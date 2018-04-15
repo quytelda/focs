@@ -55,7 +55,7 @@ void rwlock_free(struct rwlock * rwlock)
 	pthread_mutex_destroy(&rwlock->lock);
 	pthread_cond_destroy(&rwlock->cond);
 
-	free_null(rwlock);
+	free(rwlock);
 }
 
 void rwlock_writer_entry(struct rwlock * rwlock)

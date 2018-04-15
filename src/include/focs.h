@@ -29,9 +29,3 @@ union data {
 	double dec;
 	void * ptr;
 };
-
-inline void free_null(void * ptr)
-{
-	free(ptr);
-	ptr = NULL;
-}
