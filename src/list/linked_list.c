@@ -136,38 +136,44 @@ static struct element * __delete_element(struct linked_list * list, size_t pos)
 	return current;
 }
 
-int linklist_alloc(struct linked_list * list)
+int linklist_alloc(struct linked_list ** list)
 {
 	int err;
 
-	list = calloc(1, sizeof(*list));
-	err = rwlock_alloc(&list->rwlock);
+	*list = calloc(1, sizeof(**list));
+	if(!*list) {
+		err = -ENOMEM;
+		goto exit;
+	}
+
+	err = rwlock_alloc(&(*list)->rwlock);
 	if(err)
 		goto exit;
 
-exit:
+	return 0;
 
-	free_null(list);
+exit:
+	free(*list);
 	return err;
 }
 
-void linklist_free(struct linked_list * list)
+void linklist_free(struct linked_list ** list)
 {
 	struct element * current;
 	struct element * next;
 
-	rwlock_writer_entry(&list->rwlock);
+	rwlock_writer_entry(&(*list)->rwlock);
 
-	list->length = 0;
+	(*list)->length = 0;
 
-	for(current = list->head; current; current = next) {
+	for(current = (*list)->head; current; current = next) {
 		next = current->next;
-		free_null(current);
+		free(current);
 	}
 
-	free_null(list);
+	free(*list);
 
-	rwlock_writer_exit(&list->rwlock);
+	rwlock_writer_exit(&(*list)->rwlock);
 }
 
 bool linklist_null(struct linked_list * list)

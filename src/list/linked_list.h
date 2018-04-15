@@ -41,8 +41,8 @@ struct linked_list {
 #define linklist_foreach(list, current)					\
 	for(current = list->head; current; current = current->next)
 
-int linklist_alloc(struct linked_list * list);
-void linklist_free(struct linked_list * list);
+int linklist_alloc(struct linked_list ** list);
+void linklist_free(struct linked_list ** list);
 
 bool linklist_null(struct linked_list * list);
 void linklist_push_head(struct linked_list * list, union data data);
