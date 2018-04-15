@@ -59,7 +59,7 @@ static struct element * __lookup_element(struct linked_list * list, size_t pos)
 	return current;
 }
 
-static void __push_front(struct linked_list * list, struct element * current)
+static void __push_head(struct linked_list * list, struct element * current)
 {
 	if(list->head)
 		list->head->prev = current;
@@ -74,7 +74,7 @@ static void __push_front(struct linked_list * list, struct element * current)
 	(list->length)++;
 }
 
-static struct element * __pop_front(struct linked_list * list)
+static struct element * __pop_head(struct linked_list * list)
 {
 	struct element * current;
 
@@ -94,7 +94,7 @@ static struct element * __pop_front(struct linked_list * list)
 	return current;
 }
 
-static void __push_back(struct linked_list * list, struct element * current)
+static void __push_tail(struct linked_list * list, struct element * current)
 {
 	if(list->tail)
 		list->tail->next = current;
@@ -109,7 +109,7 @@ static void __push_back(struct linked_list * list, struct element * current)
 	(list->length)++;
 }
 
-static struct element * __pop_back(struct linked_list * list)
+static struct element * __pop_tail(struct linked_list * list)
 {
 	struct element * current;
 
@@ -137,9 +137,9 @@ static bool __insert_element(struct linked_list * list, struct element * current
 		return false;
 
 	if(pos == 0) {
-		__push_front(list, current);
+		__push_head(list, current);
 	} else if(pos == list->length) {
-		__push_back(list, current);
+		__push_tail(list, current);
 	} else {
 		prev = __lookup_element(list, pos - 1);
 
@@ -162,9 +162,9 @@ static struct element * __delete_element(struct linked_list * list, size_t pos)
 		return NULL;
 
 	if(pos == 0) {
-		current = __pop_front(list);
+		current = __pop_head(list);
 	} else if(pos == list->length) {
-		current = __pop_back(list);
+		current = __pop_tail(list);
 	} else {
 		current = __lookup_element(list, pos);
 		current->prev->next = current->next;
@@ -236,7 +236,7 @@ void linklist_push_head(struct linked_list * list, void * data)
 	current = __element_init(list, data);
 
 	rwlock_writer_entry(&list->rwlock);
-	__push_front(list, current);
+	__push_head(list, current);
 	rwlock_writer_exit(&list->rwlock);
 }
 
@@ -247,7 +247,7 @@ void linklist_push_tail(struct linked_list * list, void * data)
 	current = __element_init(list, data);
 
 	rwlock_writer_entry(&list->rwlock);
-	__push_back(list, current);
+	__push_tail(list, current);
 	rwlock_writer_exit(&list->rwlock);
 }
 
@@ -256,7 +256,7 @@ void * linklist_pop_head(struct linked_list * list)
 	struct element * current;
 
 	rwlock_writer_entry(&list->rwlock);
-	current = __pop_front(list);
+	current = __pop_head(list);
 	rwlock_writer_exit(&list->rwlock);
 
 	return current->data;
@@ -267,7 +267,7 @@ void * linklist_pop_tail(struct linked_list * list)
 	struct element * current;
 
 	rwlock_writer_entry(&list->rwlock);
-	current = __pop_back(list);
+	current = __pop_tail(list);
 	rwlock_writer_exit(&list->rwlock);
 
 	return current->data;
