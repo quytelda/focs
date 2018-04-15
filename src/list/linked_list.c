@@ -68,6 +68,9 @@ static void __push_front(struct linked_list * list, struct element * current)
 	current->prev = NULL;
 	list->head = current;
 
+	if(!list->tail)
+		list->tail = current;
+
 	(list->length)++;
 }
 
@@ -95,6 +98,9 @@ static void __push_back(struct linked_list * list, struct element * current)
 	current->prev = list->tail;
 	current->next = NULL;
 	list->tail = current;
+
+	if(!list->head)
+		list->head = current;
 
 	(list->length)++;
 }
