@@ -11,7 +11,7 @@ OBJS=$(SRCS:.c=.o)
 all: $(BIN)
 
 $(BIN): $(OBJS)
-	gcc -shared -o $(BIN) $(CFLAGS) $(OBJS)
+	$(CC) -shared -o $(BIN) $(CFLAGS) $(OBJS)
 
 debug: $(OBJS)
 	$(CC) -shared -o $(BIN) $(CFLAGS) $(LIBS) $(DEBUG_FLAGS) $(OBJS)
