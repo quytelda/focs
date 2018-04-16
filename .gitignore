@@ -11,6 +11,9 @@
 *.tar
 *.xz
 
+# tests
+test/linklist
+
 # dotfiles
 !.gitignore
 
