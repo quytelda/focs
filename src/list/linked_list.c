@@ -295,7 +295,10 @@ void * linklist_delete(struct linked_list * list, size_t pos)
 	current = __delete_element(list, pos);
 	rwlock_writer_exit(&list->rwlock);
 
-	return current->data;
+	if(current)
+		return current->data;
+
+	return NULL;
 }
 
 void * linklist_fetch(struct linked_list * list, size_t pos)
