@@ -22,10 +22,3 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-
-union data {
-	uint64_t u64;
-	int64_t s64;
-	double dec;
-	void * ptr;
-};
