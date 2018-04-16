@@ -10,8 +10,11 @@ START_TEST(test_linklist_alloc)
 	struct linked_list * list = NULL;
 
 	err = linklist_alloc(&list, 0);
+
 	ck_assert(!err);
 	ck_assert(list);
+	ck_assert_int_eq(list->length, 0);
+
 	linklist_free(&list);
 }
 END_TEST
@@ -43,13 +46,15 @@ START_TEST(test_linklist_push_head_single)
 	uint8_t val = 1;
 	struct linked_list * list;
 
-	linklist_alloc(&list, sizeof(uint8_t));
+	linklist_alloc(&list, sizeof(val));
 	linklist_push_head(list, &val);
+
 	ck_assert(list->head);
 	ck_assert(list->tail);
+	ck_assert_int_eq(list->length, 1);
 	ck_assert_mem_eq(list->head->data, &val, sizeof(uint8_t));
-	linklist_free(&list);
 
+	linklist_free(&list);
 }
 END_TEST
 
@@ -60,19 +65,25 @@ START_TEST(test_linklist_push_head_multiple)
 	uint8_t val3 = 3;
 	struct linked_list * list;
 
-	linklist_alloc(&list, sizeof(uint8_t));
+	linklist_alloc(&list, sizeof(val1));
+
 	linklist_push_head(list, &val1);
 	linklist_push_head(list, &val2);
 	linklist_push_head(list, &val3);
 
-	struct element * current = list->head;
-	ck_assert_mem_eq(current->data, &val3, sizeof(uint8_t));
-	current = current->next;
-	ck_assert_mem_eq(current->data, &val2, sizeof(uint8_t));
-	current = current->next;
-	ck_assert_mem_eq(current->data, &val1, sizeof(uint8_t));
-	linklist_free(&list);
+	ck_assert(list->head);
+	ck_assert(list->tail);
+	ck_assert_int_eq(list->length, 3);
 
+	struct element * current = list->head;
+	ck_assert_mem_eq(current->data, &val3, sizeof(val3));
+	current = current->next;
+	ck_assert_mem_eq(current->data, &val2, sizeof(val2));
+	current = current->next;
+	ck_assert_mem_eq(current->data, &val1, sizeof(val1));
+	ck_assert(!current->next);
+
+	linklist_free(&list);
 }
 END_TEST
 
@@ -83,11 +94,13 @@ START_TEST(test_linklist_push_tail_single)
 
 	linklist_alloc(&list, sizeof(uint8_t));
 	linklist_push_tail(list, &val);
+
 	ck_assert(list->head);
 	ck_assert(list->tail);
-	ck_assert_mem_eq(list->head->data, &val, sizeof(uint8_t));
-	linklist_free(&list);
+	ck_assert_int_eq(list->length, 1);
+	ck_assert_mem_eq(list->head->data, &val, sizeof(val));
 
+	linklist_free(&list);
 }
 END_TEST
 
@@ -99,9 +112,14 @@ START_TEST(test_linklist_push_tail_multiple)
 	struct linked_list * list;
 
 	linklist_alloc(&list, sizeof(uint8_t));
+
 	linklist_push_tail(list, &val1);
 	linklist_push_tail(list, &val2);
 	linklist_push_tail(list, &val3);
+
+	ck_assert(list->head);
+	ck_assert(list->tail);
+	ck_assert_int_eq(list->length, 3);
 
 	struct element * current = list->head;
 	ck_assert_mem_eq(current->data, &val1, sizeof(uint8_t));
@@ -119,12 +137,14 @@ START_TEST(test_linklist_pop_head_single)
 	uint8_t in = 1;
 	struct linked_list * list;
 
-	linklist_alloc(&list, sizeof(uint8_t));
+	linklist_alloc(&list, sizeof(in));
+
 	linklist_push_head(list, &in);
 
 	ck_assert_mem_eq(linklist_pop_head(list), &in, sizeof(in));
 	ck_assert(!list->head);
 	ck_assert(!list->tail);
+	ck_assert(linklist_null(list));
 
 	linklist_free(&list);
 }
@@ -135,6 +155,9 @@ START_TEST(test_linklist_pop_head_multiple)
 	uint8_t in1 = 1;
 	uint8_t in2 = 2;
 	uint8_t in3 = 3;
+	uint8_t * out1;
+	uint8_t * out2;
+	uint8_t * out3;
 	struct linked_list * list;
 
 	linklist_alloc(&list, sizeof(uint8_t));
@@ -143,12 +166,21 @@ START_TEST(test_linklist_pop_head_multiple)
 	linklist_push_head(list, &in2);
 	linklist_push_head(list, &in3);
 
-	ck_assert_mem_eq(linklist_pop_head(list), &in3, sizeof(uint8_t));
-	ck_assert_mem_eq(linklist_pop_head(list), &in2, sizeof(uint8_t));
-	ck_assert_mem_eq(linklist_pop_head(list), &in1, sizeof(uint8_t));
+	out1 = (uint8_t *) linklist_pop_head(list);
+	out2 = (uint8_t *) linklist_pop_head(list);
+	out3 = (uint8_t *) linklist_pop_head(list);
+
+	ck_assert(out1);
+	ck_assert(out2);
+	ck_assert(out3);
+
+	ck_assert_mem_eq(out1, &in3, sizeof(in3));
+	ck_assert_mem_eq(out2, &in2, sizeof(in2));
+	ck_assert_mem_eq(out3, &in1, sizeof(in1));
 
 	ck_assert(!list->head);
 	ck_assert(!list->tail);
+	ck_assert(linklist_null(list));
 
 	linklist_free(&list);
 }
@@ -158,13 +190,13 @@ START_TEST(test_linklist_pop_tail_single)
 {
 	uint8_t in = 1;
 	struct linked_list * list;
-
-	linklist_alloc(&list, sizeof(uint8_t));
+	linklist_alloc(&list, sizeof(in));
 	linklist_push_tail(list, &in);
 
 	ck_assert_mem_eq(linklist_pop_tail(list), &in, sizeof(in));
 	ck_assert(!list->head);
 	ck_assert(!list->tail);
+	ck_assert(linklist_null(list));
 
 	linklist_free(&list);
 }
@@ -189,6 +221,7 @@ START_TEST(test_linklist_pop_tail_multiple)
 
 	ck_assert(!list->head);
 	ck_assert(!list->tail);
+	ck_assert(linklist_null(list));
 
 	linklist_free(&list);
 }
@@ -207,6 +240,7 @@ START_TEST(test_linklist_insert_single)
 	ck_assert(success);
 	ck_assert(list->head);
 	ck_assert(list->tail);
+	ck_assert_int_eq(list->length, 1);
 
 	linklist_free(&list);
 }
@@ -239,6 +273,7 @@ START_TEST(test_linklist_insert_multiple)
 
 	ck_assert(list->head);
 	ck_assert(list->tail);
+	ck_assert_int_eq(list->length, 4);
 
 	ck_assert_mem_eq(linklist_pop_head(list), &in4, sizeof(uint8_t));
 	ck_assert_mem_eq(linklist_pop_head(list), &in1, sizeof(uint8_t));
@@ -376,10 +411,11 @@ Suite * linklist_suite(void)
 	tcase_add_test(case_linklist_push_tail, test_linklist_push_tail_single);
 	tcase_add_test(case_linklist_push_tail, test_linklist_push_tail_multiple);
 	tcase_add_test(case_linklist_pop_head, test_linklist_pop_head_single);
-	tcase_add_test(case_linklist_pop_tail, test_linklist_pop_tail_multiple);
+	tcase_add_test(case_linklist_pop_head, test_linklist_pop_head_multiple);
 	tcase_add_test(case_linklist_pop_tail, test_linklist_pop_tail_single);
-	tcase_add_test(case_linklist_insert, test_linklist_insert_multiple);
+	tcase_add_test(case_linklist_pop_tail, test_linklist_pop_tail_multiple);
 	tcase_add_test(case_linklist_insert, test_linklist_insert_single);
+	tcase_add_test(case_linklist_insert, test_linklist_insert_multiple);
 	tcase_add_test(case_linklist_delete, test_linklist_delete_empty);
 	tcase_add_test(case_linklist_delete, test_linklist_delete_single);
 	tcase_add_test(case_linklist_delete, test_linklist_delete_multiple);
