@@ -163,7 +163,7 @@ static struct element * __delete_element(struct linked_list * list, size_t pos)
 
 	if(pos == 0) {
 		current = __pop_head(list);
-	} else if(pos == list->length) {
+	} else if(pos == list->length - 1) {
 		current = __pop_tail(list);
 	} else {
 		current = __lookup_element(list, pos);
