@@ -259,7 +259,10 @@ void * linklist_pop_head(struct linked_list * list)
 	current = __pop_head(list);
 	rwlock_writer_exit(&list->rwlock);
 
-	return current->data;
+	if(current)
+		return current->data;
+
+	return NULL;
 }
 
 void * linklist_pop_tail(struct linked_list * list)
@@ -270,7 +273,10 @@ void * linklist_pop_tail(struct linked_list * list)
 	current = __pop_tail(list);
 	rwlock_writer_exit(&list->rwlock);
 
-	return current->data;
+	if(current)
+		return current->data;
+
+	return NULL;
 }
 
 bool linklist_insert(struct linked_list * list, void * data, size_t pos)
@@ -309,7 +315,10 @@ void * linklist_fetch(struct linked_list * list, size_t pos)
 	current = __lookup_element(list, pos);
 	rwlock_reader_exit(&list->rwlock);
 
-	return current->data;
+	if(current)
+		return current->data;
+
+	return NULL;
 }
 
 void linklist_map(struct linked_list * list,
