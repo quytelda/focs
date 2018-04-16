@@ -273,15 +273,18 @@ void * linklist_pop_tail(struct linked_list * list)
 	return current->data;
 }
 
-void linklist_insert(struct linked_list * list, void * data, size_t pos)
+bool linklist_insert(struct linked_list * list, void * data, size_t pos)
 {
+	bool success;
 	struct element * current;
 
 	current = __element_init(list, data);
 
 	rwlock_writer_entry(&list->rwlock);
-	__insert_element(list, current, pos);
+	success = __insert_element(list, current, pos);
 	rwlock_writer_exit(&list->rwlock);
+
+	return success;
 }
 
 void * linklist_delete(struct linked_list * list, size_t pos)
