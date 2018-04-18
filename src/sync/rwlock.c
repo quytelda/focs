@@ -21,41 +21,42 @@
 #include "include/focs.h"
 #include "sync/rwlock.h"
 
-int rwlock_alloc(struct rwlock * rwlock)
+int rwlock_alloc(struct rwlock ** rwlock)
 {
 	int err;
 
-	rwlock = malloc(sizeof(*rwlock));
-	if(!rwlock)
+	*rwlock = malloc(sizeof(**rwlock));
+	if(!*rwlock)
 		return -ENOMEM;
 
-	err = pthread_mutex_init(&rwlock->lock, NULL);
+	err = pthread_mutex_init(&(*rwlock)->lock, NULL);
 	if(err)
 		goto exit;
 
-	err = pthread_cond_init(&rwlock->cond, NULL);
+	err = pthread_cond_init(&(*rwlock)->cond, NULL);
 	if(err)
 		goto exit;
 
-	rwlock->readers = 0;
-	rwlock->writers = 0;
-	rwlock->writing = false;
+	(*rwlock)->readers = 0;
+	(*rwlock)->writers = 0;
+	(*rwlock)->writing = false;
 
 	return 0;
 
 exit:
-	pthread_mutex_destroy(&rwlock->lock);
-	pthread_cond_destroy(&rwlock->cond);
+	pthread_mutex_destroy(&(*rwlock)->lock);
+	pthread_cond_destroy(&(*rwlock)->cond);
 
 	return err;
 }
 
-void rwlock_free(struct rwlock * rwlock)
+void rwlock_free(struct rwlock ** rwlock)
 {
-	pthread_mutex_destroy(&rwlock->lock);
-	pthread_cond_destroy(&rwlock->cond);
+	pthread_mutex_destroy(&(*rwlock)->lock);
+	pthread_cond_destroy(&(*rwlock)->cond);
 
-	free(rwlock);
+	free(*rwlock);
+	*rwlock = NULL;
 }
 
 void rwlock_writer_entry(struct rwlock * rwlock)

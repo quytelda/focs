@@ -32,7 +32,8 @@ struct rwlock {
 	bool writing;
 };
 
-int rwlock_alloc(struct rwlock * rwlock);
+int rwlock_alloc(struct rwlock ** rwlock);
+void rwlock_free(struct rwlock ** rwlock);
 void rwlock_writer_entry(struct rwlock * rwlock);
 void rwlock_writer_exit(struct rwlock * rwlock);
 void rwlock_reader_entry(struct rwlock * rwlock);
