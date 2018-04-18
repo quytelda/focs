@@ -341,15 +341,18 @@ void * linklist_foldr(struct linked_list * list,
 			  void * (* fn)(void * a, void * b),
 			  void * init)
 {
+	void * result;
 	struct element * current;
-	void * sum = init;
+
+	result = malloc(list->data_size);
+	memcpy(result, init, list->data_size);
 
 	rwlock_reader_entry(list->rwlock);
 	linklist_foreach(list, current)
-		sum = fn(current->data, sum);
+		result = fn(current->data, result);
 	rwlock_reader_exit(list->rwlock);
 
-	return sum;
+	return result;
 }
 
 /**
@@ -360,13 +363,16 @@ void * linklist_foldl(struct linked_list * list,
 			  void * (* fn)(void * a, void * b),
 			  void * init)
 {
+	void * result;
 	struct element * current;
-	void * sum = init;
+
+	result = malloc(list->data_size);
+	memcpy(result, init, list->data_size);
 
 	rwlock_writer_entry(list->rwlock);
 	linklist_foreach(list, current)
-		sum = fn(sum, current->data);
+		result = fn(result, current->data);
 	rwlock_writer_exit(list->rwlock);
 
-	return sum;
+	return result;
 }
