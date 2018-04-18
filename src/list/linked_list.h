@@ -36,7 +36,7 @@ struct linked_list {
 	size_t length;
 	size_t data_size;
 
-	struct rwlock rwlock;
+	struct rwlock * rwlock;
 };
 
 #define linklist_foreach(list, current)					\

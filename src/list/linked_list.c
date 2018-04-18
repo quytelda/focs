@@ -203,7 +203,7 @@ void linklist_free(struct linked_list ** list)
 	struct element * current;
 	struct element * next;
 
-	rwlock_writer_entry(&(*list)->rwlock);
+	rwlock_writer_entry((*list)->rwlock);
 
 	(*list)->length = 0;
 
@@ -213,18 +213,19 @@ void linklist_free(struct linked_list ** list)
 		free(current);
 	}
 
-	free(*list);
+	rwlock_writer_exit((*list)->rwlock);
+	rwlock_free(&(*list)->rwlock);
 
-	rwlock_writer_exit(&(*list)->rwlock);
+	free(*list);
 }
 
 bool linklist_null(struct linked_list * list)
 {
 	bool null;
 
-	rwlock_reader_entry(&list->rwlock);
+	rwlock_reader_entry(list->rwlock);
 	null = (list->length == 0);
-	rwlock_reader_exit(&list->rwlock);
+	rwlock_reader_exit(list->rwlock);
 
 	return null;
 }
@@ -235,9 +236,9 @@ void linklist_push_head(struct linked_list * list, void * data)
 
 	current = __element_init(list, data);
 
-	rwlock_writer_entry(&list->rwlock);
+	rwlock_writer_entry(list->rwlock);
 	__push_head(list, current);
-	rwlock_writer_exit(&list->rwlock);
+	rwlock_writer_exit(list->rwlock);
 }
 
 void linklist_push_tail(struct linked_list * list, void * data)
@@ -246,18 +247,18 @@ void linklist_push_tail(struct linked_list * list, void * data)
 
 	current = __element_init(list, data);
 
-	rwlock_writer_entry(&list->rwlock);
+	rwlock_writer_entry(list->rwlock);
 	__push_tail(list, current);
-	rwlock_writer_exit(&list->rwlock);
+	rwlock_writer_exit(list->rwlock);
 }
 
 void * linklist_pop_head(struct linked_list * list)
 {
 	struct element * current;
 
-	rwlock_writer_entry(&list->rwlock);
+	rwlock_writer_entry(list->rwlock);
 	current = __pop_head(list);
-	rwlock_writer_exit(&list->rwlock);
+	rwlock_writer_exit(list->rwlock);
 
 	if(current)
 		return current->data;
@@ -269,9 +270,9 @@ void * linklist_pop_tail(struct linked_list * list)
 {
 	struct element * current;
 
-	rwlock_writer_entry(&list->rwlock);
+	rwlock_writer_entry(list->rwlock);
 	current = __pop_tail(list);
-	rwlock_writer_exit(&list->rwlock);
+	rwlock_writer_exit(list->rwlock);
 
 	if(current)
 		return current->data;
@@ -286,9 +287,9 @@ bool linklist_insert(struct linked_list * list, void * data, size_t pos)
 
 	current = __element_init(list, data);
 
-	rwlock_writer_entry(&list->rwlock);
+	rwlock_writer_entry(list->rwlock);
 	success = __insert_element(list, current, pos);
-	rwlock_writer_exit(&list->rwlock);
+	rwlock_writer_exit(list->rwlock);
 
 	return success;
 }
@@ -297,9 +298,9 @@ void * linklist_delete(struct linked_list * list, size_t pos)
 {
 	struct element * current;
 
-	rwlock_writer_entry(&list->rwlock);
+	rwlock_writer_entry(list->rwlock);
 	current = __delete_element(list, pos);
-	rwlock_writer_exit(&list->rwlock);
+	rwlock_writer_exit(list->rwlock);
 
 	if(current)
 		return current->data;
@@ -311,9 +312,9 @@ void * linklist_fetch(struct linked_list * list, size_t pos)
 {
 	struct element * current;
 
-	rwlock_reader_entry(&list->rwlock);
+	rwlock_reader_entry(list->rwlock);
 	current = __lookup_element(list, pos);
-	rwlock_reader_exit(&list->rwlock);
+	rwlock_reader_exit(list->rwlock);
 
 	if(current)
 		return current->data;
@@ -326,10 +327,10 @@ void linklist_map(struct linked_list * list,
 {
 	struct element * current;
 
-	rwlock_writer_entry(&list->rwlock);
+	rwlock_writer_entry(list->rwlock);
 	linklist_foreach(list, current)
 		current->data = fn(current->data);
-	rwlock_writer_exit(&list->rwlock);
+	rwlock_writer_exit(list->rwlock);
 }
 
 /**
@@ -343,10 +344,10 @@ void * linklist_foldr(struct linked_list * list,
 	struct element * current;
 	void * sum = init;
 
-	rwlock_writer_entry(&list->rwlock);
+	rwlock_reader_entry(list->rwlock);
 	linklist_foreach(list, current)
 		sum = fn(current->data, sum);
-	rwlock_writer_exit(&list->rwlock);
+	rwlock_reader_exit(list->rwlock);
 
 	return sum;
 }
@@ -362,10 +363,10 @@ void * linklist_foldl(struct linked_list * list,
 	struct element * current;
 	void * sum = init;
 
-	rwlock_writer_entry(&list->rwlock);
+	rwlock_writer_entry(list->rwlock);
 	linklist_foreach(list, current)
 		sum = fn(sum, current->data);
-	rwlock_writer_exit(&list->rwlock);
+	rwlock_writer_exit(list->rwlock);
 
 	return sum;
 }
