@@ -322,6 +322,17 @@ void * linklist_fetch(struct linked_list * list, size_t pos)
 	return NULL;
 }
 
+/**
+ * linklist_map() - Map a function over a linked list in-place.
+ * @list: A list of values
+ * @fn: A function that will transform each value in the list
+ *
+ * A map operation iterates over the provided list (@list) and transforms each
+ * data element using the function @fn, replacing the old value with the result
+ * of the transformation:
+ * for i from 0 to &list->length:
+ * 	@list[i] = @fn(@list[i])
+ */
 void linklist_map(struct linked_list * list,
 		  void * (* fn)(void * data))
 {
@@ -335,11 +346,19 @@ void linklist_map(struct linked_list * list,
 
 /**
  * linklist_foldr() - Right associative fold for linked lists.
- * fn(list[0], fn(list[1], fn(list[2], ...)))
+ * @list: A list of values to reduce
+ * @fn: A binary function that will sequentially reduce values
+ * @init: An initial value for the fold
+ *
+ * A right associative fold uses the binary function @fn to sequentially reduce
+ * a list of values to a single value, starting from some initial value @init:
+ * @fn(@init, @fn(@list[0], fn(@list[1], ...)))
+ *
+ * If @list is empty, the fold will be equal to the value of @init.
  */
-void * linklist_foldr(struct linked_list * list,
-			  void * (* fn)(void * a, void * b),
-			  void * init)
+void * linklist_foldr(const struct linked_list * list,
+		      void * (* fn)(void * a, void * b),
+		      const void * init)
 {
 	void * result;
 	struct element * current;
@@ -357,11 +376,19 @@ void * linklist_foldr(struct linked_list * list,
 
 /**
  * linklist_foldl() - Left associative fold for linked lists.
- * fn(fn(fn(..., list[0]), list[1]), list[2])
+ * @list: A list of values to reduce
+ * @fn: A binary function that will sequentially reduce values
+ * @init: An initial value for the fold
+ *
+ * A left associative fold uses the binary function @fn to sequentially reduce
+ * a list of values to a single value, starting from some initial value @init:
+ * @fn(@fn(@fn(..., @init), @list[0]), @list[1])
+ *
+ * If @list is empty, the fold will be equal to the value of @init.
  */
-void * linklist_foldl(struct linked_list * list,
-			  void * (* fn)(void * a, void * b),
-			  void * init)
+void * linklist_foldl(const struct linked_list * list,
+		      void * (* fn)(void * a, void * b),
+		      const void * init)
 {
 	void * result;
 	struct element * current;

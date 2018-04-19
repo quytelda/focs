@@ -55,10 +55,10 @@ void * linklist_delete(struct linked_list * list, size_t pos);
 void * linklist_fetch(struct linked_list * list, size_t pos);
 void linklist_map(struct linked_list * list,
 		  void * (* fn)(void * data));
-void * linklist_foldr(struct linked_list * list,
-			  void * (* fn)(void * a, void * b),
-			  void * init);
-void * linklist_foldl(struct linked_list * list,
-			  void * (* fn)(void * a, void * b),
-			  void * init);
+void * linklist_foldr(const struct linked_list * list,
+		      void * (* fn)(void * a, void * b),
+		      const void * init);
+void * linklist_foldl(const struct linked_list * list,
+		      void * (* fn)(void * a, void * b),
+		      const void * init);
 #endif /* __LINKED_LIST_H */
