@@ -360,14 +360,25 @@ void * linklist_fetch(struct linked_list * list, size_t pos)
  * for i from 0 to &list->length:
  * 	@list[i] = @fn(@list[i])
  */
-void linklist_map(struct linked_list * list,
-		  void * (* fn)(void * data))
+void linklist_map(struct linked_list * list, map_fn_t fn)
 {
+	void * result;
 	struct element * current;
 
 	rwlock_writer_entry(list->rwlock);
-	linklist_foreach(list, current)
-		current->data = fn(current->data);
+	linklist_foreach(list, current) {
+		result = fn(current->data);
+
+		/* Check if the user allocated a new variable.
+		 * If so, it's value must be copied into current->data so that
+		 * the newly allocated variable can be freed before it's
+		 * reference is lost in the next iteration.
+		 */
+		if(result != current->data) {
+			memcpy(current->data, result, list->data_size);
+			free(result);
+		}
+	}
 	rwlock_writer_exit(list->rwlock);
 }
 
@@ -384,21 +395,33 @@ void linklist_map(struct linked_list * list,
  * If @list is empty, the fold will be equal to the value of @init.
  */
 void * linklist_foldr(const struct linked_list * list,
-		      void * (* fn)(void * a, void * b),
+		      foldr_fn_t fn,
 		      const void * init)
 {
 	void * result;
+	void * accumulator;
 	struct element * current;
 
-	result = malloc(list->data_size);
-	memcpy(result, init, list->data_size);
+	accumulator = malloc(list->data_size);
+	memcpy(accumulator, init, list->data_size);
 
 	rwlock_reader_entry(list->rwlock);
-	linklist_foreach(list, current)
-		result = fn(current->data, result);
+	linklist_foreach(list, current) {
+		result = fn(current->data, accumulator);
+
+		/* Check if the user allocated a new variable.
+		 * If so, it's value must be copied into the accumulator so that
+		 * the newly allocated variable can be freed before it's
+		 * reference is lost in the next iteration.
+		 */
+		if(result != accumulator) {
+			memcpy(accumulator, result, list->data_size);
+			free(result);
+		}
+	}
 	rwlock_reader_exit(list->rwlock);
 
-	return result;
+	return accumulator;
 }
 
 /**
@@ -414,19 +437,31 @@ void * linklist_foldr(const struct linked_list * list,
  * If @list is empty, the fold will be equal to the value of @init.
  */
 void * linklist_foldl(const struct linked_list * list,
-		      void * (* fn)(void * a, void * b),
+		      foldl_fn_t fn,
 		      const void * init)
 {
 	void * result;
+	void * accumulator;
 	struct element * current;
 
-	result = malloc(list->data_size);
-	memcpy(result, init, list->data_size);
+	accumulator = malloc(list->data_size);
+	memcpy(accumulator, init, list->data_size);
 
-	rwlock_writer_entry(list->rwlock);
-	linklist_foreach(list, current)
-		result = fn(result, current->data);
-	rwlock_writer_exit(list->rwlock);
+	rwlock_reader_entry(list->rwlock);
+	linklist_foreach(list, current) {
+		result = fn(accumulator, current->data);
 
-	return result;
+		/* Check if the user allocated a new variable.
+		 * If so, it's value must be copied into the accumulator so that
+		 * the newly allocated variable can be freed before it's
+		 * reference is lost in the next iteration.
+		 */
+		if(result != accumulator) {
+			memcpy(accumulator, result, list->data_size);
+			free(result);
+		}
+	}
+	rwlock_reader_exit(list->rwlock);
+
+	return accumulator;
 }

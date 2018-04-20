@@ -642,9 +642,18 @@ START_TEST(test_linklist_fetch_multiple)
 }
 END_TEST
 
-void * map_fn(void * data)
+uint8_t * map_fn(uint8_t * data)
 {
-	uint8_t * n = (uint8_t *) data;
+	(*data)++;
+	return data;
+}
+
+uint8_t * map_fn_newptr(uint8_t * data)
+{
+	uint8_t * n;
+
+	n = malloc(sizeof(*data));
+	memcpy(n, data, sizeof(*data));
 	(*n)++;
 
 	return n;
@@ -656,7 +665,8 @@ START_TEST(test_linklist_map_empty)
 
 	linklist_alloc(&list, 0);
 
-	linklist_map(list, map_fn);
+	linklist_map(list, (map_fn_t) map_fn);
+	linklist_map(list, (map_fn_t) map_fn_newptr);
 
 	ck_assert(!list->head);
 	ck_assert(!list->tail);
@@ -676,14 +686,16 @@ START_TEST(test_linklist_map_single)
 	linklist_alloc(&list, sizeof(in));
 	linklist_push_head(list, &in);
 
-	linklist_map(list, map_fn);
+	/* Map two increment functions over the list. */
+	linklist_map(list, (map_fn_t) map_fn); /* [1] -> [2] */
+	linklist_map(list, (map_fn_t) map_fn_newptr); /* [2] -> [3] */
 	out = linklist_fetch(list, 0);
 
 	ck_assert(list->head);
 	ck_assert(list->tail);
 	ck_assert_int_eq(list->length, 1);
 
-	ck_assert_int_eq(*out, in + 1);
+	ck_assert_int_eq(*out, in + 2);
 
 	linklist_free(&list);
 }
@@ -706,7 +718,11 @@ START_TEST(test_linklist_map_multiple)
 	linklist_push_tail(list, &in2);
 	linklist_push_tail(list, &in3);
 
-	linklist_map(list, map_fn);
+	/* [1, 2, 3] -> [2, 3, 4] */
+	linklist_map(list, (map_fn_t) map_fn);
+	/* [2, 3, 4] -> [3, 4, 5] */
+	linklist_map(list, (map_fn_t) map_fn_newptr);
+
 	out1 = linklist_fetch(list, 0);
 	out2 = linklist_fetch(list, 1);
 	out3 = linklist_fetch(list, 2);
@@ -715,28 +731,63 @@ START_TEST(test_linklist_map_multiple)
 	ck_assert(list->tail);
 	ck_assert_int_eq(list->length, 3);
 
-	ck_assert_int_eq(*out1, in1 + 1);
-	ck_assert_int_eq(*out2, in2 + 1);
-	ck_assert_int_eq(*out3, in3 + 1);
+	ck_assert_int_eq(*out1, in1 + 2);
+	ck_assert_int_eq(*out2, in2 + 2);
+	ck_assert_int_eq(*out3, in3 + 2);
 
 	linklist_free(&list);
 }
 END_TEST
 
 /**
- * fold_fn() - Folding function for testing.
- * This function takes to signed 8-bit integers in the order a, b,
- * and returns a pointer to the difference (a - b).
- * This function produces different results when folded right versus left.
+ * foldr_fn() - Right folding function for testing.
+ * @c: A constant byte integer
+ * @acc: The byte integer currently in the accumulator
+ *
+ * Subtract the value of *@acc from *@c.  Store the result in @acc, since we
+ * know this is the fold accumulator in right folds.  The data structure will
+ * know that since the addresses match, the accumulator has already been
+ * updated.
  */
-void * fold_fn(void * a, void * b)
+int8_t * foldr_fn(const int8_t * c, int8_t * acc)
+{
+	*acc = (*c) - (*acc);
+	return acc;
+}
+
+/**
+ * foldl_fn() - Left folding function for testing.
+ * @acc: The byte integer currently in the accumulator
+ * @c: A constant byte integer
+ *
+ * Subtract the value of *@c from *@acc.  Store the result in @acc, since we
+ * know this is the fold accumulator in left folds.  The data structure will
+ * know that since the addresses match, the accumulator has already been
+ * updated.
+ */
+int8_t * foldl_fn(int8_t * acc, const int8_t * c)
+{
+	*acc = (*acc) - (*c);
+	return acc;
+}
+
+/**
+ * generic_fold_fn() - Generic folding function for testing.
+ * @a: A constant byte integer
+ * @b: A constant byte integer
+ *
+ * Subtract the value of *@b from *@a.  Store the result in a new pointer, since
+ * we do not know ahead of time whether the function will be used in a left or a
+ * right fold.  The data structure will know that since the addresses don't
+ * match, the accumulator has not been updated, and it will update it and free
+ * our new variable automatically.
+ */
+int8_t * generic_fold_fn(const int8_t * a, const int8_t * b)
 {
 	int8_t * n;
-	int8_t ia = *(uint8_t *) a;
-	int8_t ib = *(uint8_t *) b;
 
 	n = malloc(sizeof(n));
-	*n = ia - ib;
+	*n = (*a) - (*b);
 
 	return n;
 }
@@ -744,21 +795,26 @@ void * fold_fn(void * a, void * b)
 START_TEST(test_linklist_foldr_empty)
 {
 	int8_t init = 0;
-	int8_t * out;
+	int8_t * out1;
+	int8_t * out2;
 	struct linked_list * list;
 
-	linklist_alloc(&list, 0);
+	linklist_alloc(&list, sizeof(uint8_t));
 
-	out = (uint8_t *) linklist_foldr(list, fold_fn, &init);
+	out1 = linklist_foldr(list, (foldr_fn_t) foldr_fn, &init);
+	out2 = linklist_foldr(list, (foldr_fn_t) generic_fold_fn, &init);
 
-	ck_assert(out);
-	ck_assert_int_eq(*out, init);
+	ck_assert(out1);
+	ck_assert(out2);
+	ck_assert_int_eq(*out1, init);
+	ck_assert_int_eq(*out2, init);
 
 	ck_assert(!list->head);
 	ck_assert(!list->tail);
 	ck_assert(linklist_null(list));
 
-	free(out);
+	free(out1);
+	free(out2);
 	linklist_free(&list);
 }
 END_TEST
@@ -767,22 +823,26 @@ START_TEST(test_linklist_foldr_single)
 {
 	int8_t in = 1;
 	int8_t init = 0;
-	int8_t * out;
+	int8_t * out1;
+	int8_t * out2;
 	struct linked_list * list;
 
 	linklist_alloc(&list, sizeof(in));
 	linklist_push_head(list, &in);
 
-	out = (uint8_t *) linklist_foldr(list, fold_fn, &init);
+	out1 = linklist_foldr(list, (foldr_fn_t) foldr_fn, &init);
+	out2 = linklist_foldr(list, (foldr_fn_t) generic_fold_fn, &init);
 
-	ck_assert(out);
-	ck_assert_int_eq(*out, 1);
+	ck_assert(out1);
+	ck_assert_int_eq(*out1, 1);
+	ck_assert_int_eq(*out2, 1);
 
 	ck_assert(list->head);
 	ck_assert(list->tail);
 	ck_assert_int_eq(list->length, 1);
 
-	free(out);
+	free(out1);
+	free(out2);
 	linklist_free(&list);
 }
 END_TEST
@@ -793,48 +853,58 @@ START_TEST(test_linklist_foldr_multiple)
 	int8_t in2 = 2;
 	int8_t in3 = 3;
 	int8_t init = 0;
-	int8_t * out;
+	int8_t * out1;
+	int8_t * out2;
 	struct linked_list * list;
 
-	linklist_alloc(&list, sizeof(in1));
+	linklist_alloc(&list, sizeof(int8_t));
 
 	linklist_push_tail(list, &in1);
 	linklist_push_tail(list, &in2);
 	linklist_push_tail(list, &in3);
 
 	/* foldr (-) 0 [1, 2, 3] -> 2 */
-	out = (uint8_t *) linklist_foldr(list, fold_fn, &init);
+	out1 = linklist_foldr(list, (foldr_fn_t) foldr_fn, &init);
+	out2 = linklist_foldr(list, (foldr_fn_t) generic_fold_fn, &init);
 
-	ck_assert(out);
-	ck_assert_int_eq(*out, 2);
+	ck_assert(out1);
+	ck_assert(out2);
+	ck_assert_int_eq(*out1, 2);
+	ck_assert_int_eq(*out2, 2);
 
 	ck_assert(list->head);
 	ck_assert(list->tail);
 	ck_assert_int_eq(list->length, 3);
 
-	free(out);
+	free(out1);
+	free(out2);
 	linklist_free(&list);
 }
 END_TEST
 
 START_TEST(test_linklist_foldl_empty)
 {
-	int8_t in = 0;
-	int8_t * out;
+	int8_t init = 0;
+	int8_t * out1;
+	int8_t * out2;
 	struct linked_list * list;
 
-	linklist_alloc(&list, 0);
+	linklist_alloc(&list, sizeof(int8_t));
 
-	out = (uint8_t *) linklist_foldl(list, fold_fn, &in);
+	out1 = linklist_foldl(list, (foldl_fn_t) foldl_fn, &init);
+	out2 = linklist_foldl(list, (foldl_fn_t) generic_fold_fn, &init);
 
-	ck_assert(out);
-	ck_assert_int_eq(*out, in);
+	ck_assert(out1);
+	ck_assert(out2);
+	ck_assert_int_eq(*out1, init);
+	ck_assert_int_eq(*out2, init);
 
 	ck_assert(!list->head);
 	ck_assert(!list->tail);
 	ck_assert(linklist_null(list));
 
-	free(out);
+	free(out1);
+	free(out2);
 	linklist_free(&list);
 }
 END_TEST
@@ -843,23 +913,28 @@ START_TEST(test_linklist_foldl_single)
 {
 	int8_t in = 1;
 	int8_t init = 0;
-	int8_t * out;
+	int8_t * out1;
+	int8_t * out2;
 	struct linked_list * list;
 
 	linklist_alloc(&list, sizeof(in));
 	linklist_push_head(list, &in);
 
 	/* foldl (-) 0 [1] -> -1 */
-	out = (uint8_t *) linklist_foldl(list, fold_fn, &init);
+	out1 = linklist_foldl(list, (foldl_fn_t) foldl_fn, &init);
+	out2 = linklist_foldl(list, (foldl_fn_t) generic_fold_fn, &init);
 
-	ck_assert(out);
-	ck_assert_int_eq(*out, -1);
+	ck_assert(out1);
+	ck_assert(out2);
+	ck_assert_int_eq(*out1, -1);
+	ck_assert_int_eq(*out2, -1);
 
 	ck_assert(list->head);
 	ck_assert(list->tail);
 	ck_assert_int_eq(list->length, 1);
 
-	free(out);
+	free(out1);
+	free(out2);
 	linklist_free(&list);
 }
 END_TEST
@@ -870,26 +945,31 @@ START_TEST(test_linklist_foldl_multiple)
 	int8_t in2 = 2;
 	int8_t in3 = 3;
 	int8_t init = 0;
-	int8_t * out;
+	int8_t * out1;
+	int8_t * out2;
 	struct linked_list * list;
 
-	linklist_alloc(&list, sizeof(in1));
+	linklist_alloc(&list, sizeof(int8_t));
 
 	linklist_push_tail(list, &in1);
 	linklist_push_tail(list, &in2);
 	linklist_push_tail(list, &in3);
 
 	/* foldl (-) 0 [1, 2, 3] -> -6 */
-	out = (uint8_t *) linklist_foldl(list, fold_fn, &init);
+	out1 = linklist_foldl(list, (foldl_fn_t) foldl_fn, &init);
+	out2 = linklist_foldl(list, (foldl_fn_t) generic_fold_fn, &init);
 
-	ck_assert(out);
-	ck_assert_int_eq(*out, -6);
+	ck_assert(out1);
+	ck_assert(out2);
+	ck_assert_int_eq(*out1, -6);
+	ck_assert_int_eq(*out2, -6);
 
 	ck_assert(list->head);
 	ck_assert(list->tail);
 	ck_assert_int_eq(list->length, 3);
 
-	free(out);
+	free(out1);
+	free(out2);
 	linklist_free(&list);
 }
 END_TEST

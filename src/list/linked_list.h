@@ -54,12 +54,11 @@ bool linklist_insert(struct linked_list * list, void * data, size_t pos);
 bool linklist_delete(struct linked_list * list, size_t pos);
 void * linklist_remove(struct linked_list * list, size_t pos);
 void * linklist_fetch(struct linked_list * list, size_t pos);
-void linklist_map(struct linked_list * list,
-		  void * (* fn)(void * data));
+void linklist_map(struct linked_list * list, map_fn_t fn);
 void * linklist_foldr(const struct linked_list * list,
-		      void * (* fn)(void * a, void * b),
+		      foldr_fn_t fn,
 		      const void * init);
 void * linklist_foldl(const struct linked_list * list,
-		      void * (* fn)(void * a, void * b),
+		      foldl_fn_t fn,
 		      const void * init);
 #endif /* __LINKED_LIST_H */
