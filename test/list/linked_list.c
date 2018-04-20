@@ -358,17 +358,17 @@ END_TEST
 
 START_TEST(test_linklist_delete_empty)
 {
-	void * val1;
-	void * val2;
+	bool r1;
+	bool r2;
 	struct linked_list * list;
 
 	linklist_alloc(&list, sizeof(uint8_t));
 
-	val1 = linklist_delete(list, 0);
-	val2 = linklist_delete(list, 1);
+	r1 = linklist_delete(list, 0);
+	r2 = linklist_delete(list, 1);
 
-	ck_assert(!val1);
-	ck_assert(!val2);
+	ck_assert(!r1);
+	ck_assert(!r2);
 
 	ck_assert(!list->head);
 	ck_assert(!list->tail);
@@ -381,13 +381,108 @@ END_TEST
 START_TEST(test_linklist_delete_single)
 {
 	uint8_t in = 1;
+	bool r1;
+	bool r2;
+	bool r3;
+	struct linked_list * list;
+
+	linklist_alloc(&list, sizeof(in));
+	linklist_push_head(list, &in);
+
+	r1 = linklist_delete(list, 1); /* [1] -> [1] (false) */
+	r2 = linklist_delete(list, 0); /* [1] -> [] (true) */
+	r3 = linklist_delete(list, 0); /* [] -> [] (false) */
+
+	ck_assert(!r1);
+	ck_assert(r2);
+	ck_assert(!r3);
+
+	ck_assert(!list->head);
+	ck_assert(!list->tail);
+	ck_assert(linklist_null(list));
+
+	linklist_free(&list);
+}
+END_TEST
+
+START_TEST(test_linklist_delete_multiple)
+{
+	uint8_t in1 = 1;
+	uint8_t in2 = 2;
+	uint8_t in3 = 3;
+	uint8_t in4 = 4;
+	bool r1;
+	bool r2;
+	bool r3;
+	bool r4;
+	bool r5;
+	struct linked_list * list;
+
+	/* Create linked list: [1, 2, 3, 4] */
+	linklist_alloc(&list, sizeof(uint8_t));
+	linklist_push_tail(list, &in1);
+	linklist_push_tail(list, &in2);
+	linklist_push_tail(list, &in3);
+	linklist_push_tail(list, &in4);
+
+	/* Drop the elements out of order. */
+	/* [1, 2, 3, 4] -> [1, 2, 4] (true) */
+	r1 = linklist_delete(list, 2);
+	/* [1, 2, 4] -> [2, 4] (true) */
+	r2 = linklist_delete(list, 0);
+	/* [2, 4] -> [2] (true) */
+	r3 = linklist_delete(list, 1);
+	/* [2] -> [] (true) */
+	r4 = linklist_delete(list, 0);
+	/* [] -> [] (false) */
+	r5 = linklist_delete(list, 0);
+
+	ck_assert(!list->head);
+	ck_assert(!list->tail);
+	ck_assert(linklist_null(list));
+
+	ck_assert(r1);
+	ck_assert(r2);
+	ck_assert(r3);
+	ck_assert(r4);
+	ck_assert(!r5);
+
+	linklist_free(&list);
+}
+END_TEST
+
+START_TEST(test_linklist_remove_empty)
+{
+	void * val1;
+	void * val2;
+	struct linked_list * list;
+
+	linklist_alloc(&list, sizeof(uint8_t));
+
+	val1 = linklist_remove(list, 0);
+	val2 = linklist_remove(list, 1);
+
+	ck_assert(!val1);
+	ck_assert(!val2);
+
+	ck_assert(!list->head);
+	ck_assert(!list->tail);
+	ck_assert(linklist_null(list));
+
+	linklist_free(&list);
+}
+END_TEST
+
+START_TEST(test_linklist_remove_single)
+{
+	uint8_t in = 1;
 	uint8_t * out;
 	struct linked_list * list;
 
 	linklist_alloc(&list, sizeof(uint8_t));
 
 	linklist_push_head(list, &in);
-	out = (uint8_t *) linklist_delete(list, 0);
+	out = linklist_remove(list, 0);
 
 	ck_assert(out);
 	ck_assert_int_eq(*out, in);
@@ -401,7 +496,7 @@ START_TEST(test_linklist_delete_single)
 }
 END_TEST
 
-START_TEST(test_linklist_delete_multiple)
+START_TEST(test_linklist_remove_multiple)
 {
 	uint8_t in1 = 1;
 	uint8_t in2 = 2;
@@ -423,15 +518,15 @@ START_TEST(test_linklist_delete_multiple)
 
 	/* Remove the elements out of order. */
 	/* [1, 2, 3, 4] -> [1, 2, 4] (3) */
-	out1 = (uint8_t *) linklist_delete(list, 2);
+	out1 = linklist_remove(list, 2);
 	/* [1, 2, 4] -> [2, 4] (1) */
-	out2 = (uint8_t *) linklist_delete(list, 0);
+	out2 = linklist_remove(list, 0);
 	/* [2, 4] -> [2] (4) */
-	out3 = (uint8_t *) linklist_delete(list, 1);
+	out3 = linklist_remove(list, 1);
 	/* [2] -> [] (2) */
-	out4 = (uint8_t *) linklist_delete(list, 0);
+	out4 = linklist_remove(list, 0);
 	/* [] -> [] (NULL) */
-	out5 = (uint8_t *) linklist_delete(list, 0);
+	out5 = linklist_remove(list, 0);
 
 	ck_assert(!list->head);
 	ck_assert(!list->tail);
@@ -810,6 +905,7 @@ Suite * linklist_suite(void)
 	TCase * case_linklist_pop_tail;
 	TCase * case_linklist_insert;
 	TCase * case_linklist_delete;
+	TCase * case_linklist_remove;
 	TCase * case_linklist_fetch;
 	TCase * case_linklist_map;
 	TCase * case_linklist_foldl;
@@ -825,6 +921,7 @@ Suite * linklist_suite(void)
 	case_linklist_pop_tail = tcase_create("linklist_pop_tail");
 	case_linklist_insert = tcase_create("linklist_insert");
 	case_linklist_delete = tcase_create("linklist_delete");
+	case_linklist_remove = tcase_create("linklist_remove");
 	case_linklist_fetch = tcase_create("linklist_fetch");
 	case_linklist_map = tcase_create("linklist_map");
 	case_linklist_foldl = tcase_create("linklist_foldl");
@@ -848,6 +945,9 @@ Suite * linklist_suite(void)
 	tcase_add_test(case_linklist_delete, test_linklist_delete_empty);
 	tcase_add_test(case_linklist_delete, test_linklist_delete_single);
 	tcase_add_test(case_linklist_delete, test_linklist_delete_multiple);
+	tcase_add_test(case_linklist_remove, test_linklist_remove_empty);
+	tcase_add_test(case_linklist_remove, test_linklist_remove_single);
+	tcase_add_test(case_linklist_remove, test_linklist_remove_multiple);
 	tcase_add_test(case_linklist_fetch, test_linklist_fetch_empty);
 	tcase_add_test(case_linklist_fetch, test_linklist_fetch_single);
 	tcase_add_test(case_linklist_fetch, test_linklist_fetch_multiple);
@@ -869,6 +969,7 @@ Suite * linklist_suite(void)
 	suite_add_tcase(suite, case_linklist_pop_tail);
 	suite_add_tcase(suite, case_linklist_insert);
 	suite_add_tcase(suite, case_linklist_delete);
+	suite_add_tcase(suite, case_linklist_remove);
 	suite_add_tcase(suite, case_linklist_fetch);
 	suite_add_tcase(suite, case_linklist_map);
 	suite_add_tcase(suite, case_linklist_foldr);

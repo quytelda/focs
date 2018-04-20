@@ -300,7 +300,7 @@ bool linklist_insert(struct linked_list * list, void * data, size_t pos)
 	return success;
 }
 
-void * linklist_delete(struct linked_list * list, size_t pos)
+bool linklist_delete(struct linked_list * list, size_t pos)
 {
 	struct element * current;
 
@@ -308,10 +308,31 @@ void * linklist_delete(struct linked_list * list, size_t pos)
 	current = __delete_element(list, pos);
 	rwlock_writer_exit(list->rwlock);
 
-	if(current)
-		return current->data;
+	if(current) {
+		free(current->data);
+		free(current);
 
-	return NULL;
+		return true;
+	}
+
+	return false;
+}
+
+void * linklist_remove(struct linked_list * list, size_t pos)
+{
+	void * data = NULL;
+	struct element * current;
+
+	rwlock_writer_entry(list->rwlock);
+	current = __delete_element(list, pos);
+	rwlock_writer_exit(list->rwlock);
+
+	if(current) {
+		data = current->data;
+		free(current);
+	}
+
+	return data;
 }
 
 void * linklist_fetch(struct linked_list * list, size_t pos)

@@ -51,7 +51,8 @@ void linklist_push_tail(struct linked_list * list, void * data);
 void * linklist_pop_head(struct linked_list * list);
 void * linklist_pop_tail(struct linked_list * list);
 bool linklist_insert(struct linked_list * list, void * data, size_t pos);
-void * linklist_delete(struct linked_list * list, size_t pos);
+bool linklist_delete(struct linked_list * list, size_t pos);
+void * linklist_remove(struct linked_list * list, size_t pos);
 void * linklist_fetch(struct linked_list * list, size_t pos);
 void linklist_map(struct linked_list * list,
 		  void * (* fn)(void * data));
