@@ -628,6 +628,177 @@ START_TEST(test_linklist_map_multiple)
 }
 END_TEST
 
+/**
+ * fold_fn() - Folding function for testing.
+ * This function takes to signed 8-bit integers in the order a, b,
+ * and returns a pointer to the difference (a - b).
+ * This function produces different results when folded right versus left.
+ */
+void * fold_fn(void * a, void * b)
+{
+	int8_t * n;
+	int8_t ia = *(uint8_t *) a;
+	int8_t ib = *(uint8_t *) b;
+
+	n = malloc(sizeof(n));
+	*n = ia - ib;
+
+	return n;
+}
+
+START_TEST(test_linklist_foldr_empty)
+{
+	int8_t init = 0;
+	int8_t * out;
+	struct linked_list * list;
+
+	linklist_alloc(&list, 0);
+
+	out = (uint8_t *) linklist_foldr(list, fold_fn, &init);
+
+	ck_assert(out);
+	ck_assert_int_eq(*out, init);
+
+	ck_assert(!list->head);
+	ck_assert(!list->tail);
+	ck_assert(linklist_null(list));
+
+	free(out);
+	linklist_free(&list);
+}
+END_TEST
+
+START_TEST(test_linklist_foldr_single)
+{
+	int8_t in = 1;
+	int8_t init = 0;
+	int8_t * out;
+	struct linked_list * list;
+
+	linklist_alloc(&list, sizeof(in));
+	linklist_push_head(list, &in);
+
+	out = (uint8_t *) linklist_foldr(list, fold_fn, &init);
+
+	ck_assert(out);
+	ck_assert_int_eq(*out, 1);
+
+	ck_assert(list->head);
+	ck_assert(list->tail);
+	ck_assert_int_eq(list->length, 1);
+
+	free(out);
+	linklist_free(&list);
+}
+END_TEST
+
+START_TEST(test_linklist_foldr_multiple)
+{
+	int8_t in1 = 1;
+	int8_t in2 = 2;
+	int8_t in3 = 3;
+	int8_t init = 0;
+	int8_t * out;
+	struct linked_list * list;
+
+	linklist_alloc(&list, sizeof(in1));
+
+	linklist_push_tail(list, &in1);
+	linklist_push_tail(list, &in2);
+	linklist_push_tail(list, &in3);
+
+	/* foldr (-) 0 [1, 2, 3] -> 2 */
+	out = (uint8_t *) linklist_foldr(list, fold_fn, &init);
+
+	ck_assert(out);
+	ck_assert_int_eq(*out, 2);
+
+	ck_assert(list->head);
+	ck_assert(list->tail);
+	ck_assert_int_eq(list->length, 3);
+
+	free(out);
+	linklist_free(&list);
+}
+END_TEST
+
+START_TEST(test_linklist_foldl_empty)
+{
+	int8_t in = 0;
+	int8_t * out;
+	struct linked_list * list;
+
+	linklist_alloc(&list, 0);
+
+	out = (uint8_t *) linklist_foldl(list, fold_fn, &in);
+
+	ck_assert(out);
+	ck_assert_int_eq(*out, in);
+
+	ck_assert(!list->head);
+	ck_assert(!list->tail);
+	ck_assert(linklist_null(list));
+
+	free(out);
+	linklist_free(&list);
+}
+END_TEST
+
+START_TEST(test_linklist_foldl_single)
+{
+	int8_t in = 1;
+	int8_t init = 0;
+	int8_t * out;
+	struct linked_list * list;
+
+	linklist_alloc(&list, sizeof(in));
+	linklist_push_head(list, &in);
+
+	/* foldl (-) 0 [1] -> -1 */
+	out = (uint8_t *) linklist_foldl(list, fold_fn, &init);
+
+	ck_assert(out);
+	ck_assert_int_eq(*out, -1);
+
+	ck_assert(list->head);
+	ck_assert(list->tail);
+	ck_assert_int_eq(list->length, 1);
+
+	free(out);
+	linklist_free(&list);
+}
+END_TEST
+
+START_TEST(test_linklist_foldl_multiple)
+{
+	int8_t in1 = 1;
+	int8_t in2 = 2;
+	int8_t in3 = 3;
+	int8_t init = 0;
+	int8_t * out;
+	struct linked_list * list;
+
+	linklist_alloc(&list, sizeof(in1));
+
+	linklist_push_tail(list, &in1);
+	linklist_push_tail(list, &in2);
+	linklist_push_tail(list, &in3);
+
+	/* foldl (-) 0 [1, 2, 3] -> -6 */
+	out = (uint8_t *) linklist_foldl(list, fold_fn, &init);
+
+	ck_assert(out);
+	ck_assert_int_eq(*out, -6);
+
+	ck_assert(list->head);
+	ck_assert(list->tail);
+	ck_assert_int_eq(list->length, 3);
+
+	free(out);
+	linklist_free(&list);
+}
+END_TEST
+
 Suite * linklist_suite(void)
 {
 	Suite * suite;
@@ -641,6 +812,8 @@ Suite * linklist_suite(void)
 	TCase * case_linklist_delete;
 	TCase * case_linklist_fetch;
 	TCase * case_linklist_map;
+	TCase * case_linklist_foldl;
+	TCase * case_linklist_foldr;
 
 	suite = suite_create("Linked List");
 
@@ -654,6 +827,8 @@ Suite * linklist_suite(void)
 	case_linklist_delete = tcase_create("linklist_delete");
 	case_linklist_fetch = tcase_create("linklist_fetch");
 	case_linklist_map = tcase_create("linklist_map");
+	case_linklist_foldl = tcase_create("linklist_foldl");
+	case_linklist_foldr = tcase_create("linklist_foldr");
 
 	tcase_add_test(case_linklist_alloc, test_linklist_alloc);
 	tcase_add_test(case_linklist_null, test_linklist_null_true);
@@ -679,6 +854,12 @@ Suite * linklist_suite(void)
 	tcase_add_test(case_linklist_map, test_linklist_map_empty);
 	tcase_add_test(case_linklist_map, test_linklist_map_single);
 	tcase_add_test(case_linklist_map, test_linklist_map_multiple);
+	tcase_add_test(case_linklist_foldr, test_linklist_foldr_empty);
+	tcase_add_test(case_linklist_foldr, test_linklist_foldr_single);
+	tcase_add_test(case_linklist_foldr, test_linklist_foldr_multiple);
+	tcase_add_test(case_linklist_foldl, test_linklist_foldl_empty);
+	tcase_add_test(case_linklist_foldl, test_linklist_foldl_single);
+	tcase_add_test(case_linklist_foldl, test_linklist_foldl_multiple);
 
 	suite_add_tcase(suite, case_linklist_alloc);
 	suite_add_tcase(suite, case_linklist_null);
@@ -690,6 +871,8 @@ Suite * linklist_suite(void)
 	suite_add_tcase(suite, case_linklist_delete);
 	suite_add_tcase(suite, case_linklist_fetch);
 	suite_add_tcase(suite, case_linklist_map);
+	suite_add_tcase(suite, case_linklist_foldr);
+	suite_add_tcase(suite, case_linklist_foldl);
 
 	return suite;
 }
