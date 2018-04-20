@@ -6,6 +6,7 @@
 *.lzma
 *.lzo
 *.o
+*.out
 *.patch
 *.so
 *.tar
