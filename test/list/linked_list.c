@@ -153,19 +153,22 @@ END_TEST
 
 START_TEST(test_linklist_pop_head_single)
 {
-	uint8_t in = 1;
+	uint8_t val = 1;
+	uint8_t * out;
 	struct linked_list * list;
 
-	linklist_alloc(&list, sizeof(in));
+	linklist_alloc(&list, sizeof(val));
+	linklist_push_head(list, &val);
 
-	linklist_push_head(list, &in);
+	out = linklist_pop_head(list);
 
-	ck_assert_mem_eq(linklist_pop_head(list), &in, sizeof(in));
 	ck_assert(!list->head);
 	ck_assert(!list->tail);
 	ck_assert(linklist_null(list));
 
+	free(out);
 	linklist_free(&list);
+
 }
 END_TEST
 
@@ -201,6 +204,9 @@ START_TEST(test_linklist_pop_head_multiple)
 	ck_assert(!list->tail);
 	ck_assert(linklist_null(list));
 
+	free(out1);
+	free(out2);
+	free(out3);
 	linklist_free(&list);
 }
 END_TEST
@@ -226,15 +232,19 @@ END_TEST
 START_TEST(test_linklist_pop_tail_single)
 {
 	uint8_t in = 1;
+	uint8_t * out;
 	struct linked_list * list;
 	linklist_alloc(&list, sizeof(in));
 	linklist_push_tail(list, &in);
 
-	ck_assert_mem_eq(linklist_pop_tail(list), &in, sizeof(in));
+	out = linklist_pop_tail(list);
+
+	ck_assert_mem_eq(out, &in, sizeof(in));
 	ck_assert(!list->head);
 	ck_assert(!list->tail);
 	ck_assert(linklist_null(list));
 
+	free(out);
 	linklist_free(&list);
 }
 END_TEST
@@ -244,6 +254,9 @@ START_TEST(test_linklist_pop_tail_multiple)
 	uint8_t in1 = 1;
 	uint8_t in2 = 2;
 	uint8_t in3 = 3;
+	uint8_t * out1;
+	uint8_t * out2;
+	uint8_t * out3;
 	struct linked_list * list;
 
 	linklist_alloc(&list, sizeof(uint8_t));
@@ -252,14 +265,21 @@ START_TEST(test_linklist_pop_tail_multiple)
 	linklist_push_tail(list, &in2);
 	linklist_push_tail(list, &in3);
 
-	ck_assert_mem_eq(linklist_pop_tail(list), &in3, sizeof(uint8_t));
-	ck_assert_mem_eq(linklist_pop_tail(list), &in2, sizeof(uint8_t));
-	ck_assert_mem_eq(linklist_pop_tail(list), &in1, sizeof(uint8_t));
+	out1 = linklist_pop_tail(list);
+	out2 = linklist_pop_tail(list);
+	out3 = linklist_pop_tail(list);
+
+	ck_assert_mem_eq(out1, &in3, sizeof(uint8_t));
+	ck_assert_mem_eq(out2, &in2, sizeof(uint8_t));
+	ck_assert_mem_eq(out3, &in1, sizeof(uint8_t));
 
 	ck_assert(!list->head);
 	ck_assert(!list->tail);
 	ck_assert(linklist_null(list));
 
+	free(out1);
+	free(out2);
+	free(out3);
 	linklist_free(&list);
 }
 END_TEST
@@ -293,11 +313,17 @@ START_TEST(test_linklist_insert_multiple)
 	uint8_t in2 = 2;
 	uint8_t in3 = 3;
 	uint8_t in4 = 4;
+	uint8_t * out1;
+	uint8_t * out2;
+	uint8_t * out3;
+	uint8_t * out4;
+
 	struct linked_list * list;
 
 	linklist_alloc(&list, sizeof(uint8_t));
 
 	/* Insert the elements out of order. */
+	/* [4 1 2 3] */
 	r1 = linklist_insert(list, &in1, 0);
 	r2 = linklist_insert(list, &in3, 1);
 	r3 = linklist_insert(list, &in2, 1);
@@ -312,11 +338,20 @@ START_TEST(test_linklist_insert_multiple)
 	ck_assert(list->tail);
 	ck_assert_int_eq(list->length, 4);
 
-	ck_assert_mem_eq(linklist_pop_head(list), &in4, sizeof(uint8_t));
-	ck_assert_mem_eq(linklist_pop_head(list), &in1, sizeof(uint8_t));
-	ck_assert_mem_eq(linklist_pop_head(list), &in2, sizeof(uint8_t));
-	ck_assert_mem_eq(linklist_pop_head(list), &in3, sizeof(uint8_t));
+	out1 = linklist_pop_head(list); /* 4 */
+	out2 = linklist_pop_head(list); /* 1 */
+	out3 = linklist_pop_head(list); /* 2 */
+	out4 = linklist_pop_head(list); /* 3 */
 
+	ck_assert_int_eq(*out1, in4);
+	ck_assert_int_eq(*out2, in1);
+	ck_assert_int_eq(*out3, in2);
+	ck_assert_int_eq(*out4, in3);
+
+	free(out1);
+	free(out2);
+	free(out3);
+	free(out4);
 	linklist_free(&list);
 }
 END_TEST
@@ -337,7 +372,7 @@ START_TEST(test_linklist_delete_empty)
 
 	ck_assert(!list->head);
 	ck_assert(!list->tail);
-	ck_assert_int_eq(list->length, 0);
+	ck_assert(linklist_null(list));
 
 	linklist_free(&list);
 }
@@ -359,8 +394,9 @@ START_TEST(test_linklist_delete_single)
 
 	ck_assert(!list->head);
 	ck_assert(!list->tail);
-	ck_assert_int_eq(list->length, 0);
+	ck_assert(linklist_null(list));
 
+	free(out);
 	linklist_free(&list);
 }
 END_TEST
@@ -378,9 +414,8 @@ START_TEST(test_linklist_delete_multiple)
 	uint8_t * out5;
 	struct linked_list * list;
 
-	linklist_alloc(&list, sizeof(uint8_t));
-
 	/* Create linked list: [1, 2, 3, 4] */
+	linklist_alloc(&list, sizeof(uint8_t));
 	linklist_push_tail(list, &in1);
 	linklist_push_tail(list, &in2);
 	linklist_push_tail(list, &in3);
@@ -400,7 +435,7 @@ START_TEST(test_linklist_delete_multiple)
 
 	ck_assert(!list->head);
 	ck_assert(!list->tail);
-	ck_assert_int_eq(list->length, 0);
+	ck_assert(linklist_null(list));
 
 	ck_assert(out1);
 	ck_assert(out2);
@@ -413,6 +448,10 @@ START_TEST(test_linklist_delete_multiple)
 	ck_assert_int_eq(*out3, in4);
 	ck_assert_int_eq(*out4, in2);
 
+	free(out1);
+	free(out2);
+	free(out3);
+	free(out4);
 	linklist_free(&list);
 }
 END_TEST
@@ -433,7 +472,7 @@ START_TEST(test_linklist_fetch_empty)
 
 	ck_assert(!list->head);
 	ck_assert(!list->tail);
-	ck_assert_int_eq(list->length, 0);
+	ck_assert(linklist_null(list));
 
 	linklist_free(&list);
 }
@@ -448,7 +487,7 @@ START_TEST(test_linklist_fetch_single)
 	linklist_alloc(&list, sizeof(in));
 	linklist_push_head(list, &in);
 
-	out = (uint8_t *) linklist_fetch(list, 0);
+	out = linklist_fetch(list, 0);
 
 	ck_assert(out);
 	ck_assert_int_eq(*out, in);
@@ -483,11 +522,11 @@ START_TEST(test_linklist_fetch_multiple)
 	linklist_push_tail(list, &in4);
 
 	/* Fetch the elements out of order. */
-	out1 = (uint8_t *) linklist_fetch(list, 2); /* 3 */
-	out2 = (uint8_t *) linklist_fetch(list, 0); /* 1 */
-	out3 = (uint8_t *) linklist_fetch(list, 1); /* 2 */
-	out4 = (uint8_t *) linklist_fetch(list, 3); /* 4 */
-	out5 = (uint8_t *) linklist_fetch(list, 4); /* NULL */
+	out1 = linklist_fetch(list, 2); /* 3 */
+	out2 = linklist_fetch(list, 0); /* 1 */
+	out3 = linklist_fetch(list, 1); /* 2 */
+	out4 = linklist_fetch(list, 3); /* 4 */
+	out5 = linklist_fetch(list, 4); /* NULL */
 
 	ck_assert(list->head);
 	ck_assert(list->tail);
@@ -512,12 +551,14 @@ void * map_fn(void * data)
 {
 	uint8_t * n = (uint8_t *) data;
 	(*n)++;
+
 	return n;
 }
 
 START_TEST(test_linklist_map_empty)
 {
 	struct linked_list * list;
+
 	linklist_alloc(&list, 0);
 
 	linklist_map(list, map_fn);
@@ -535,6 +576,8 @@ START_TEST(test_linklist_map_single)
 	uint8_t in = 1;
 	uint8_t * out;
 	struct linked_list * list;
+
+	/* Create single element list [1] */
 	linklist_alloc(&list, sizeof(in));
 	linklist_push_head(list, &in);
 
@@ -554,8 +597,8 @@ END_TEST
 START_TEST(test_linklist_map_multiple)
 {
 	uint8_t in1 = 1;
-	uint8_t in2 = 1;
-	uint8_t in3 = 1;
+	uint8_t in2 = 2;
+	uint8_t in3 = 3;
 	uint8_t * out1;
 	uint8_t * out2;
 	uint8_t * out3;
@@ -563,6 +606,7 @@ START_TEST(test_linklist_map_multiple)
 
 	linklist_alloc(&list, sizeof(in1));
 
+	/* list: [1, 2, 3] */
 	linklist_push_tail(list, &in1);
 	linklist_push_tail(list, &in2);
 	linklist_push_tail(list, &in3);
