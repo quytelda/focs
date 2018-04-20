@@ -18,4 +18,4 @@ check: $(TESTS)
 	@for test in $(TESTS); do LD_LIBRARY_PATH=.. ./$$test; done
 
 clean:
-	-rm $(TESTS) $(TEST_LINKLIST_OBJS)
+	-$(RM) $(TESTS) $(TEST_LINKLIST_OBJS)

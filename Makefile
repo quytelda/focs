@@ -18,7 +18,7 @@ debug: $(OBJS)
 	$(CC) -shared -o $(BIN) $(CFLAGS) $(LIBS) $(DEBUG_FLAGS) $(OBJS)
 
 clean:
-	-rm $(BIN) $(OBJS)
+	-$(RM) $(BIN) $(OBJS)
 	$(MAKE) -C $(CK_DIR) clean
 
 check:
