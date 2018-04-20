@@ -254,30 +254,36 @@ void linklist_push_tail(struct linked_list * list, void * data)
 
 void * linklist_pop_head(struct linked_list * list)
 {
+	void * data = NULL;
 	struct element * current;
 
 	rwlock_writer_entry(list->rwlock);
 	current = __pop_head(list);
 	rwlock_writer_exit(list->rwlock);
 
-	if(current)
-		return current->data;
+	if(current) {
+		data = current->data;
+		free(current);
+	}
 
-	return NULL;
+	return data;
 }
 
 void * linklist_pop_tail(struct linked_list * list)
 {
+	void * data = NULL;
 	struct element * current;
 
 	rwlock_writer_entry(list->rwlock);
 	current = __pop_tail(list);
 	rwlock_writer_exit(list->rwlock);
 
-	if(current)
-		return current->data;
+	if(current) {
+		data = current->data;
+		free(current);
+	}
 
-	return NULL;
+	return data;
 }
 
 bool linklist_insert(struct linked_list * list, void * data, size_t pos)
