@@ -39,9 +39,39 @@ struct linked_list {
 	struct rwlock * rwlock;
 };
 
-#define linklist_foreach(list, current)					\
-	for(current = list->head; current; current = current->next)
+#define NEXT_SAFE(current) ((current) ? (current)->next : NULL)
+#define PREV_SAFE(current) ((current) ? (current)->prev : NULL)
 
+#define linklist_foreach(list, current)					\
+	for(current = (list)->head; current; current = current->next)
+
+#define linklist_foreach_rev(list, current)				\
+	for(current = (list)->tail; current; current = current->prev)
+
+#define linklist_foreach_safe(list, current)			\
+	struct element * tmp; /* tmp is on the stack */		\
+	for(current = (list)->head, tmp = NEXT_SAFE(current);	\
+	    current;						\
+	    current = tmp, tmp = NEXT_SAFE(current))
+
+#define linklist_foreach_rev_safe(list, current, tmp)		\
+	struct element * tmp; /* tmp is on the stack */		\
+	for(current = (list)->tail, tmp = PREV_SAFE(current);	\
+	    current;						\
+	    current = tmp, tmp = PREV_SAFE(current))
+
+#define linklist_while(list, current, condition)	\
+	for(current = (list)->head;			\
+	    current && condition;			\
+	    current = current->next)
+
+#define linklist_while_safe(list, current, condition)		\
+	struct element * tmp; /* tmp is on the stack */		\
+	for(current = (list)->head, tmp = NEXT_SAFE(current);	\
+	    current && condition;				\
+	    current = tmp, tmp = NEXT_SAFE(current))
+
+/* Creation & Destruction */
 int linklist_alloc(struct linked_list ** list, size_t data_size);
 void linklist_free(struct linked_list ** list);
 

@@ -218,14 +218,12 @@ exit:
 void linklist_free(struct linked_list ** list)
 {
 	struct element * current;
-	struct element * next;
 
 	rwlock_writer_entry((*list)->rwlock);
 
 	(*list)->length = 0;
 
-	for(current = (*list)->head; current; current = next) {
-		next = current->next;
+	linklist_foreach_safe(*list, current) {
 		free(current->data);
 		free(current);
 	}
