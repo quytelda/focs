@@ -500,6 +500,8 @@ bool linklist_filter(struct linked_list * list, pred_fn_t p)
  * @list: A list of values
  * @fn: A function that will transform each value in the list
  *
+ * Runtime: O(n)
+ *
  * A map operation iterates over the provided list (@list) and transforms each
  * data element using the function @fn, replacing the old value with the result
  * of the transformation:
@@ -533,6 +535,8 @@ void linklist_map(struct linked_list * list, map_fn_t fn)
  * @list: A list of values to reduce
  * @fn: A binary function that will sequentially reduce values
  * @init: An initial value for the fold
+ *
+ * Runtime: O(n)
  *
  * A right associative fold uses the binary function @fn to sequentially reduce
  * a list of values to a single value, starting from some initial value @init:
@@ -575,6 +579,8 @@ void * linklist_foldr(const struct linked_list * list,
  * @list: A list of values to reduce
  * @fn: A binary function that will sequentially reduce values
  * @init: An initial value for the fold
+ *
+ * Runtime: O(n)
  *
  * A left associative fold uses the binary function @fn to sequentially reduce
  * a list of values to a single value, starting from some initial value @init:
