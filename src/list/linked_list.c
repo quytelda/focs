@@ -470,6 +470,31 @@ bool linklist_all(struct linked_list * list, pred_fn_t p)
 	return success;
 }
 
+bool linklist_filter(struct linked_list * list, pred_fn_t p)
+{
+	bool changed = false;
+	struct element * current;
+
+	if(linklist_null(list))
+		return false;
+
+	rwlock_writer_entry(list->rwlock);
+
+	linklist_foreach_safe(list, current) {
+		if(!p(current->data)) {
+			changed = true;
+
+			__delete_element(list, current);
+			free(current->data);
+			free(current);
+		}
+	}
+
+	rwlock_writer_exit(list->rwlock);
+
+	return changed;
+}
+
 /**
  * linklist_map() - Map a function over a linked list in-place.
  * @list: A list of values

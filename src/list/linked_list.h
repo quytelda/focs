@@ -100,4 +100,9 @@ bool linklist_contains(struct linked_list * list, void * data);
 bool linklist_any(struct linked_list * list, pred_fn_t p);
 bool linklist_all(struct linked_list * list, pred_fn_t p);
 
+/* Filtering */
+bool linklist_filter(struct linked_list * list, pred_fn_t p);
+bool linklist_drop_while(struct linked_list * list, pred_fn_t p);
+bool linklist_take_while(struct linked_list * list, pred_fn_t p);
+
 #endif /* __LINKED_LIST_H */

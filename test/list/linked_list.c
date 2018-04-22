@@ -871,6 +871,87 @@ START_TEST(test_linklist_all_multiple)
 }
 END_TEST
 
+START_TEST(test_linklist_filter_empty)
+{
+	bool changed;
+	struct linked_list * list;
+
+	linklist_alloc(&list, sizeof(uint8_t));
+
+	changed = linklist_filter(list, (pred_fn_t) pred_gt1);
+
+	ck_assert(!changed);
+
+	ck_assert(!list->head);
+	ck_assert(!list->tail);
+	ck_assert(linklist_null(list));
+
+	linklist_free(&list);
+}
+END_TEST
+
+START_TEST(test_linklist_filter_single)
+{
+	bool changed;
+	uint8_t in = 0;
+	struct linked_list * list;
+
+	linklist_alloc(&list, sizeof(in));
+	linklist_push_head(list, &in);
+
+	changed = linklist_filter(list, (pred_fn_t) pred_lte1);
+	ck_assert(!changed);
+
+	ck_assert(list->head);
+	ck_assert(list->tail);
+	ck_assert_int_eq(list->length, 1);
+
+	changed = linklist_filter(list, (pred_fn_t) pred_gt1);
+	ck_assert(changed);
+
+	ck_assert(!list->head);
+	ck_assert(!list->tail);
+	ck_assert(linklist_null(list));
+
+	linklist_free(&list);
+}
+END_TEST
+
+START_TEST(test_linklist_filter_multiple)
+{
+	bool changed;
+	uint8_t in[] = {0, 2, 0, 2};
+	struct linked_list * list;
+
+	/* Create linked list: [0, 2, 0, 2] */
+	linklist_alloc(&list, sizeof(uint8_t));
+	linklist_push_tail(list, &in[0]);
+	linklist_push_tail(list, &in[1]);
+	linklist_push_tail(list, &in[2]);
+	linklist_push_tail(list, &in[3]);
+
+	/* filter (> 1) [0, 2, 0, 2] -> [0, 0] */
+	changed = linklist_filter(list, (pred_fn_t) pred_gt1);
+
+	ck_assert(changed);
+
+	ck_assert(list->head);
+	ck_assert(list->tail);
+	ck_assert_int_eq(list->length, 2);
+
+	/* filter (<= 1) [0, 0] -> [] */
+	changed = linklist_filter(list, (pred_fn_t) pred_lte1);
+
+	ck_assert(changed);
+
+	ck_assert(!list->head);
+	ck_assert(!list->tail);
+	ck_assert(linklist_null(list));
+
+	linklist_free(&list);
+}
+END_TEST
+
 uint8_t * map_fn(uint8_t * data)
 {
 	(*data)++;
@@ -1219,6 +1300,7 @@ Suite * linklist_suite(void)
 	TCase * case_linklist_contains;
 	TCase * case_linklist_any;
 	TCase * case_linklist_all;
+	TCase * case_linklist_filter;
 	TCase * case_linklist_map;
 	TCase * case_linklist_foldl;
 	TCase * case_linklist_foldr;
@@ -1238,6 +1320,7 @@ Suite * linklist_suite(void)
 	case_linklist_contains = tcase_create("linklist_contains");
 	case_linklist_any = tcase_create("linklist_any");
 	case_linklist_all = tcase_create("linklist_all");
+	case_linklist_filter = tcase_create("linklist_filter");
 	case_linklist_map = tcase_create("linklist_map");
 	case_linklist_foldl = tcase_create("linklist_foldl");
 	case_linklist_foldr = tcase_create("linklist_foldr");
@@ -1275,6 +1358,9 @@ Suite * linklist_suite(void)
 	tcase_add_test(case_linklist_all, test_linklist_all_empty);
 	tcase_add_test(case_linklist_all, test_linklist_all_single);
 	tcase_add_test(case_linklist_all, test_linklist_all_multiple);
+	tcase_add_test(case_linklist_filter, test_linklist_filter_empty);
+	tcase_add_test(case_linklist_filter, test_linklist_filter_single);
+	tcase_add_test(case_linklist_filter, test_linklist_filter_multiple);
 	tcase_add_test(case_linklist_map, test_linklist_map_empty);
 	tcase_add_test(case_linklist_map, test_linklist_map_single);
 	tcase_add_test(case_linklist_map, test_linklist_map_multiple);
@@ -1298,6 +1384,7 @@ Suite * linklist_suite(void)
 	suite_add_tcase(suite, case_linklist_contains);
 	suite_add_tcase(suite, case_linklist_any);
 	suite_add_tcase(suite, case_linklist_all);
+	suite_add_tcase(suite, case_linklist_filter);
 	suite_add_tcase(suite, case_linklist_map);
 	suite_add_tcase(suite, case_linklist_foldr);
 	suite_add_tcase(suite, case_linklist_foldl);
