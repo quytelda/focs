@@ -176,6 +176,23 @@ static struct element * __remove_element(struct linked_list * list, size_t pos)
 	return current;
 }
 
+static void __delete_element(struct linked_list * list, struct element * elem)
+{
+	/* Fix head and tail. */
+	if(list->head == elem)
+		list->head = elem->next;
+	if(list->tail == elem)
+		list->tail = elem->prev;
+
+	/* Fix pointers in surrounding elements. */
+	if(elem->prev)
+		elem->prev->next = elem->next;
+	if(elem->next)
+		elem->next->prev = elem->prev;
+
+	(list->length)--;
+}
+
 int linklist_alloc(struct linked_list ** list, size_t data_size)
 {
 	int err;
