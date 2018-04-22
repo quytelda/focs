@@ -54,6 +54,7 @@ bool linklist_insert(struct linked_list * list, void * data, size_t pos);
 bool linklist_delete(struct linked_list * list, size_t pos);
 void * linklist_remove(struct linked_list * list, size_t pos);
 void * linklist_fetch(struct linked_list * list, size_t pos);
+bool linklist_contains(struct linked_list * list, void * data);
 void linklist_map(struct linked_list * list, map_fn_t fn);
 void * linklist_foldr(const struct linked_list * list,
 		      foldr_fn_t fn,

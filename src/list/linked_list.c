@@ -367,6 +367,36 @@ void * linklist_fetch(struct linked_list * list, size_t pos)
 }
 
 /**
+ * linklist_contains() - Determines if a list contains a value
+ * @list: The list to search
+ * @data: The data to search for in the list
+ *
+ * Determines if @list contains an entry matching @data.
+ * The operation compares the contents of the memory pointed to by @data, and
+ * not the memory addresses of the data pointers.
+ *
+ * Return: ``true`` if a matching entry is found, otherwise ``false``
+ */
+bool linklist_contains(struct linked_list * list, void * data)
+{
+	bool success = false;
+	struct element * current;
+
+	rwlock_reader_entry(list->rwlock);
+
+	linklist_foreach(list, current) {
+		if(memcmp(current->data, data, list->data_size) == 0) {
+			success = true;
+			break;
+		}
+	}
+
+	rwlock_reader_exit(list->rwlock);
+
+	return success;
+}
+
+/**
  * linklist_map() - Map a function over a linked list in-place.
  * @list: A list of values
  * @fn: A function that will transform each value in the list
