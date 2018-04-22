@@ -154,7 +154,7 @@ static bool __insert_element(struct linked_list * list, struct element * current
 	return true;
 }
 
-static struct element * __delete_element(struct linked_list * list, size_t pos)
+static struct element * __remove_element(struct linked_list * list, size_t pos)
 {
 	struct element * current;
 
@@ -305,7 +305,7 @@ bool linklist_delete(struct linked_list * list, size_t pos)
 	struct element * current;
 
 	rwlock_writer_entry(list->rwlock);
-	current = __delete_element(list, pos);
+	current = __remove_element(list, pos);
 	rwlock_writer_exit(list->rwlock);
 
 	if(current) {
@@ -324,7 +324,7 @@ void * linklist_remove(struct linked_list * list, size_t pos)
 	struct element * current;
 
 	rwlock_writer_entry(list->rwlock);
-	current = __delete_element(list, pos);
+	current = __remove_element(list, pos);
 	rwlock_writer_exit(list->rwlock);
 
 	if(current) {
