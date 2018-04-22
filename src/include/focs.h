@@ -26,3 +26,5 @@
 typedef void * (* map_fn_t)(void * data);
 typedef void * (* foldr_fn_t)(const void * c, void * acc);
 typedef void * (* foldl_fn_t)(void * acc, const void * c);
+typedef bool   (* comp_fn_t)(const void * a, const void * b);
+typedef bool   (* pred_fn_t)(const void * data);

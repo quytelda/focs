@@ -395,6 +395,82 @@ bool linklist_contains(struct linked_list * list, void * data)
 }
 
 /**
+ * linklist_any() - Determines if any value in a list satisifies some condition
+ * @list: A list of values
+ * @p: The predicate function (representing a condition to be satisfied).
+ *
+ * Runtime:
+ * * worst: O(n)
+ * * average: O(n/2)
+ * * best: O(1)
+ *
+ * Iterate over each value stored in @list, and determine if any of them
+ * satisfies @p (e.g. @p returns true when passed that value).  This function
+ *
+ * Return: ``true`` if there is at least one value that satisfies the predicate.
+ * Otherwise, it returns ``false``.
+ */
+bool linklist_any(struct linked_list * list, pred_fn_t p)
+{
+	bool success = false;
+	struct element * current;
+
+	if(linklist_null(list))
+		return false;
+
+	rwlock_reader_entry(list->rwlock);
+
+	linklist_foreach(list, current) {
+		if(p(current->data)) {
+			success = true;
+			break;
+		}
+	}
+
+	rwlock_reader_exit(list->rwlock);
+
+	return success;
+}
+
+/**
+ * linklist_all() - Determines if all values in a list satisify some condition
+ * @list: A list of values
+ * @p: The predicate function (representing a condition to be satisfied).
+ *
+ * Runtime:
+ * * worst: O(n)
+ * * average: O(n/2)
+ * * best: O(1)
+ *
+ * Iterate over each value stored in @list, and determine if all of them
+ * satisfy @p (e.g. @p returns true when passed that value).
+ *
+ * Return: ``false`` if there is at least one value that does not satisfy the
+ * predicate.  Otherwise, it returns ``true``.
+ */
+bool linklist_all(struct linked_list * list, pred_fn_t p)
+{
+	bool success = true;
+	struct element * current;
+
+	if(linklist_null(list))
+		return false;
+
+	rwlock_reader_entry(list->rwlock);
+
+	linklist_foreach(list, current) {
+		if(!p(current->data)) {
+			success = false;
+			break;
+		}
+	}
+
+	rwlock_reader_exit(list->rwlock);
+
+	return success;
+}
+
+/**
  * linklist_map() - Map a function over a linked list in-place.
  * @list: A list of values
  * @fn: A function that will transform each value in the list
