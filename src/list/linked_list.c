@@ -193,6 +193,42 @@ static void __delete_element(struct linked_list * list, struct element * elem)
 	(list->length)--;
 }
 
+static void __delete_before(struct linked_list * list, struct element * mark)
+{
+	struct element * current;
+
+	linklist_while_safe(list, current, current != mark) {
+		free(current->data);
+		free(current);
+
+		(list->length)--;
+	}
+
+	list->head = mark;
+	if(mark)
+		mark->prev = NULL;
+	else
+		list->tail = NULL;
+}
+
+static void __delete_after(struct linked_list * list, struct element * mark)
+{
+	struct element * current;
+
+	linklist_while_rev_safe(list, current, current != mark) {
+		free(current->data);
+		free(current);
+
+		(list->length)--;
+	}
+
+	list->tail = mark;
+	if(mark)
+		mark->next = NULL;
+	else
+		list->head = NULL;
+}
+
 int linklist_alloc(struct linked_list ** list, size_t data_size)
 {
 	int err;
@@ -493,6 +529,56 @@ bool linklist_filter(struct linked_list * list, pred_fn_t p)
 	rwlock_writer_exit(list->rwlock);
 
 	return changed;
+}
+
+bool linklist_drop_while(struct linked_list * list, pred_fn_t p)
+{
+	size_t orig_length;
+	struct element * current;
+
+	rwlock_writer_entry(list->rwlock);
+
+	orig_length = list->length;
+
+	/* Iterate over the list until we find the first element that doesn't
+	 * satisfy the predicate; delete everything before that element.
+	 * Otherwise, if an element that fails to satisfy the predicate is never
+	 * found, then the entire list should be dropped. */
+	linklist_foreach(list, current) {
+		if(!p(current->data)) {
+			__delete_before(list, current);
+			break;
+		}
+	} otherwise(current) {
+		__delete_before(list, NULL);
+	}
+
+	rwlock_writer_exit(list->rwlock);
+
+	return (orig_length != list->length);
+}
+
+bool linklist_take_while(struct linked_list * list, pred_fn_t p)
+{
+	size_t orig_length;
+	struct element * current;
+
+	rwlock_writer_entry(list->rwlock);
+
+	orig_length = list->length;
+
+	/* Iterate over the list until we find the first element that doesn't
+	 * satisfy the predicate; delete that element and every one after. */
+	linklist_foreach(list, current) {
+		if(!p(current->data)) {
+			__delete_after(list, current->prev);
+			break;
+		}
+	}
+
+	rwlock_writer_exit(list->rwlock);
+
+	return (orig_length != list->length);
 }
 
 /**

@@ -68,8 +68,21 @@ struct linked_list {
 #define linklist_while_safe(list, current, condition)		\
 	struct element * tmp; /* tmp is on the stack */		\
 	for(current = (list)->head, tmp = NEXT_SAFE(current);	\
-	    current && condition;				\
+	    current && (condition);				\
 	    current = tmp, tmp = NEXT_SAFE(current))
+
+#define linklist_while_rev(list, current, condition)	\
+	for(current = (list)->tail;			\
+	    current && condition;			\
+	    current = current->prev)
+
+#define linklist_while_rev_safe(list, current, condition)	\
+	struct element * tmp; /* tmp is on the stack */		\
+	for(current = (list)->tail, tmp = PREV_SAFE(current);	\
+	    current && (condition);				\
+	    current = tmp, tmp = PREV_SAFE(current))
+
+#define otherwise(current) if(!current)
 
 /* Creation & Destruction */
 int linklist_alloc(struct linked_list ** list, size_t data_size);

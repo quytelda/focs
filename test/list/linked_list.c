@@ -723,9 +723,9 @@ START_TEST(test_linklist_contains_multiple)
 }
 END_TEST
 
-bool pred_gt1(uint8_t * n)
+bool pred_gte1(uint8_t * n)
 {
-	return (*n > 1);
+	return (*n >= 1);
 }
 
 bool pred_lte1(uint8_t * n)
@@ -740,7 +740,7 @@ START_TEST(test_linklist_any_empty)
 
 	linklist_alloc(&list, sizeof(uint8_t));
 
-	any = linklist_any(list, (pred_fn_t) pred_gt1);
+	any = linklist_any(list, (pred_fn_t) pred_gte1);
 
 	ck_assert(!any);
 
@@ -761,7 +761,7 @@ START_TEST(test_linklist_any_single)
 	linklist_alloc(&list, sizeof(in));
 	linklist_push_head(list, &in);
 
-	any[0] = linklist_any(list, (pred_fn_t) pred_gt1);
+	any[0] = linklist_any(list, (pred_fn_t) pred_gte1);
 	any[1] = linklist_any(list, (pred_fn_t) pred_lte1);
 
 	ck_assert(!any[0]);
@@ -788,7 +788,7 @@ START_TEST(test_linklist_any_multiple)
 	linklist_push_tail(list, &in[2]);
 
 	/* Check the elements out of order. */
-	any[0] = linklist_any(list, (pred_fn_t) pred_gt1);
+	any[0] = linklist_any(list, (pred_fn_t) pred_gte1);
 	any[1] = linklist_any(list, (pred_fn_t) pred_lte1);
 
 	ck_assert(list->head);
@@ -809,7 +809,7 @@ START_TEST(test_linklist_all_empty)
 
 	linklist_alloc(&list, sizeof(uint8_t));
 
-	all = linklist_all(list, (pred_fn_t) pred_gt1);
+	all = linklist_all(list, (pred_fn_t) pred_gte1);
 
 	ck_assert(!all);
 
@@ -830,7 +830,7 @@ START_TEST(test_linklist_all_single)
 	linklist_alloc(&list, sizeof(in));
 	linklist_push_head(list, &in);
 
-	all[0] = linklist_all(list, (pred_fn_t) pred_gt1);
+	all[0] = linklist_all(list, (pred_fn_t) pred_gte1);
 	all[1] = linklist_all(list, (pred_fn_t) pred_lte1);
 
 	ck_assert(!all[0]);
@@ -857,7 +857,7 @@ START_TEST(test_linklist_all_multiple)
 	linklist_push_tail(list, &in[2]);
 
 	/* Check the elements out of order. */
-	all[0] = linklist_all(list, (pred_fn_t) pred_gt1);
+	all[0] = linklist_all(list, (pred_fn_t) pred_gte1);
 	all[1] = linklist_all(list, (pred_fn_t) pred_lte1);
 
 	ck_assert(list->head);
@@ -878,7 +878,7 @@ START_TEST(test_linklist_filter_empty)
 
 	linklist_alloc(&list, sizeof(uint8_t));
 
-	changed = linklist_filter(list, (pred_fn_t) pred_gt1);
+	changed = linklist_filter(list, (pred_fn_t) pred_gte1);
 
 	ck_assert(!changed);
 
@@ -906,7 +906,7 @@ START_TEST(test_linklist_filter_single)
 	ck_assert(list->tail);
 	ck_assert_int_eq(list->length, 1);
 
-	changed = linklist_filter(list, (pred_fn_t) pred_gt1);
+	changed = linklist_filter(list, (pred_fn_t) pred_gte1);
 	ck_assert(changed);
 
 	ck_assert(!list->head);
@@ -931,7 +931,7 @@ START_TEST(test_linklist_filter_multiple)
 	linklist_push_tail(list, &in[3]);
 
 	/* filter (> 1) [0, 2, 0, 2] -> [0, 0] */
-	changed = linklist_filter(list, (pred_fn_t) pred_gt1);
+	changed = linklist_filter(list, (pred_fn_t) pred_gte1);
 
 	ck_assert(changed);
 
@@ -947,6 +947,171 @@ START_TEST(test_linklist_filter_multiple)
 	ck_assert(!list->head);
 	ck_assert(!list->tail);
 	ck_assert(linklist_null(list));
+
+	linklist_free(&list);
+}
+END_TEST
+
+START_TEST(test_linklist_drop_while_empty)
+{
+	bool changed;
+	struct linked_list * list;
+
+	linklist_alloc(&list, sizeof(uint8_t));
+
+	changed = linklist_drop_while(list, (pred_fn_t) pred_gte1);
+
+	ck_assert(!changed);
+
+	ck_assert(!list->head);
+	ck_assert(!list->tail);
+	ck_assert(linklist_null(list));
+
+	linklist_free(&list);
+}
+END_TEST
+
+START_TEST(test_linklist_drop_while_single)
+{
+	bool changed;
+	uint8_t in = 0;
+	struct linked_list * list;
+
+	/* Singleton List: [0] */
+	linklist_alloc(&list, sizeof(in));
+	linklist_push_head(list, &in);
+
+	/* dropWhile (> 1) [0] -> [0] */
+	changed = linklist_drop_while(list, (pred_fn_t) pred_gte1);
+
+	ck_assert(!changed);
+	ck_assert(list->head);
+	ck_assert(list->tail);
+	ck_assert_int_eq(list->length, 1);
+
+	/* dropWhile (<= 1) [0] -> [] */
+	changed = linklist_drop_while(list, (pred_fn_t) pred_lte1);
+
+	ck_assert(changed);
+	ck_assert(!list->head);
+	ck_assert(!list->tail);
+	ck_assert(linklist_null(list));
+
+	linklist_free(&list);
+}
+END_TEST
+
+START_TEST(test_linklist_drop_while_multiple)
+{
+	bool changed;
+	uint8_t in[6] = {0, 0, 2, 2, 0, 0};
+	struct linked_list * list;
+
+	/* Create linked list: [0, 0, 2, 2, 0, 0] */
+	linklist_alloc(&list, sizeof(uint8_t));
+	linklist_push_tail(list, &in[0]);
+	linklist_push_tail(list, &in[1]);
+	linklist_push_tail(list, &in[2]);
+	linklist_push_tail(list, &in[3]);
+	linklist_push_tail(list, &in[4]);
+	linklist_push_tail(list, &in[5]);
+
+	/* dropWhile (<= 1) [0, 0, 2, 2, 0, 0] -> [2, 2, 0, 0] */
+	changed = linklist_drop_while(list, (pred_fn_t) pred_lte1);
+
+	ck_assert(changed);
+	ck_assert(list->head);
+	ck_assert(list->tail);
+	ck_assert_int_eq(list->length, 4);
+
+	/* dropWhile (> 1) [2, 2, 0, 0] -> [0, 0]*/
+	changed = linklist_drop_while(list, (pred_fn_t) pred_gte1);
+
+	ck_assert(changed);
+	ck_assert(list->head);
+	ck_assert(list->tail);
+	ck_assert_int_eq(list->length, 2);
+
+	linklist_free(&list);
+}
+END_TEST
+
+START_TEST(test_linklist_take_while_empty)
+{
+	bool changed;
+	struct linked_list * list;
+
+	linklist_alloc(&list, sizeof(uint8_t));
+
+	changed = linklist_take_while(list, (pred_fn_t) pred_gte1);
+
+	ck_assert(!changed);
+
+	ck_assert(!list->head);
+	ck_assert(!list->tail);
+	ck_assert(linklist_null(list));
+
+	linklist_free(&list);
+}
+END_TEST
+
+START_TEST(test_linklist_take_while_single)
+{
+	bool changed;
+	uint8_t in = 0;
+	struct linked_list * list;
+
+	/* Singleton List: [0] */
+	linklist_alloc(&list, sizeof(in));
+	linklist_push_head(list, &in);
+
+	/* takeWhile (<= 1) [0] -> [0] */
+	changed = linklist_take_while(list, (pred_fn_t) pred_lte1);
+
+	ck_assert(!changed);
+	ck_assert(list->head);
+	ck_assert(list->tail);
+	ck_assert_int_eq(list->length, 1);
+
+	/* takeWhile (> 1) [0] -> [] */
+	changed = linklist_take_while(list, (pred_fn_t) pred_gte1);
+
+	ck_assert(changed);
+	ck_assert(!list->head);
+	ck_assert(!list->tail);
+	ck_assert(linklist_null(list));
+
+	linklist_free(&list);
+}
+END_TEST
+
+START_TEST(test_linklist_take_while_multiple)
+{
+	bool changed;
+	uint8_t in[] = {1, 0, 2};
+	struct linked_list * list;
+
+	/* Create linked list: [1, 0, 2] */
+	linklist_alloc(&list, sizeof(uint8_t));
+	linklist_push_tail(list, &in[0]);
+	linklist_push_tail(list, &in[1]);
+	linklist_push_tail(list, &in[2]);
+
+	/* takeWhile (<= 1) [1, 0, 2] -> [1, 0] */
+	changed = linklist_take_while(list, (pred_fn_t) pred_lte1);
+
+	ck_assert(changed);
+	ck_assert(list->head);
+	ck_assert(list->tail);
+	ck_assert_int_eq(list->length, 2);
+
+	/* dropWhile (> 1) [1, 0] -> [1]*/
+	changed = linklist_take_while(list, (pred_fn_t) pred_gte1);
+
+	ck_assert(changed);
+	ck_assert(list->head);
+	ck_assert(list->tail);
+	ck_assert_int_eq(list->length, 1);
 
 	linklist_free(&list);
 }
@@ -1301,6 +1466,8 @@ Suite * linklist_suite(void)
 	TCase * case_linklist_any;
 	TCase * case_linklist_all;
 	TCase * case_linklist_filter;
+	TCase * case_linklist_drop_while;
+	TCase * case_linklist_take_while;
 	TCase * case_linklist_map;
 	TCase * case_linklist_foldl;
 	TCase * case_linklist_foldr;
@@ -1321,6 +1488,8 @@ Suite * linklist_suite(void)
 	case_linklist_any = tcase_create("linklist_any");
 	case_linklist_all = tcase_create("linklist_all");
 	case_linklist_filter = tcase_create("linklist_filter");
+	case_linklist_drop_while = tcase_create("linklist_drop_while");
+	case_linklist_take_while = tcase_create("linklist_take_while");
 	case_linklist_map = tcase_create("linklist_map");
 	case_linklist_foldl = tcase_create("linklist_foldl");
 	case_linklist_foldr = tcase_create("linklist_foldr");
@@ -1361,6 +1530,12 @@ Suite * linklist_suite(void)
 	tcase_add_test(case_linklist_filter, test_linklist_filter_empty);
 	tcase_add_test(case_linklist_filter, test_linklist_filter_single);
 	tcase_add_test(case_linklist_filter, test_linklist_filter_multiple);
+	tcase_add_test(case_linklist_drop_while, test_linklist_drop_while_empty);
+	tcase_add_test(case_linklist_drop_while, test_linklist_drop_while_single);
+	tcase_add_test(case_linklist_drop_while, test_linklist_drop_while_multiple);
+	tcase_add_test(case_linklist_take_while, test_linklist_take_while_empty);
+	tcase_add_test(case_linklist_take_while, test_linklist_take_while_single);
+	tcase_add_test(case_linklist_take_while, test_linklist_take_while_multiple);
 	tcase_add_test(case_linklist_map, test_linklist_map_empty);
 	tcase_add_test(case_linklist_map, test_linklist_map_single);
 	tcase_add_test(case_linklist_map, test_linklist_map_multiple);
@@ -1385,6 +1560,8 @@ Suite * linklist_suite(void)
 	suite_add_tcase(suite, case_linklist_any);
 	suite_add_tcase(suite, case_linklist_all);
 	suite_add_tcase(suite, case_linklist_filter);
+	suite_add_tcase(suite, case_linklist_drop_while);
+	suite_add_tcase(suite, case_linklist_take_while);
 	suite_add_tcase(suite, case_linklist_map);
 	suite_add_tcase(suite, case_linklist_foldr);
 	suite_add_tcase(suite, case_linklist_foldl);
