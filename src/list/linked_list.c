@@ -1,4 +1,4 @@
-/* list.h - Linked List Implementation
+/* linked_list.c - Doubly Linked List Implementation
  * Copyright (C) 2018 Quytelda Kahja
  *
  * This file is part of focs.
