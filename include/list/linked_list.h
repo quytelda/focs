@@ -23,16 +23,16 @@
 #include "focs.h"
 #include "sync/rwlock.h"
 
-struct element {
-	struct element * next;
-	struct element * prev;
+struct ll_element {
+	struct ll_element * next;
+	struct ll_element * prev;
 
 	void * data;
 };
 
 struct linked_list {
-	struct element * head;
-	struct element * tail;
+	struct ll_element * head;
+	struct ll_element * tail;
 	size_t length;
 	size_t data_size;
 
@@ -49,13 +49,13 @@ struct linked_list {
 	for(current = (list)->tail; current; current = current->prev)
 
 #define linklist_foreach_safe(list, current)			\
-	struct element * _tmp;					\
+	struct ll_element * _tmp;					\
 	for(current = (list)->head, _tmp = NEXT_SAFE(current);	\
 	    current;						\
 	    current = _tmp, _tmp = NEXT_SAFE(current))
 
 #define linklist_foreach_rev_safe(list, current, _tmp)		\
-	struct element * _tmp;					\
+	struct ll_element * _tmp;					\
 	for(current = (list)->tail, _tmp = PREV_SAFE(current);	\
 	    current;						\
 	    current = _tmp, _tmp = PREV_SAFE(current))
@@ -66,7 +66,7 @@ struct linked_list {
 	    current = current->next)
 
 #define linklist_while_safe(list, current, condition)		\
-	struct element * _tmp;					\
+	struct ll_element * _tmp;					\
 	for(current = (list)->head, _tmp = NEXT_SAFE(current);	\
 	    current && (condition);				\
 	    current = _tmp, _tmp = NEXT_SAFE(current))
@@ -77,7 +77,7 @@ struct linked_list {
 	    current = current->prev)
 
 #define linklist_while_rev_safe(list, current, condition)	\
-	struct element * _tmp;					\
+	struct ll_element * _tmp;					\
 	for(current = (list)->tail, _tmp = PREV_SAFE(current);	\
 	    current && (condition);				\
 	    current = _tmp, _tmp = PREV_SAFE(current))

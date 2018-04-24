@@ -20,9 +20,9 @@
 
 #include "list/linked_list.h"
 
-static struct element * __element_init(struct linked_list * list, void * data)
+static struct ll_element * __element_init(struct linked_list * list, void * data)
 {
-	struct  element * elem;
+	struct ll_element * elem;
 
 	elem = malloc(sizeof(*elem));
 	if(!elem)
@@ -46,9 +46,9 @@ exit:
 	return NULL;
 }
 
-static struct element * __lookup_element(struct linked_list * list, size_t pos)
+static struct ll_element * __lookup_element(struct linked_list * list, size_t pos)
 {
-	struct element * current;
+	struct ll_element * current;
 
 	if(pos >= list->length)
 		return NULL;
@@ -59,7 +59,7 @@ static struct element * __lookup_element(struct linked_list * list, size_t pos)
 	return current;
 }
 
-static void __push_head(struct linked_list * list, struct element * current)
+static void __push_head(struct linked_list * list, struct ll_element * current)
 {
 	if(list->head)
 		list->head->prev = current;
@@ -74,9 +74,9 @@ static void __push_head(struct linked_list * list, struct element * current)
 	(list->length)++;
 }
 
-static struct element * __pop_head(struct linked_list * list)
+static struct ll_element * __pop_head(struct linked_list * list)
 {
-	struct element * current;
+	struct ll_element * current;
 
 	if(list->length == 0)
 		return NULL;
@@ -94,7 +94,7 @@ static struct element * __pop_head(struct linked_list * list)
 	return current;
 }
 
-static void __push_tail(struct linked_list * list, struct element * current)
+static void __push_tail(struct linked_list * list, struct ll_element * current)
 {
 	if(list->tail)
 		list->tail->next = current;
@@ -109,9 +109,9 @@ static void __push_tail(struct linked_list * list, struct element * current)
 	(list->length)++;
 }
 
-static struct element * __pop_tail(struct linked_list * list)
+static struct ll_element * __pop_tail(struct linked_list * list)
 {
-	struct element * current;
+	struct ll_element * current;
 
 	if(list->length == 0)
 		return NULL;
@@ -129,9 +129,9 @@ static struct element * __pop_tail(struct linked_list * list)
 	return current;
 }
 
-static bool __insert_element(struct linked_list * list, struct element * current, size_t pos)
+static bool __insert_element(struct linked_list * list, struct ll_element * current, size_t pos)
 {
-	struct element * prev;
+	struct ll_element * prev;
 
 	if(pos > list->length)
 		return false;
@@ -154,9 +154,9 @@ static bool __insert_element(struct linked_list * list, struct element * current
 	return true;
 }
 
-static struct element * __remove_element(struct linked_list * list, size_t pos)
+static struct ll_element * __remove_element(struct linked_list * list, size_t pos)
 {
-	struct element * current;
+	struct ll_element * current;
 
 	if(pos >= list->length)
 		return NULL;
@@ -176,7 +176,7 @@ static struct element * __remove_element(struct linked_list * list, size_t pos)
 	return current;
 }
 
-static void __delete_element(struct linked_list * list, struct element * elem)
+static void __delete_element(struct linked_list * list, struct ll_element * elem)
 {
 	/* Fix head and tail. */
 	if(list->head == elem)
@@ -193,9 +193,9 @@ static void __delete_element(struct linked_list * list, struct element * elem)
 	(list->length)--;
 }
 
-static void __delete_before(struct linked_list * list, struct element * mark)
+static void __delete_before(struct linked_list * list, struct ll_element * mark)
 {
-	struct element * current;
+	struct ll_element * current;
 
 	linklist_while_safe(list, current, current != mark) {
 		free(current->data);
@@ -211,9 +211,9 @@ static void __delete_before(struct linked_list * list, struct element * mark)
 		list->tail = NULL;
 }
 
-static void __delete_after(struct linked_list * list, struct element * mark)
+static void __delete_after(struct linked_list * list, struct ll_element * mark)
 {
-	struct element * current;
+	struct ll_element * current;
 
 	linklist_while_rev_safe(list, current, current != mark) {
 		free(current->data);
@@ -253,7 +253,7 @@ exit:
 
 void linklist_free(struct linked_list ** list)
 {
-	struct element * current;
+	struct ll_element * current;
 
 	rwlock_writer_entry((*list)->rwlock);
 
@@ -283,7 +283,7 @@ bool linklist_null(struct linked_list * list)
 
 void linklist_push_head(struct linked_list * list, void * data)
 {
-	struct element * current;
+	struct ll_element * current;
 
 	current = __element_init(list, data);
 
@@ -294,7 +294,7 @@ void linklist_push_head(struct linked_list * list, void * data)
 
 void linklist_push_tail(struct linked_list * list, void * data)
 {
-	struct element * current;
+	struct ll_element * current;
 
 	current = __element_init(list, data);
 
@@ -306,7 +306,7 @@ void linklist_push_tail(struct linked_list * list, void * data)
 void * linklist_pop_head(struct linked_list * list)
 {
 	void * data = NULL;
-	struct element * current;
+	struct ll_element * current;
 
 	rwlock_writer_entry(list->rwlock);
 	current = __pop_head(list);
@@ -323,7 +323,7 @@ void * linklist_pop_head(struct linked_list * list)
 void * linklist_pop_tail(struct linked_list * list)
 {
 	void * data = NULL;
-	struct element * current;
+	struct ll_element * current;
 
 	rwlock_writer_entry(list->rwlock);
 	current = __pop_tail(list);
@@ -340,7 +340,7 @@ void * linklist_pop_tail(struct linked_list * list)
 bool linklist_insert(struct linked_list * list, void * data, size_t pos)
 {
 	bool success;
-	struct element * current;
+	struct ll_element * current;
 
 	current = __element_init(list, data);
 
@@ -353,7 +353,7 @@ bool linklist_insert(struct linked_list * list, void * data, size_t pos)
 
 bool linklist_delete(struct linked_list * list, size_t pos)
 {
-	struct element * current;
+	struct ll_element * current;
 
 	rwlock_writer_entry(list->rwlock);
 	current = __remove_element(list, pos);
@@ -372,7 +372,7 @@ bool linklist_delete(struct linked_list * list, size_t pos)
 void * linklist_remove(struct linked_list * list, size_t pos)
 {
 	void * data = NULL;
-	struct element * current;
+	struct ll_element * current;
 
 	rwlock_writer_entry(list->rwlock);
 	current = __remove_element(list, pos);
@@ -388,7 +388,7 @@ void * linklist_remove(struct linked_list * list, size_t pos)
 
 void * linklist_fetch(struct linked_list * list, size_t pos)
 {
-	struct element * current;
+	struct ll_element * current;
 
 	rwlock_reader_entry(list->rwlock);
 	current = __lookup_element(list, pos);
@@ -414,7 +414,7 @@ void * linklist_fetch(struct linked_list * list, size_t pos)
 bool linklist_contains(struct linked_list * list, void * data)
 {
 	bool success = false;
-	struct element * current;
+	struct ll_element * current;
 
 	rwlock_reader_entry(list->rwlock);
 
@@ -449,7 +449,7 @@ bool linklist_contains(struct linked_list * list, void * data)
 bool linklist_any(struct linked_list * list, pred_fn_t p)
 {
 	bool success = false;
-	struct element * current;
+	struct ll_element * current;
 
 	if(linklist_null(list))
 		return false;
@@ -487,7 +487,7 @@ bool linklist_any(struct linked_list * list, pred_fn_t p)
 bool linklist_all(struct linked_list * list, pred_fn_t p)
 {
 	bool success = true;
-	struct element * current;
+	struct ll_element * current;
 
 	if(linklist_null(list))
 		return false;
@@ -509,7 +509,7 @@ bool linklist_all(struct linked_list * list, pred_fn_t p)
 bool linklist_filter(struct linked_list * list, pred_fn_t p)
 {
 	bool changed = false;
-	struct element * current;
+	struct ll_element * current;
 
 	if(linklist_null(list))
 		return false;
@@ -534,7 +534,7 @@ bool linklist_filter(struct linked_list * list, pred_fn_t p)
 bool linklist_drop_while(struct linked_list * list, pred_fn_t p)
 {
 	size_t orig_length;
-	struct element * current;
+	struct ll_element * current;
 
 	rwlock_writer_entry(list->rwlock);
 
@@ -561,7 +561,7 @@ bool linklist_drop_while(struct linked_list * list, pred_fn_t p)
 bool linklist_take_while(struct linked_list * list, pred_fn_t p)
 {
 	size_t orig_length;
-	struct element * current;
+	struct ll_element * current;
 
 	rwlock_writer_entry(list->rwlock);
 
@@ -597,7 +597,7 @@ bool linklist_take_while(struct linked_list * list, pred_fn_t p)
 void linklist_map(struct linked_list * list, map_fn_t fn)
 {
 	void * result;
-	struct element * current;
+	struct ll_element * current;
 
 	rwlock_writer_entry(list->rwlock);
 	linklist_foreach(list, current) {
@@ -636,7 +636,7 @@ void * linklist_foldr(const struct linked_list * list,
 {
 	void * result;
 	void * accumulator;
-	struct element * current;
+	struct ll_element * current;
 
 	accumulator = malloc(list->data_size);
 	memcpy(accumulator, init, list->data_size);
@@ -680,7 +680,7 @@ void * linklist_foldl(const struct linked_list * list,
 {
 	void * result;
 	void * accumulator;
-	struct element * current;
+	struct ll_element * current;
 
 	accumulator = malloc(list->data_size);
 	memcpy(accumulator, init, list->data_size);

@@ -92,7 +92,7 @@ START_TEST(test_linklist_push_head_multiple)
 	ck_assert(list->tail);
 	ck_assert_int_eq(list->length, 3);
 
-	struct element * current = list->head;
+	struct ll_element * current = list->head;
 	ck_assert_mem_eq(current->data, &val3, sizeof(val3));
 	current = current->next;
 	ck_assert_mem_eq(current->data, &val2, sizeof(val2));
@@ -138,7 +138,7 @@ START_TEST(test_linklist_push_tail_multiple)
 	ck_assert(list->tail);
 	ck_assert_int_eq(list->length, 3);
 
-	struct element * current = list->head;
+	struct ll_element * current = list->head;
 	ck_assert_mem_eq(current->data, &val1, sizeof(uint8_t));
 	current = current->next;
 	ck_assert_mem_eq(current->data, &val2, sizeof(uint8_t));
