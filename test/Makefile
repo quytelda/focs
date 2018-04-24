@@ -1,7 +1,7 @@
 include ../global.mk
 
 LIBS=-lcheck -L .. -l$(TGT)
-CFLAGS=-I ../$(SRC_DIR) -g
+CFLAGS=-I ../$(INC_DIR) -g
 
 TESTS=$(TEST_LINKLIST_BIN)
 

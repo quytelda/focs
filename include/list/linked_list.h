@@ -20,7 +20,7 @@
 #ifndef __LINKED_LIST_H
 #define __LINKED_LIST_H
 
-#include "include/focs.h"
+#include "focs.h"
 #include "sync/rwlock.h"
 
 struct element {

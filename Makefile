@@ -1,7 +1,7 @@
 include global.mk
 
 LIBS=-lpthread
-CFLAGS=-std=c99 -I $(SRC_DIR) -fpic -Wall -pedantic
+CFLAGS=-std=c99 -I $(INC_DIR) -fpic -Wall -pedantic
 
 SRCS=$(addprefix $(SRC_DIR)/, list/linked_list.c sync/rwlock.c)
 OBJS=$(SRCS:.c=.o)

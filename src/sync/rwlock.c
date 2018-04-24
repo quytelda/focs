@@ -18,7 +18,6 @@
  * along with focs.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "include/focs.h"
 #include "sync/rwlock.h"
 
 int rwlock_alloc(struct rwlock ** rwlock)

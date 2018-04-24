@@ -24,6 +24,8 @@
 #include <errno.h>
 #include <pthread.h>
 
+#include "focs.h"
+
 struct rwlock {
 	pthread_mutex_t lock;
 	pthread_cond_t cond;
