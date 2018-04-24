@@ -70,4 +70,16 @@ struct data_operations {
 #define drop_while(ds, pred) __dops(ds)->drop_while(ds, pred)
 #define take_while(ds, pred) __dops(ds)->take_while(ds, pred)
 
+#define DS_METADATA()				\
+	const struct data_properties * props;	\
+	const struct data_operations * dops;
+
+#define DS_PROPERTIES(ds) ((ds)->props)
+
+#define DS_METADATA_INIT(ds, _props, _dops)	\
+	do {					\
+		DS_PROPERTIES(ds) = _props;	\
+		__dops(ds) = _dops;		\
+	} while(0)
+
 #endif /* __METADATA_H */
