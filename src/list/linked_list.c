@@ -616,6 +616,23 @@ void linklist_map(struct linked_list * list, map_fn_t fn)
 	rwlock_writer_exit(list->rwlock);
 }
 
+void linklist_reverse(struct linked_list * list)
+{
+	struct ll_element * current;
+	struct ll_element * tmp;
+
+	linklist_foreach_safe(list, current) {
+		tmp = current->prev;
+		current->prev = current->next;
+		current->next = tmp;
+	}
+
+	/* Swap the list head and tail */
+	tmp = list->head;
+	list->head = list->tail;
+	list->tail = tmp;
+}
+
 /**
  * linklist_foldr() - Right associative fold for linked lists.
  * @list: A list of values to reduce

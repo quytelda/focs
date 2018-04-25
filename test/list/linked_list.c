@@ -1231,6 +1231,82 @@ START_TEST(test_linklist_map_multiple)
 }
 END_TEST
 
+START_TEST(test_linklist_reverse_empty)
+{
+	struct linked_list * list;
+
+	linklist_alloc(&list, sizeof(uint8_t));
+
+	linklist_reverse(list);
+
+	ck_assert(!list->head);
+	ck_assert(!list->tail);
+	ck_assert(linklist_null(list));
+
+	linklist_free(&list);
+}
+END_TEST
+
+START_TEST(test_linklist_reverse_single)
+{
+	uint8_t in = 1;
+	uint8_t * out;
+	struct linked_list * list;
+
+	linklist_alloc(&list, sizeof(in));
+	linklist_push_head(list, &in);
+
+	linklist_reverse(list);
+
+	out = linklist_fetch(list, 0);
+	ck_assert(out);
+	ck_assert_int_eq(*out, in);
+
+	ck_assert(list->head);
+	ck_assert(list->tail);
+	ck_assert_int_eq(list->length, 1);
+
+	linklist_free(&list);
+}
+END_TEST
+
+START_TEST(test_linklist_reverse_multiple)
+{
+	uint8_t in[3] = {1, 2, 3};
+	uint8_t * out[3];
+	struct linked_list * list;
+
+	linklist_alloc(&list, sizeof(uint8_t));
+
+	/* Create linked list: [1, 2, 3] */
+	linklist_push_tail(list, &in[0]);
+	linklist_push_tail(list, &in[1]);
+	linklist_push_tail(list, &in[2]);
+
+	/* Reverse the list: [1, 2, 3] -> [3, 2, 1] */
+	linklist_reverse(list);
+
+	/* Fetch the elements in order. */
+	out[0] = linklist_fetch(list, 0); /* 3 */
+	out[1] = linklist_fetch(list, 1); /* 2 */
+	out[2] = linklist_fetch(list, 2); /* 1 */
+
+	ck_assert(list->head);
+	ck_assert(list->tail);
+	ck_assert_int_eq(list->length, 3);
+
+	ck_assert(out[0]);
+	ck_assert(out[1]);
+	ck_assert(out[2]);
+
+	ck_assert_int_eq(*out[0], in[2]);
+	ck_assert_int_eq(*out[1], in[1]);
+	ck_assert_int_eq(*out[2], in[0]);
+
+	linklist_free(&list);
+}
+END_TEST
+
 /**
  * foldr_fn() - Right folding function for testing.
  * @c: A constant byte integer
@@ -1486,6 +1562,7 @@ Suite * linklist_suite(void)
 	TCase * case_linklist_drop_while;
 	TCase * case_linklist_take_while;
 	TCase * case_linklist_map;
+	TCase * case_linklist_reverse;
 	TCase * case_linklist_foldl;
 	TCase * case_linklist_foldr;
 
@@ -1508,6 +1585,7 @@ Suite * linklist_suite(void)
 	case_linklist_drop_while = tcase_create("linklist_drop_while");
 	case_linklist_take_while = tcase_create("linklist_take_while");
 	case_linklist_map = tcase_create("linklist_map");
+	case_linklist_reverse = tcase_create("linklist_reverse");
 	case_linklist_foldl = tcase_create("linklist_foldl");
 	case_linklist_foldr = tcase_create("linklist_foldr");
 
@@ -1556,6 +1634,9 @@ Suite * linklist_suite(void)
 	tcase_add_test(case_linklist_map, test_linklist_map_empty);
 	tcase_add_test(case_linklist_map, test_linklist_map_single);
 	tcase_add_test(case_linklist_map, test_linklist_map_multiple);
+	tcase_add_test(case_linklist_reverse, test_linklist_reverse_empty);
+	tcase_add_test(case_linklist_reverse, test_linklist_reverse_single);
+	tcase_add_test(case_linklist_reverse, test_linklist_reverse_multiple);
 	tcase_add_test(case_linklist_foldr, test_linklist_foldr_empty);
 	tcase_add_test(case_linklist_foldr, test_linklist_foldr_single);
 	tcase_add_test(case_linklist_foldr, test_linklist_foldr_multiple);
@@ -1580,6 +1661,7 @@ Suite * linklist_suite(void)
 	suite_add_tcase(suite, case_linklist_drop_while);
 	suite_add_tcase(suite, case_linklist_take_while);
 	suite_add_tcase(suite, case_linklist_map);
+	suite_add_tcase(suite, case_linklist_reverse);
 	suite_add_tcase(suite, case_linklist_foldr);
 	suite_add_tcase(suite, case_linklist_foldl);
 

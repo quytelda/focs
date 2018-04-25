@@ -100,6 +100,7 @@ void * linklist_fetch(struct linked_list * list, size_t pos);
 
 /* Transformations */
 void linklist_map(struct linked_list * list, map_fn_t fn);
+void linklist_reverse(struct linked_list * list);
 void * linklist_foldr(const struct linked_list * list,
 		      foldr_fn_t fn,
 		      const void * init);
