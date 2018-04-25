@@ -616,6 +616,13 @@ void linklist_map(struct linked_list * list, map_fn_t fn)
 	rwlock_writer_exit(list->rwlock);
 }
 
+/**
+ * linklist_reverse() - Reverse a list in place.
+ * @list: The list to reverse
+ *
+ * Reverses a list in place so that the elements are in reverse order and the
+ * head and tail are switched.
+ */
 void linklist_reverse(struct linked_list * list)
 {
 	struct ll_element * current;
