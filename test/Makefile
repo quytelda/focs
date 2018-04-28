@@ -19,8 +19,8 @@ CFLAGS = -I ../$(INC_DIR) -g
 TESTS = $(TEST_LINKLIST_BIN)
 
 # The test suite for doubly linked lists
-TEST_LINKLIST_BIN = linklist
-TEST_LINKLIST_SRCS = list/linked_list.c
+TEST_LINKLIST_BIN = double_list
+TEST_LINKLIST_SRCS = list/double_list.c
 TEST_LINKLIST_OBJS = $(TEST_LINKLIST_SRCS:.c=.o)
 
 all: $(TESTS)

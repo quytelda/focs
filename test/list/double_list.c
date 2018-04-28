@@ -1,4 +1,4 @@
-/* linked_list.c - Unit Tests for Doubly Linked List
+/* double_list.c - Unit Tests for Doubly Linked List
  * Copyright (C) 2018 Quytelda Kahja
  *
  * This file is part of focs.
@@ -19,7 +19,7 @@
 
 #include <check.h>
 
-#include "list/linked_list.h"
+#include "list/double_list.h"
 
 START_TEST(test_linklist_alloc)
 {

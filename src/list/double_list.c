@@ -1,4 +1,4 @@
-/* linked_list.c - Doubly Linked List Implementation
+/* double_list.c - Doubly Linked List Implementation
  * Copyright (C) 2018 Quytelda Kahja
  *
  * This file is part of focs.
@@ -18,7 +18,7 @@
  * along with focs.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "list/linked_list.h"
+#include "list/double_list.h"
 
 static struct ll_element * __element_init(struct linked_list * list, void * data)
 {
