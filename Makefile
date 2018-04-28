@@ -1,10 +1,10 @@
 include global.mk
 
-LIBS=-lpthread
-CFLAGS=-std=c99 -I $(INC_DIR) -fpic -Wall -pedantic
+LIBS = -lpthread
+CFLAGS = -std=c99 -I $(INC_DIR) -fpic -Wall -pedantic
 
-SRCS=$(addprefix $(SRC_DIR)/, list/linked_list.c sync/rwlock.c)
-OBJS=$(SRCS:.c=.o)
+SRCS = $(addprefix $(SRC_DIR)/, list/linked_list.c sync/rwlock.c)
+OBJS = $(SRCS:.c=.o)
 
 # Installation Prefix (default to '/usr')
 # This variable may be overriden by the user
@@ -21,7 +21,7 @@ all: $(BIN)
 $(BIN): $(OBJS)
 	$(CC) -shared -o $(BIN) $(CFLAGS) $(OBJS)
 
-debug: DEBUG_FLAGS=-g -DDEBUG
+debug: DEBUG_FLAGS = -g -DDEBUG
 debug: $(OBJS)
 	$(CC) -shared -o $(BIN) $(CFLAGS) $(LIBS) $(DEBUG_FLAGS) $(OBJS)
 
@@ -38,7 +38,7 @@ uninstall: $(LIB_PREFIX)/$(BIN)
 	rm -f $(LIB_PREFIX)/$(BIN)
 	ldconfig
 
-	rm -f $(INC_PREFIX)/focs.h 
+	rm -f $(INC_PREFIX)/focs.h
 	rm -f $(INC_PREFIX)/metadata.h
 	rm -rf $(INC_PREFIX)/list
 	rm -rf $(INC_PREFIX)/sync
