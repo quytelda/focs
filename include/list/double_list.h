@@ -21,6 +21,7 @@
 #define __LINKED_LIST_H
 
 #include "focs.h"
+#include "list/linked_list.h"
 #include "sync/rwlock.h"
 
 struct ll_element {
@@ -39,37 +40,16 @@ struct linked_list {
 	struct rwlock * rwlock;
 };
 
-#define NEXT_SAFE(current) ((current) ? (current)->next : NULL)
 #define PREV_SAFE(current) ((current) ? (current)->prev : NULL)
-
-#define linklist_foreach(list, current)					\
-	for(current = (list)->head; current; current = current->next)
 
 #define linklist_foreach_rev(list, current)				\
 	for(current = (list)->tail; current; current = current->prev)
-
-#define linklist_foreach_safe(list, current)			\
-	struct ll_element * _tmp;					\
-	for(current = (list)->head, _tmp = NEXT_SAFE(current);	\
-	    current;						\
-	    current = _tmp, _tmp = NEXT_SAFE(current))
 
 #define linklist_foreach_rev_safe(list, current, _tmp)		\
 	struct ll_element * _tmp;					\
 	for(current = (list)->tail, _tmp = PREV_SAFE(current);	\
 	    current;						\
 	    current = _tmp, _tmp = PREV_SAFE(current))
-
-#define linklist_while(list, current, condition)	\
-	for(current = (list)->head;			\
-	    current && (condition);			\
-	    current = current->next)
-
-#define linklist_while_safe(list, current, condition)		\
-	struct ll_element * _tmp;					\
-	for(current = (list)->head, _tmp = NEXT_SAFE(current);	\
-	    current && (condition);				\
-	    current = _tmp, _tmp = NEXT_SAFE(current))
 
 #define linklist_while_rev(list, current, condition)	\
 	for(current = (list)->tail;			\
@@ -81,8 +61,6 @@ struct linked_list {
 	for(current = (list)->tail, _tmp = PREV_SAFE(current);	\
 	    current && (condition);				\
 	    current = _tmp, _tmp = PREV_SAFE(current))
-
-#define otherwise(current) if(!current)
 
 /* Creation & Destruction */
 int dl_alloc(struct linked_list ** list, size_t data_size);
