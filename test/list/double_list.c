@@ -1,4 +1,4 @@
-/* linked_list.c - Unit Tests for Doubly Linked List
+/* double_list.c - Unit Tests for Doubly Linked List
  * Copyright (C) 2018 Quytelda Kahja
  *
  * This file is part of focs.
@@ -19,7 +19,7 @@
 
 #include <check.h>
 
-#include "list/linked_list.h"
+#include "list/double_list.h"
 
 START_TEST(test_linklist_alloc)
 {
@@ -69,7 +69,7 @@ START_TEST(test_linklist_push_head_single)
 	ck_assert(list->head);
 	ck_assert(list->tail);
 	ck_assert_int_eq(list->length, 1);
-	ck_assert_mem_eq(list->head->data, &val, sizeof(uint8_t));
+	ck_assert_int_eq(*(uint8_t *) list->head->data, val);
 
 	linklist_free(&list);
 }
@@ -93,11 +93,11 @@ START_TEST(test_linklist_push_head_multiple)
 	ck_assert_int_eq(list->length, 3);
 
 	struct ll_element * current = list->head;
-	ck_assert_mem_eq(current->data, &val3, sizeof(val3));
+	ck_assert_int_eq(*(uint8_t *) current->data, val3);
 	current = current->next;
-	ck_assert_mem_eq(current->data, &val2, sizeof(val2));
+	ck_assert_int_eq(*(uint8_t *) current->data, val2);
 	current = current->next;
-	ck_assert_mem_eq(current->data, &val1, sizeof(val1));
+	ck_assert_int_eq(*(uint8_t *) current->data, val1);
 	ck_assert(!current->next);
 
 	linklist_free(&list);
@@ -115,7 +115,7 @@ START_TEST(test_linklist_push_tail_single)
 	ck_assert(list->head);
 	ck_assert(list->tail);
 	ck_assert_int_eq(list->length, 1);
-	ck_assert_mem_eq(list->head->data, &val, sizeof(val));
+	ck_assert_int_eq(*(uint8_t *) list->head->data, val);
 
 	linklist_free(&list);
 }
@@ -139,11 +139,11 @@ START_TEST(test_linklist_push_tail_multiple)
 	ck_assert_int_eq(list->length, 3);
 
 	struct ll_element * current = list->head;
-	ck_assert_mem_eq(current->data, &val1, sizeof(uint8_t));
+	ck_assert_int_eq(*(uint8_t *) current->data, val1);
 	current = current->next;
-	ck_assert_mem_eq(current->data, &val2, sizeof(uint8_t));
+	ck_assert_int_eq(*(uint8_t *) current->data, val2);
 	current = current->next;
-	ck_assert_mem_eq(current->data, &val3, sizeof(uint8_t));
+	ck_assert_int_eq(*(uint8_t *) current->data, val3);
 	ck_assert(!current->next);
 
 	linklist_free(&list);
@@ -213,9 +213,9 @@ START_TEST(test_linklist_pop_head_multiple)
 	ck_assert(out2);
 	ck_assert(out3);
 
-	ck_assert_mem_eq(out1, &in3, sizeof(in3));
-	ck_assert_mem_eq(out2, &in2, sizeof(in2));
-	ck_assert_mem_eq(out3, &in1, sizeof(in1));
+	ck_assert_int_eq(*out1, in3);
+	ck_assert_int_eq(*out2, in2);
+	ck_assert_int_eq(*out3, in1);
 
 	ck_assert(!list->head);
 	ck_assert(!list->tail);
@@ -256,7 +256,7 @@ START_TEST(test_linklist_pop_tail_single)
 
 	out = linklist_pop_tail(list);
 
-	ck_assert_mem_eq(out, &in, sizeof(in));
+	ck_assert_int_eq(*out, in);
 	ck_assert(!list->head);
 	ck_assert(!list->tail);
 	ck_assert(linklist_null(list));
@@ -286,9 +286,9 @@ START_TEST(test_linklist_pop_tail_multiple)
 	out2 = linklist_pop_tail(list);
 	out3 = linklist_pop_tail(list);
 
-	ck_assert_mem_eq(out1, &in3, sizeof(uint8_t));
-	ck_assert_mem_eq(out2, &in2, sizeof(uint8_t));
-	ck_assert_mem_eq(out3, &in1, sizeof(uint8_t));
+	ck_assert_int_eq(*out1, in3);
+	ck_assert_int_eq(*out2, in2);
+	ck_assert_int_eq(*out3, in1);
 
 	ck_assert(!list->head);
 	ck_assert(!list->tail);

@@ -13,7 +13,7 @@
 *.xz
 
 # tests
-test/linklist
+test/double_list
 
 # dotfiles
 !.gitignore
