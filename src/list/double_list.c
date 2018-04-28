@@ -229,7 +229,7 @@ static void __delete_after(struct linked_list * list, struct ll_element * mark)
 		list->head = NULL;
 }
 
-int linklist_alloc(struct linked_list ** list, size_t data_size)
+int dl_alloc(struct linked_list ** list, size_t data_size)
 {
 	int err;
 
@@ -251,7 +251,7 @@ exit:
 	return err;
 }
 
-void linklist_free(struct linked_list ** list)
+void dl_free(struct linked_list ** list)
 {
 	struct ll_element * current;
 
@@ -270,7 +270,7 @@ void linklist_free(struct linked_list ** list)
 	free(*list);
 }
 
-bool linklist_null(struct linked_list * list)
+bool dl_null(struct linked_list * list)
 {
 	bool null;
 
@@ -281,7 +281,7 @@ bool linklist_null(struct linked_list * list)
 	return null;
 }
 
-void linklist_push_head(struct linked_list * list, void * data)
+void dl_push_head(struct linked_list * list, void * data)
 {
 	struct ll_element * current;
 
@@ -292,7 +292,7 @@ void linklist_push_head(struct linked_list * list, void * data)
 	rwlock_writer_exit(list->rwlock);
 }
 
-void linklist_push_tail(struct linked_list * list, void * data)
+void dl_push_tail(struct linked_list * list, void * data)
 {
 	struct ll_element * current;
 
@@ -303,7 +303,7 @@ void linklist_push_tail(struct linked_list * list, void * data)
 	rwlock_writer_exit(list->rwlock);
 }
 
-void * linklist_pop_head(struct linked_list * list)
+void * dl_pop_head(struct linked_list * list)
 {
 	void * data = NULL;
 	struct ll_element * current;
@@ -320,7 +320,7 @@ void * linklist_pop_head(struct linked_list * list)
 	return data;
 }
 
-void * linklist_pop_tail(struct linked_list * list)
+void * dl_pop_tail(struct linked_list * list)
 {
 	void * data = NULL;
 	struct ll_element * current;
@@ -337,7 +337,7 @@ void * linklist_pop_tail(struct linked_list * list)
 	return data;
 }
 
-bool linklist_insert(struct linked_list * list, void * data, size_t pos)
+bool dl_insert(struct linked_list * list, void * data, size_t pos)
 {
 	bool success;
 	struct ll_element * current;
@@ -351,7 +351,7 @@ bool linklist_insert(struct linked_list * list, void * data, size_t pos)
 	return success;
 }
 
-bool linklist_delete(struct linked_list * list, size_t pos)
+bool dl_delete(struct linked_list * list, size_t pos)
 {
 	struct ll_element * current;
 
@@ -369,7 +369,7 @@ bool linklist_delete(struct linked_list * list, size_t pos)
 	return false;
 }
 
-void * linklist_remove(struct linked_list * list, size_t pos)
+void * dl_remove(struct linked_list * list, size_t pos)
 {
 	void * data = NULL;
 	struct ll_element * current;
@@ -386,7 +386,7 @@ void * linklist_remove(struct linked_list * list, size_t pos)
 	return data;
 }
 
-void * linklist_fetch(struct linked_list * list, size_t pos)
+void * dl_fetch(struct linked_list * list, size_t pos)
 {
 	struct ll_element * current;
 
@@ -401,7 +401,7 @@ void * linklist_fetch(struct linked_list * list, size_t pos)
 }
 
 /**
- * linklist_contains() - Determines if a list contains a value
+ * dl_contains() - Determines if a list contains a value
  * @list: The list to search
  * @data: The data to search for in the list
  *
@@ -411,7 +411,7 @@ void * linklist_fetch(struct linked_list * list, size_t pos)
  *
  * Return: ``true`` if a matching entry is found, otherwise ``false``
  */
-bool linklist_contains(struct linked_list * list, void * data)
+bool dl_contains(struct linked_list * list, void * data)
 {
 	bool success = false;
 	struct ll_element * current;
@@ -431,7 +431,7 @@ bool linklist_contains(struct linked_list * list, void * data)
 }
 
 /**
- * linklist_any() - Determines if any value in a list satisifies some condition
+ * dl_any() - Determines if any value in a list satisifies some condition
  * @list: A list of values
  * @p: The predicate function (representing a condition to be satisfied).
  *
@@ -446,12 +446,12 @@ bool linklist_contains(struct linked_list * list, void * data)
  * Return: ``true`` if there is at least one value that satisfies the predicate.
  * Otherwise, it returns ``false``.
  */
-bool linklist_any(struct linked_list * list, pred_fn_t p)
+bool dl_any(struct linked_list * list, pred_fn_t p)
 {
 	bool success = false;
 	struct ll_element * current;
 
-	if(linklist_null(list))
+	if(dl_null(list))
 		return false;
 
 	rwlock_reader_entry(list->rwlock);
@@ -469,7 +469,7 @@ bool linklist_any(struct linked_list * list, pred_fn_t p)
 }
 
 /**
- * linklist_all() - Determines if all values in a list satisify some condition
+ * dl_all() - Determines if all values in a list satisify some condition
  * @list: A list of values
  * @p: The predicate function (representing a condition to be satisfied).
  *
@@ -484,12 +484,12 @@ bool linklist_any(struct linked_list * list, pred_fn_t p)
  * Return: ``false`` if there is at least one value that does not satisfy the
  * predicate.  Otherwise, it returns ``true``.
  */
-bool linklist_all(struct linked_list * list, pred_fn_t p)
+bool dl_all(struct linked_list * list, pred_fn_t p)
 {
 	bool success = true;
 	struct ll_element * current;
 
-	if(linklist_null(list))
+	if(dl_null(list))
 		return false;
 
 	rwlock_reader_entry(list->rwlock);
@@ -506,12 +506,12 @@ bool linklist_all(struct linked_list * list, pred_fn_t p)
 	return success;
 }
 
-bool linklist_filter(struct linked_list * list, pred_fn_t p)
+bool dl_filter(struct linked_list * list, pred_fn_t p)
 {
 	bool changed = false;
 	struct ll_element * current;
 
-	if(linklist_null(list))
+	if(dl_null(list))
 		return false;
 
 	rwlock_writer_entry(list->rwlock);
@@ -531,7 +531,7 @@ bool linklist_filter(struct linked_list * list, pred_fn_t p)
 	return changed;
 }
 
-bool linklist_drop_while(struct linked_list * list, pred_fn_t p)
+bool dl_drop_while(struct linked_list * list, pred_fn_t p)
 {
 	size_t orig_length;
 	struct ll_element * current;
@@ -558,7 +558,7 @@ bool linklist_drop_while(struct linked_list * list, pred_fn_t p)
 	return (orig_length != list->length);
 }
 
-bool linklist_take_while(struct linked_list * list, pred_fn_t p)
+bool dl_take_while(struct linked_list * list, pred_fn_t p)
 {
 	size_t orig_length;
 	struct ll_element * current;
@@ -582,7 +582,7 @@ bool linklist_take_while(struct linked_list * list, pred_fn_t p)
 }
 
 /**
- * linklist_map() - Map a function over a linked list in-place.
+ * dl_map() - Map a function over a linked list in-place.
  * @list: A list of values
  * @fn: A function that will transform each value in the list
  *
@@ -594,7 +594,7 @@ bool linklist_take_while(struct linked_list * list, pred_fn_t p)
  * for i from 0 to &list->length:
  * 	@list[i] = @fn(@list[i])
  */
-void linklist_map(struct linked_list * list, map_fn_t fn)
+void dl_map(struct linked_list * list, map_fn_t fn)
 {
 	void * result;
 	struct ll_element * current;
@@ -617,13 +617,13 @@ void linklist_map(struct linked_list * list, map_fn_t fn)
 }
 
 /**
- * linklist_reverse() - Reverse a list in place.
+ * dl_reverse() - Reverse a list in place.
  * @list: The list to reverse
  *
  * Reverses a list in place so that the elements are in reverse order and the
  * head and tail are switched.
  */
-void linklist_reverse(struct linked_list * list)
+void dl_reverse(struct linked_list * list)
 {
 	struct ll_element * current;
 	struct ll_element * tmp;
@@ -641,7 +641,7 @@ void linklist_reverse(struct linked_list * list)
 }
 
 /**
- * linklist_foldr() - Right associative fold for linked lists.
+ * dl_foldr() - Right associative fold for linked lists.
  * @list: A list of values to reduce
  * @fn: A binary function that will sequentially reduce values
  * @init: An initial value for the fold
@@ -654,7 +654,7 @@ void linklist_reverse(struct linked_list * list)
  *
  * If @list is empty, the fold will be equal to the value of @init.
  */
-void * linklist_foldr(const struct linked_list * list,
+void * dl_foldr(const struct linked_list * list,
 		      foldr_fn_t fn,
 		      const void * init)
 {
@@ -685,7 +685,7 @@ void * linklist_foldr(const struct linked_list * list,
 }
 
 /**
- * linklist_foldl() - Left associative fold for linked lists.
+ * dl_foldl() - Left associative fold for linked lists.
  * @list: A list of values to reduce
  * @fn: A binary function that will sequentially reduce values
  * @init: An initial value for the fold
@@ -698,7 +698,7 @@ void * linklist_foldr(const struct linked_list * list,
  *
  * If @list is empty, the fold will be equal to the value of @init.
  */
-void * linklist_foldl(const struct linked_list * list,
+void * dl_foldl(const struct linked_list * list,
 		      foldl_fn_t fn,
 		      const void * init)
 {
