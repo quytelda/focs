@@ -17,6 +17,8 @@
  * along with focs.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <unistd.h>
+
 #include "focs.h"
 #include "metadata.h"
 #include "sync/rwlock.h"
@@ -36,3 +38,7 @@ struct ring_buffer {
 int rb_alloc(struct ring_buffer ** buf,
 		   const struct data_properties * props);
 void rb_free(struct ring_buffer ** buf);
+
+/* Data Management */
+bool rb_push_head(struct ring_buffer * buf, void * data);
+bool rb_push_tail(struct ring_buffer * buf, void * data);
