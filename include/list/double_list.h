@@ -85,38 +85,38 @@ struct linked_list {
 #define otherwise(current) if(!current)
 
 /* Creation & Destruction */
-int linklist_alloc(struct linked_list ** list, size_t data_size);
-void linklist_free(struct linked_list ** list);
+int dl_alloc(struct linked_list ** list, size_t data_size);
+void dl_free(struct linked_list ** list);
 
 /* Data Management */
-void linklist_push_head(struct linked_list * list, void * data);
-void linklist_push_tail(struct linked_list * list, void * data);
-void * linklist_pop_head(struct linked_list * list);
-void * linklist_pop_tail(struct linked_list * list);
-bool linklist_insert(struct linked_list * list, void * data, size_t pos);
-bool linklist_delete(struct linked_list * list, size_t pos);
-void * linklist_remove(struct linked_list * list, size_t pos);
-void * linklist_fetch(struct linked_list * list, size_t pos);
+void dl_push_head(struct linked_list * list, void * data);
+void dl_push_tail(struct linked_list * list, void * data);
+void * dl_pop_head(struct linked_list * list);
+void * dl_pop_tail(struct linked_list * list);
+bool dl_insert(struct linked_list * list, void * data, size_t pos);
+bool dl_delete(struct linked_list * list, size_t pos);
+void * dl_remove(struct linked_list * list, size_t pos);
+void * dl_fetch(struct linked_list * list, size_t pos);
 
 /* Transformations */
-void linklist_map(struct linked_list * list, map_fn_t fn);
-void linklist_reverse(struct linked_list * list);
-void * linklist_foldr(const struct linked_list * list,
+void dl_map(struct linked_list * list, map_fn_t fn);
+void dl_reverse(struct linked_list * list);
+void * dl_foldr(const struct linked_list * list,
 		      foldr_fn_t fn,
 		      const void * init);
-void * linklist_foldl(const struct linked_list * list,
+void * dl_foldl(const struct linked_list * list,
 		      foldl_fn_t fn,
 		      const void * init);
 
 /* Data Properties */
-bool linklist_null(struct linked_list * list);
-bool linklist_contains(struct linked_list * list, void * data);
-bool linklist_any(struct linked_list * list, pred_fn_t p);
-bool linklist_all(struct linked_list * list, pred_fn_t p);
+bool dl_null(struct linked_list * list);
+bool dl_contains(struct linked_list * list, void * data);
+bool dl_any(struct linked_list * list, pred_fn_t p);
+bool dl_all(struct linked_list * list, pred_fn_t p);
 
 /* Filtering */
-bool linklist_filter(struct linked_list * list, pred_fn_t p);
-bool linklist_drop_while(struct linked_list * list, pred_fn_t p);
-bool linklist_take_while(struct linked_list * list, pred_fn_t p);
+bool dl_filter(struct linked_list * list, pred_fn_t p);
+bool dl_drop_while(struct linked_list * list, pred_fn_t p);
+bool dl_take_while(struct linked_list * list, pred_fn_t p);
 
 #endif /* __LINKED_LIST_H */
