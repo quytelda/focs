@@ -57,29 +57,31 @@ struct data_operations {
 	take_while_dop_t take_while;
 };
 
-#define __dops(ds) (ds->dops)
-
-#define map(ds, fn)          __dops(ds)->map(ds, fn)
-#define foldr(ds, fn, init)  __dops(ds)->foldr(ds, fn, init)
-#define foldl(ds, fn, init)  __dops(ds)->foldl(ds, fn, init)
-#define null(ds)             __dops(ds)->null(ds)
-#define contains(ds, datum)  __dops(ds)->contains(ds, datum)
-#define any(ds, pred)        __dops(ds)->any(ds, pred)
-#define all(ds, pred)        __dops(ds)->all(ds, pred)
-#define filter(ds, pred)     __dops(ds)->filter(ds, pred)
-#define drop_while(ds, pred) __dops(ds)->drop_while(ds, pred)
-#define take_while(ds, pred) __dops(ds)->take_while(ds, pred)
-
-#define DS_METADATA()				\
+#define DS_METADATA				\
 	const struct data_properties * props;	\
 	const struct data_operations * dops;
 
-#define DS_PROPERTIES(ds) ((ds)->props)
+#define __ds_dops(ds)  ((ds)->dops)
+#define __ds_props(ds) ((ds)->props)
 
 #define DS_METADATA_INIT(ds, _props, _dops)	\
 	do {					\
-		DS_PROPERTIES(ds) = _props;	\
-		__dops(ds) = _dops;		\
+		__ds_dops(ds)  = _dops;		\
+		__ds_props(ds) = _props;	\
 	} while(0)
+
+#define DS_DATA_SIZE(ds) (__ds_props(ds)->data_size)
+#define DS_ENTRIES(ds)   (__ds_props(ds)->entries)
+
+#define map(ds, fn)          __ds_dops(ds)->map(ds, fn)
+#define foldr(ds, fn, init)  __ds_dops(ds)->foldr(ds, fn, init)
+#define foldl(ds, fn, init)  __ds_dops(ds)->foldl(ds, fn, init)
+#define null(ds)             __ds_dops(ds)->null(ds)
+#define contains(ds, datum)  __ds_dops(ds)->contains(ds, datum)
+#define any(ds, pred)        __ds_dops(ds)->any(ds, pred)
+#define all(ds, pred)        __ds_dops(ds)->all(ds, pred)
+#define filter(ds, pred)     __ds_dops(ds)->filter(ds, pred)
+#define drop_while(ds, pred) __ds_dops(ds)->drop_while(ds, pred)
+#define take_while(ds, pred) __ds_dops(ds)->take_while(ds, pred)
 
 #endif /* __METADATA_H */
