@@ -23,25 +23,40 @@
 int rb_alloc(struct ring_buffer ** buf,
 		   const struct data_properties * props)
 {
-	int err;
-
 	*buf = malloc(sizeof(**buf));
 	if(!*buf) {
-		err = -ENOMEM;
+		errno = ENOMEM;
+		goto exit;
+	}
+	DS_METADATA_INIT(*buf, props, NULL);
+
+	(*buf)->data = malloc(DS_DATA_SIZE(*buf) * DS_ENTRIES(*buf));
+	if(!(*buf)->data) {
+		errno = ENOMEM;
 		goto exit;
 	}
 
-	DS_METADATA_INIT(*buf, props, NULL);
-	err = rwlock_alloc(&(*buf)->rwlock);
-	if(err)
+	(*buf)->head = (*buf)->data;
+	(*buf)->tail = (*buf)->data;
+	(*buf)->length = 0;
+
+	if(rwlock_alloc(&(*buf)->rwlock) < 0)
 		goto exit;
 
 	return 0;
 
 exit:
-	free(*buf);
-	return err;
+	if(*buf) {
+		if((*buf)->data)
+			free((*buf)->data);
 
+		if((*buf)->rwlock)
+			rwlock_free(&(*buf)->rwlock);
+
+		free(*buf);
+	}
+
+	return -1;
 }
 
 void rb_free(struct ring_buffer ** buf)
