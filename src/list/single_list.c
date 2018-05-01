@@ -211,7 +211,7 @@ static void __delete_after(struct single_list * list, struct sl_element * mark)
 	struct sl_element * current;
 
 	linklist_foreach_safe(list, current) {
-		if(!passover) {
+		if(!passover || !mark) {
 			free(current->data);
 			free(current);
 
