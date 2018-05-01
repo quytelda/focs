@@ -446,7 +446,7 @@ bool dl_contains(struct linked_list * list, void * data)
  * Return: ``true`` if there is at least one value that satisfies the predicate.
  * Otherwise, it returns ``false``.
  */
-bool dl_any(struct linked_list * list, pred_fn_t p)
+bool dl_any(struct linked_list * list, pred_fn p)
 {
 	bool success = false;
 	struct ll_element * current;
@@ -484,7 +484,7 @@ bool dl_any(struct linked_list * list, pred_fn_t p)
  * Return: ``false`` if there is at least one value that does not satisfy the
  * predicate.  Otherwise, it returns ``true``.
  */
-bool dl_all(struct linked_list * list, pred_fn_t p)
+bool dl_all(struct linked_list * list, pred_fn p)
 {
 	bool success = true;
 	struct ll_element * current;
@@ -506,7 +506,7 @@ bool dl_all(struct linked_list * list, pred_fn_t p)
 	return success;
 }
 
-bool dl_filter(struct linked_list * list, pred_fn_t p)
+bool dl_filter(struct linked_list * list, pred_fn p)
 {
 	bool changed = false;
 	struct ll_element * current;
@@ -531,7 +531,7 @@ bool dl_filter(struct linked_list * list, pred_fn_t p)
 	return changed;
 }
 
-bool dl_drop_while(struct linked_list * list, pred_fn_t p)
+bool dl_drop_while(struct linked_list * list, pred_fn p)
 {
 	size_t orig_length;
 	struct ll_element * current;
@@ -558,7 +558,7 @@ bool dl_drop_while(struct linked_list * list, pred_fn_t p)
 	return (orig_length != list->length);
 }
 
-bool dl_take_while(struct linked_list * list, pred_fn_t p)
+bool dl_take_while(struct linked_list * list, pred_fn p)
 {
 	size_t orig_length;
 	struct ll_element * current;
@@ -594,7 +594,7 @@ bool dl_take_while(struct linked_list * list, pred_fn_t p)
  * for i from 0 to &list->length:
  * 	@list[i] = @fn(@list[i])
  */
-void dl_map(struct linked_list * list, map_fn_t fn)
+void dl_map(struct linked_list * list, map_fn fn)
 {
 	void * result;
 	struct ll_element * current;
@@ -655,7 +655,7 @@ void dl_reverse(struct linked_list * list)
  * If @list is empty, the fold will be equal to the value of @init.
  */
 void * dl_foldr(const struct linked_list * list,
-		      foldr_fn_t fn,
+		      foldr_fn fn,
 		      const void * init)
 {
 	void * result;
@@ -699,7 +699,7 @@ void * dl_foldr(const struct linked_list * list,
  * If @list is empty, the fold will be equal to the value of @init.
  */
 void * dl_foldl(const struct linked_list * list,
-		      foldl_fn_t fn,
+		      foldl_fn fn,
 		      const void * init)
 {
 	void * result;

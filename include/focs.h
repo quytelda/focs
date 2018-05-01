@@ -22,14 +22,32 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+
+#include "focs/functional.h"
+#include "focs/properties.h"
 
 #ifndef __FOCS_H
 #define __FOCS_H
 
-typedef void * (* map_fn_t)(void * data);
-typedef void * (* foldr_fn_t)(const void * c, void * acc);
-typedef void * (* foldl_fn_t)(void * acc, const void * c);
-typedef bool   (* comp_fn_t)(const void * a, const void * b);
-typedef bool   (* pred_fn_t)(const void * data);
+#define DECLARE_DS(dops)				\
+	const struct data_properties * __DS_PROPS_NAME;	\
+	const struct data_operations * __DS_DOPS_NAME
 
+/**
+ * mod() - Modulo operation
+ * @a The divisor
+ * @n The dividend
+ *
+ * Returns the remainder of the quotient `(@a / @n)`.  This operation is
+ * guaranteed to always return a positive integer.  Both @a and @n should be
+ * signed types if either @a or @n may be negative.
+ *
+ * This modulo operation is distinct from the ISO C99 remainder operation
+ * represented by the operator '%', which will produce negative results
+ * if the divisor is negative and always takes the sign of the dividend.
+ *
+ * See: https://en.wikipedia.org/wiki/Modulo_operation
+ */
+#define mod(a, n) (((a) % (n) + (n)) % (n))
 #endif /* __FOCS_H */

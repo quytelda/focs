@@ -75,7 +75,7 @@ int rb_alloc(struct ring_buffer ** buf,
 		errno = ENOMEM;
 		goto exit;
 	}
-	DS_METADATA_INIT(*buf, props, NULL);
+	DS_SET_PROPS(*buf, props);
 
 	(*buf)->data = malloc(DS_DATA_SIZE(*buf) * DS_ENTRIES(*buf));
 	if(!(*buf)->data) {
