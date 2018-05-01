@@ -41,7 +41,7 @@
  *
  * See: https://en.wikipedia.org/wiki/Modulo_operation
  */
-#define mod(a, n) ((a % n + n) % n)
+#define mod(a, n) (((a) % (n) + (n)) % (n))
 
 typedef void * (* map_fn_t)(void * data);
 typedef void * (* foldr_fn_t)(const void * c, void * acc);
