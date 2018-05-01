@@ -22,9 +22,17 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+
+#include "focs/functional.h"
+#include "focs/properties.h"
 
 #ifndef __FOCS_H
 #define __FOCS_H
+
+#define DECLARE_DS(dops)				\
+	const struct data_properties * __DS_PROPS_NAME;	\
+	const struct data_operations * __DS_DOPS_NAME
 
 /**
  * mod() - Modulo operation
@@ -42,11 +50,4 @@
  * See: https://en.wikipedia.org/wiki/Modulo_operation
  */
 #define mod(a, n) (((a) % (n) + (n)) % (n))
-
-typedef void * (* map_fn_t)(void * data);
-typedef void * (* foldr_fn_t)(const void * c, void * acc);
-typedef void * (* foldl_fn_t)(void * acc, const void * c);
-typedef bool   (* comp_fn_t)(const void * a, const void * b);
-typedef bool   (* pred_fn_t)(const void * data);
-
 #endif /* __FOCS_H */

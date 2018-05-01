@@ -77,24 +77,24 @@ void * dl_remove(struct linked_list * list, size_t pos);
 void * dl_fetch(struct linked_list * list, size_t pos);
 
 /* Transformations */
-void dl_map(struct linked_list * list, map_fn_t fn);
+void dl_map(struct linked_list * list, map_fn fn);
 void dl_reverse(struct linked_list * list);
 void * dl_foldr(const struct linked_list * list,
-		      foldr_fn_t fn,
+		      foldr_fn fn,
 		      const void * init);
 void * dl_foldl(const struct linked_list * list,
-		      foldl_fn_t fn,
+		      foldl_fn fn,
 		      const void * init);
 
 /* Data Properties */
 bool dl_null(struct linked_list * list);
 bool dl_contains(struct linked_list * list, void * data);
-bool dl_any(struct linked_list * list, pred_fn_t p);
-bool dl_all(struct linked_list * list, pred_fn_t p);
+bool dl_any(struct linked_list * list, pred_fn p);
+bool dl_all(struct linked_list * list, pred_fn p);
 
 /* Filtering */
-bool dl_filter(struct linked_list * list, pred_fn_t p);
-bool dl_drop_while(struct linked_list * list, pred_fn_t p);
-bool dl_take_while(struct linked_list * list, pred_fn_t p);
+bool dl_filter(struct linked_list * list, pred_fn p);
+bool dl_drop_while(struct linked_list * list, pred_fn p);
+bool dl_take_while(struct linked_list * list, pred_fn p);
 
 #endif /* __LINKED_LIST_H */
