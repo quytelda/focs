@@ -3,7 +3,11 @@ include global.mk
 LIBS = -lpthread
 CFLAGS = -std=c99 -I $(INC_DIR) -fpic -Wall -pedantic
 
-SRCS=$(addprefix $(SRC_DIR)/, list/double_list.c list/ring_buffer.c sync/rwlock.c)
+SRCS=$(addprefix $(SRC_DIR)/, \
+	list/single_list.c    \
+	list/double_list.c    \
+	list/ring_buffer.c    \
+	sync/rwlock.c)
 OBJS=$(SRCS:.c=.o)
 
 # Installation Prefix (default to '/usr')
@@ -30,7 +34,7 @@ install: $(BIN) $(LIB_PREFIX) $(INC_PREFIX)
 	ldconfig
 
 	cp $(INC_DIR)/focs.h $(INC_PREFIX)
-	cp $(INC_DIR)/metadata.h $(INC_PREFIX)
+	cp -R $(INC_DIR)/focs $(INC_PREFIX)
 	cp -R $(INC_DIR)/list $(INC_PREFIX)
 	cp -R $(INC_DIR)/sync $(INC_PREFIX)
 
@@ -39,7 +43,7 @@ uninstall: $(LIB_PREFIX)/$(BIN)
 	ldconfig
 
 	rm -f $(INC_PREFIX)/focs.h
-	rm -f $(INC_PREFIX)/metadata.h
+	rm -rf $(INC_PREFIX)/focs
 	rm -rf $(INC_PREFIX)/list
 	rm -rf $(INC_PREFIX)/sync
 

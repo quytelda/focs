@@ -24,8 +24,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "functional.h"
-#include "properties.h"
+#include "focs/functional.h"
+#include "focs/properties.h"
 
 #ifndef __FOCS_H
 #define __FOCS_H
