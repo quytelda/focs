@@ -3,7 +3,11 @@ include global.mk
 LIBS = -lpthread
 CFLAGS = -std=c99 -I $(INC_DIR) -fpic -Wall -pedantic
 
-SRCS=$(addprefix $(SRC_DIR)/, list/double_list.c list/ring_buffer.c sync/rwlock.c)
+SRCS=$(addprefix $(SRC_DIR)/, \
+	list/single_list.c    \
+	list/double_list.c    \
+	list/ring_buffer.c    \
+	sync/rwlock.c)
 OBJS=$(SRCS:.c=.o)
 
 # Installation Prefix (default to '/usr')
