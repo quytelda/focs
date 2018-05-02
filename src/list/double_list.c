@@ -215,7 +215,7 @@ static void __delete_after(struct linked_list * list, struct ll_element * mark)
 {
 	struct ll_element * current;
 
-	linklist_while_rev_safe(list, current, current != mark) {
+	double_list_while_rev_safe(list, current, current != mark) {
 		free(current->data);
 		free(current);
 

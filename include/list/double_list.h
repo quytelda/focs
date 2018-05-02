@@ -42,22 +42,22 @@ struct linked_list {
 
 #define PREV_SAFE(current) ((current) ? (current)->prev : NULL)
 
-#define linklist_foreach_rev(list, current)				\
+#define double_list_foreach_rev(list, current)				\
 	for(current = (list)->tail; current; current = current->prev)
 
-#define linklist_foreach_rev_safe(list, current, _tmp)		\
-	struct ll_element * _tmp;					\
+#define double_list_foreach_rev_safe(list, current, _tmp)	\
+	struct ll_element * _tmp;				\
 	for(current = (list)->tail, _tmp = PREV_SAFE(current);	\
 	    current;						\
 	    current = _tmp, _tmp = PREV_SAFE(current))
 
-#define linklist_while_rev(list, current, condition)	\
+#define double_list_while_rev(list, current, condition)	\
 	for(current = (list)->tail;			\
 	    current && (condition);			\
 	    current = current->prev)
 
-#define linklist_while_rev_safe(list, current, condition)	\
-	struct ll_element * _tmp;					\
+#define double_list_while_rev_safe(list, current, condition)	\
+	struct ll_element * _tmp;				\
 	for(current = (list)->tail, _tmp = PREV_SAFE(current);	\
 	    current && (condition);				\
 	    current = _tmp, _tmp = PREV_SAFE(current))
