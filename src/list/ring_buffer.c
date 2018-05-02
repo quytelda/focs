@@ -83,6 +83,54 @@ static bool __push_tail(struct ring_buffer * buf, const void * data)
 	return true;
 }
 
+static void * __pop_head(struct ring_buffer * buf)
+{
+	void * addr;
+	void * data;
+
+	if(__is_null(buf))
+		return NULL;
+
+	addr = __rbpos_to_addr(buf, 0);
+	if(!addr)
+		return NULL;
+
+	data = malloc(DS_DATA_SIZE(buf));
+	if(!data)
+		return NULL;
+
+	buf->head = __rbpos_to_addr(buf, 1);
+	memcpy(data, addr, DS_DATA_SIZE(buf));
+
+	(buf->length)--;
+
+	return data;
+}
+
+static void * __pop_tail(struct ring_buffer * buf)
+{
+	void * addr;
+	void * data;
+
+	if(__is_null(buf))
+		return NULL;
+
+	addr = __rbpos_to_addr(buf, buf->length - 1);
+	if(!addr)
+		return NULL;
+
+	data = malloc(DS_DATA_SIZE(buf));
+	if(!data)
+		return NULL;
+
+	buf->tail = __rbpos_to_addr(buf, buf->length - 1);
+	memcpy(data, addr, DS_DATA_SIZE(buf));
+
+	(buf->length)--;
+
+	return data;
+}
+
 int rb_alloc(struct ring_buffer ** buf,
 		   const struct data_properties * props)
 {
@@ -157,4 +205,26 @@ bool rb_push_tail(struct ring_buffer * buf, void * data)
 	rwlock_writer_exit(buf->rwlock);
 
 	return success;
+}
+
+void * rb_pop_head(struct ring_buffer * buf)
+{
+	void * data;
+
+	rwlock_writer_entry(buf->rwlock);
+	data = __pop_head(buf);
+	rwlock_writer_exit(buf->rwlock);
+
+	return data;
+}
+
+void * rb_pop_tail(struct ring_buffer * buf)
+{
+	void * data;
+
+	rwlock_writer_entry(buf->rwlock);
+	data = __pop_tail(buf);
+	rwlock_writer_exit(buf->rwlock);
+
+	return data;
 }
