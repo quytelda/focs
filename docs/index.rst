@@ -17,6 +17,8 @@ FOCS is a data structure library implemented in C, designed to provide common da
    :maxdepth: 2
    :caption: Contents:
 
+   installation/obtaining
+   installation/makefile
 
 Indices and tables
 ==================
