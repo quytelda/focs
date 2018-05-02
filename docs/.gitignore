@@ -1,0 +1,22 @@
+# normal rules
+.*
+*.bz2
+*.gz
+*.lz4
+*.lzma
+*.lzo
+*.out
+*.patch
+*.tar
+*.xz
+
+# dotfiles
+!.gitignore
+
+# temporary files
+*.orig
+*~
+\#*#
+
+# sphinx generated files
+_build
