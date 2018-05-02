@@ -11,7 +11,7 @@ Functional Open C Structures - C Data Structures Library
 What is FOCS?
 -------------
 
-FOCS is a data structure library implemented in C, designed to provide common data structures to C programs.  Additionally, FOCS aims to provide a functional programming bent to these data structures providing common functional utilities like `map` and `foldr/foldl` that can be used with any of these data structures.
+FOCS is a data structure library implemented in C, designed to provide common data structures to C programs.  Additionally, FOCS aims to provide a functional programming bent to these data structures providing common functional utilities like ``map`` and ``foldr/foldl`` that can be used with any of these data structures.
 
 .. toctree::
    :maxdepth: 2
