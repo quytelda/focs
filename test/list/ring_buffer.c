@@ -22,8 +22,8 @@
 #include "list/ring_buffer.h"
 
 static const struct data_properties props = {
-	.data_size = sizeof(uint8_t),
-	.entries   = 100,
+	.data_size = sizeof(uint8_t), /* Data size is 1B. */
+	.entries   = 10,
 };
 
 START_TEST(test_rb_alloc)
@@ -37,7 +37,7 @@ START_TEST(test_rb_alloc)
 	ck_assert(buf);
 	ck_assert_int_eq(buf->length, 0);
 	ck_assert_int_eq(DS_DATA_SIZE(buf), sizeof(uint8_t));
-	ck_assert_int_eq(DS_ENTRIES(buf), 100);
+	ck_assert_int_eq(DS_ENTRIES(buf), 10);
 
 	rb_free(&buf);
 }
