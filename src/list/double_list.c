@@ -197,7 +197,7 @@ static void __delete_before(struct linked_list * list, struct ll_element * mark)
 {
 	struct ll_element * current;
 
-	linklist_while_safe(list, current, current != mark) {
+	linked_list_while_safe(list, current, current != mark) {
 		free(current->data);
 		free(current);
 
@@ -259,7 +259,7 @@ void dl_free(struct linked_list ** list)
 
 	(*list)->length = 0;
 
-	linklist_foreach_safe(*list, current) {
+	linked_list_foreach_safe(*list, current) {
 		free(current->data);
 		free(current);
 	}
@@ -418,7 +418,7 @@ bool dl_contains(struct linked_list * list, void * data)
 
 	rwlock_reader_entry(list->rwlock);
 
-	linklist_foreach(list, current) {
+	linked_list_foreach(list, current) {
 		if(memcmp(current->data, data, list->data_size) == 0) {
 			success = true;
 			break;
@@ -456,7 +456,7 @@ bool dl_any(struct linked_list * list, pred_fn p)
 
 	rwlock_reader_entry(list->rwlock);
 
-	linklist_foreach(list, current) {
+	linked_list_foreach(list, current) {
 		if(p(current->data)) {
 			success = true;
 			break;
@@ -494,7 +494,7 @@ bool dl_all(struct linked_list * list, pred_fn p)
 
 	rwlock_reader_entry(list->rwlock);
 
-	linklist_foreach(list, current) {
+	linked_list_foreach(list, current) {
 		if(!p(current->data)) {
 			success = false;
 			break;
@@ -516,7 +516,7 @@ bool dl_filter(struct linked_list * list, pred_fn p)
 
 	rwlock_writer_entry(list->rwlock);
 
-	linklist_foreach_safe(list, current) {
+	linked_list_foreach_safe(list, current) {
 		if(!p(current->data)) {
 			changed = true;
 
@@ -544,7 +544,7 @@ bool dl_drop_while(struct linked_list * list, pred_fn p)
 	 * satisfy the predicate; delete everything before that element.
 	 * Otherwise, if an element that fails to satisfy the predicate is never
 	 * found, then the entire list should be dropped. */
-	linklist_foreach(list, current) {
+	linked_list_foreach(list, current) {
 		if(!p(current->data)) {
 			__delete_before(list, current);
 			break;
@@ -569,7 +569,7 @@ bool dl_take_while(struct linked_list * list, pred_fn p)
 
 	/* Iterate over the list until we find the first element that doesn't
 	 * satisfy the predicate; delete that element and every one after. */
-	linklist_foreach(list, current) {
+	linked_list_foreach(list, current) {
 		if(!p(current->data)) {
 			__delete_after(list, current->prev);
 			break;
@@ -600,7 +600,7 @@ void dl_map(struct linked_list * list, map_fn fn)
 	struct ll_element * current;
 
 	rwlock_writer_entry(list->rwlock);
-	linklist_foreach(list, current) {
+	linked_list_foreach(list, current) {
 		result = fn(current->data);
 
 		/* Check if the user allocated a new variable.
@@ -628,7 +628,7 @@ void dl_reverse(struct linked_list * list)
 	struct ll_element * current;
 	struct ll_element * tmp;
 
-	linklist_foreach_safe(list, current) {
+	linked_list_foreach_safe(list, current) {
 		tmp = current->prev;
 		current->prev = current->next;
 		current->next = tmp;
@@ -666,7 +666,7 @@ void * dl_foldr(const struct linked_list * list,
 	memcpy(accumulator, init, list->data_size);
 
 	rwlock_reader_entry(list->rwlock);
-	linklist_foreach(list, current) {
+	linked_list_foreach(list, current) {
 		result = fn(current->data, accumulator);
 
 		/* Check if the user allocated a new variable.
@@ -710,7 +710,7 @@ void * dl_foldl(const struct linked_list * list,
 	memcpy(accumulator, init, list->data_size);
 
 	rwlock_reader_entry(list->rwlock);
-	linklist_foreach(list, current) {
+	linked_list_foreach(list, current) {
 		result = fn(accumulator, current->data);
 
 		/* Check if the user allocated a new variable.

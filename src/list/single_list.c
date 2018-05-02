@@ -111,7 +111,7 @@ static struct sl_element * __pop_tail(struct single_list * list)
 		return NULL;
 
 	/* Find the previous element. */
-	linklist_while(list, prev, prev->next != list->tail) {}
+	linked_list_while(list, prev, prev->next != list->tail) {}
 
 	current = list->tail;
 	list->tail = prev;
@@ -175,7 +175,7 @@ static void __delete_element(struct single_list * list, struct sl_element * elem
 {
 	struct sl_element * prev;
 
-	linklist_while(list, prev, prev->next != elem) {}
+	linked_list_while(list, prev, prev->next != elem) {}
 
 	/* Fix head and tail. */
 	if(list->head == elem)
@@ -193,7 +193,7 @@ static void __delete_before(struct single_list * list, struct sl_element * mark)
 {
 	struct sl_element * current;
 
-	linklist_while_safe(list, current, current != mark) {
+	linked_list_while_safe(list, current, current != mark) {
 		free(current->data);
 		free(current);
 
@@ -210,7 +210,7 @@ static void __delete_after(struct single_list * list, struct sl_element * mark)
 	bool passover = true;
 	struct sl_element * current;
 
-	linklist_foreach_safe(list, current) {
+	linked_list_foreach_safe(list, current) {
 		if(!passover || !mark) {
 			free(current->data);
 			free(current);
@@ -259,7 +259,7 @@ void sl_free(struct single_list ** list)
 
 	(*list)->length = 0;
 
-	linklist_foreach_safe(*list, current) {
+	linked_list_foreach_safe(*list, current) {
 		free(current->data);
 		free(current);
 	}
@@ -418,7 +418,7 @@ bool sl_contains(struct single_list * list, void * data)
 
 	rwlock_reader_entry(list->rwlock);
 
-	linklist_foreach(list, current) {
+	linked_list_foreach(list, current) {
 		if(memcmp(current->data, data, list->data_size) == 0) {
 			success = true;
 			break;
@@ -456,7 +456,7 @@ bool sl_any(struct single_list * list, pred_fn p)
 
 	rwlock_reader_entry(list->rwlock);
 
-	linklist_foreach(list, current) {
+	linked_list_foreach(list, current) {
 		if(p(current->data)) {
 			success = true;
 			break;
@@ -494,7 +494,7 @@ bool sl_all(struct single_list * list, pred_fn p)
 
 	rwlock_reader_entry(list->rwlock);
 
-	linklist_foreach(list, current) {
+	linked_list_foreach(list, current) {
 		if(!p(current->data)) {
 			success = false;
 			break;
@@ -516,7 +516,7 @@ bool sl_filter(struct single_list * list, pred_fn p)
 
 	rwlock_writer_entry(list->rwlock);
 
-	linklist_foreach_safe(list, current) {
+	linked_list_foreach_safe(list, current) {
 		if(!p(current->data)) {
 			changed = true;
 
@@ -544,7 +544,7 @@ bool sl_drop_while(struct single_list * list, pred_fn p)
 	 * satisfy the predicate; delete everything before that element.
 	 * Otherwise, if an element that fails to satisfy the predicate is never
 	 * found, then the entire list should be dropped. */
-	linklist_foreach(list, current) {
+	linked_list_foreach(list, current) {
 		if(!p(current->data)) {
 			__delete_before(list, current);
 			break;
@@ -570,7 +570,7 @@ bool sl_take_while(struct single_list * list, pred_fn p)
 
 	/* Iterate over the list until we find the first element that doesn't
 	 * satisfy the predicate; delete that element and every one after. */
-	linklist_foreach(list, current) {
+	linked_list_foreach(list, current) {
 		if(!p(current->data)) {
 			__delete_after(list, prev);
 			break;
@@ -603,7 +603,7 @@ void sl_map(struct single_list * list, map_fn fn)
 	struct sl_element * current;
 
 	rwlock_writer_entry(list->rwlock);
-	linklist_foreach(list, current) {
+	linked_list_foreach(list, current) {
 		result = fn(current->data);
 
 		/* Check if the user allocated a new variable.
@@ -631,7 +631,7 @@ void sl_reverse(struct single_list * list)
 	struct sl_element * current;
 	struct sl_element * tmp = NULL;
 
-	linklist_foreach_safe(list, current) {
+	linked_list_foreach_safe(list, current) {
 		current->next = tmp;
 		tmp = current;
 	}
@@ -668,7 +668,7 @@ void * sl_foldr(const struct single_list * list,
 	memcpy(accumulator, init, list->data_size);
 
 	rwlock_reader_entry(list->rwlock);
-	linklist_foreach(list, current) {
+	linked_list_foreach(list, current) {
 		result = fn(current->data, accumulator);
 
 		/* Check if the user allocated a new variable.
@@ -712,7 +712,7 @@ void * sl_foldl(const struct single_list * list,
 	memcpy(accumulator, init, list->data_size);
 
 	rwlock_reader_entry(list->rwlock);
-	linklist_foreach(list, current) {
+	linked_list_foreach(list, current) {
 		result = fn(accumulator, current->data);
 
 		/* Check if the user allocated a new variable.
