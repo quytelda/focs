@@ -7,7 +7,9 @@
 *.lzo
 *.out
 *.patch
+*.pyc
 *.tar
+*.xml
 *.xz
 
 # dotfiles
@@ -17,6 +19,9 @@
 *.orig
 *~
 \#*#
+
+# doxygen generated files
+xml
 
 # sphinx generated files
 _build
