@@ -64,10 +64,12 @@ START_TEST(test_rb_push_head_multiple)
 {
 	bool success[3];
 	uint8_t in[] = {1, 2, 3};
+	uint8_t * out[3];
 	struct ring_buffer * buf = NULL;
 
 	rb_alloc(&buf, &props);
 
+	/* Create list: [3, 2, 1] */
 	success[0] = rb_push_head(buf, &in[0]);
 	success[1] = rb_push_head(buf, &in[1]);
 	success[2] = rb_push_head(buf, &in[2]);
@@ -76,6 +78,14 @@ START_TEST(test_rb_push_head_multiple)
 	ck_assert(success[1]);
 	ck_assert(success[2]);
 	ck_assert_int_eq(buf->length, 3);
+
+	out[0] = (uint8_t *) buf->head + (0 * sizeof(uint8_t));
+	out[1] = (uint8_t *) buf->head + (1 * sizeof(uint8_t));
+	out[2] = (uint8_t *) buf->head + (2 * sizeof(uint8_t));
+
+	ck_assert_int_eq(*out[0], in[2]);
+	ck_assert_int_eq(*out[1], in[1]);
+	ck_assert_int_eq(*out[2], in[0]);
 
 	rb_free(&buf);
 }
