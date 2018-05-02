@@ -147,28 +147,172 @@ START_TEST(test_rb_push_tail_multiple)
 }
 END_TEST
 
+START_TEST(test_rb_pop_head_empty)
+{
+	uint8_t * out;
+	struct ring_buffer * buf = NULL;
+
+	rb_alloc(&buf, &props);
+
+	out = rb_pop_head(buf);
+
+	ck_assert(!out);
+	ck_assert_ptr_eq(buf->head, buf->data);
+	ck_assert_ptr_eq(buf->tail, buf->data);
+	ck_assert(buf->length == 0);
+
+	rb_free(&buf);
+}
+END_TEST
+
+START_TEST(test_rb_pop_head_single)
+{
+	uint8_t in = 1;
+	uint8_t * out;
+	struct ring_buffer * buf = NULL;
+
+	/* Create list: [1] */
+	rb_alloc(&buf, &props);
+	rb_push_head(buf, &in);
+
+	out = rb_pop_head(buf);
+
+	ck_assert(out);
+	ck_assert_int_eq(*out, in);
+	ck_assert(buf->length == 0);
+
+	rb_free(&buf);
+}
+END_TEST
+
+START_TEST(test_rb_pop_head_multiple)
+{
+	uint8_t in[] = {1, 2, 3};
+	uint8_t * out[3];
+	struct ring_buffer * buf = NULL;
+
+	/* Create list: [3, 2, 1] */
+	rb_alloc(&buf, &props);
+	rb_push_head(buf, &in[0]);
+	rb_push_head(buf, &in[1]);
+	rb_push_head(buf, &in[2]);
+
+	out[0] = rb_pop_head(buf);
+	out[1] = rb_pop_head(buf);
+	out[2] = rb_pop_head(buf);
+
+	ck_assert(out[0]);
+	ck_assert(out[1]);
+	ck_assert(out[2]);
+
+	ck_assert_int_eq(*out[0], in[2]);
+	ck_assert_int_eq(*out[1], in[1]);
+	ck_assert_int_eq(*out[2], in[0]);
+
+	rb_free(&buf);
+}
+END_TEST
+
+START_TEST(test_rb_pop_tail_empty)
+{
+	uint8_t * out;
+	struct ring_buffer * buf = NULL;
+
+	rb_alloc(&buf, &props);
+
+	out = rb_pop_tail(buf);
+
+	ck_assert(!out);
+	ck_assert_ptr_eq(buf->head, buf->data);
+	ck_assert_ptr_eq(buf->tail, buf->data);
+	ck_assert(buf->length == 0);
+
+	rb_free(&buf);
+}
+END_TEST
+
+START_TEST(test_rb_pop_tail_single)
+{
+	uint8_t in = 1;
+	uint8_t * out;
+	struct ring_buffer * buf = NULL;
+
+	/* Create list: [1] */
+	rb_alloc(&buf, &props);
+	rb_push_head(buf, &in);
+
+	out = rb_pop_tail(buf);
+
+	ck_assert(out);
+	ck_assert_int_eq(*out, in);
+	ck_assert(buf->length == 0);
+
+	rb_free(&buf);
+}
+END_TEST
+
+START_TEST(test_rb_pop_tail_multiple)
+{
+	uint8_t in[] = {1, 2, 3};
+	uint8_t * out[3];
+	struct ring_buffer * buf = NULL;
+
+	/* Create list: [3, 2, 1] */
+	rb_alloc(&buf, &props);
+	rb_push_head(buf, &in[0]);
+	rb_push_head(buf, &in[1]);
+	rb_push_head(buf, &in[2]);
+
+	out[0] = rb_pop_tail(buf);
+	out[1] = rb_pop_tail(buf);
+	out[2] = rb_pop_tail(buf);
+
+	ck_assert(out[0]);
+	ck_assert(out[1]);
+	ck_assert(out[2]);
+
+	ck_assert_int_eq(*out[0], in[0]);
+	ck_assert_int_eq(*out[1], in[1]);
+	ck_assert_int_eq(*out[2], in[2]);
+
+	rb_free(&buf);
+}
+END_TEST
+
 Suite * rb_suite(void)
 {
 	Suite * suite;
 	TCase * case_rb_alloc;
 	TCase * case_rb_push_head;
 	TCase * case_rb_push_tail;
+	TCase * case_rb_pop_head;
+	TCase * case_rb_pop_tail;
 
 	suite = suite_create("Ring Buffer");
 
 	case_rb_alloc = tcase_create("rb_alloc");
 	case_rb_push_head = tcase_create("rb_push_head");
 	case_rb_push_head = tcase_create("rb_push_tail");
+	case_rb_pop_head = tcase_create("rb_pop_head");
+	case_rb_pop_tail = tcase_create("rb_pop_tail");
 
 	tcase_add_test(case_rb_alloc, test_rb_alloc);
 	tcase_add_test(case_rb_push_head, test_rb_push_head_single);
 	tcase_add_test(case_rb_push_head, test_rb_push_head_multiple);
 	tcase_add_test(case_rb_push_tail, test_rb_push_tail_single);
 	tcase_add_test(case_rb_push_tail, test_rb_push_tail_multiple);
+	tcase_add_test(case_rb_pop_head, test_rb_pop_head_empty);
+	tcase_add_test(case_rb_pop_head, test_rb_pop_head_single);
+	tcase_add_test(case_rb_pop_head, test_rb_pop_head_multiple);
+	tcase_add_test(case_rb_pop_tail, test_rb_pop_tail_empty);
+	tcase_add_test(case_rb_pop_tail, test_rb_pop_tail_single);
+	tcase_add_test(case_rb_pop_tail, test_rb_pop_tail_multiple);
 
 	suite_add_tcase(suite, case_rb_alloc);
 	suite_add_tcase(suite, case_rb_push_head);
 	suite_add_tcase(suite, case_rb_push_tail);
+	suite_add_tcase(suite, case_rb_pop_head);
+	suite_add_tcase(suite, case_rb_pop_tail);
 
 	return suite;
 }
