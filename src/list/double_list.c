@@ -20,7 +20,7 @@
 
 #include "list/double_list.h"
 
-static struct ll_element * __element_init(struct linked_list * list, void * data)
+static struct ll_element * __element_init(struct double_list * list, void * data)
 {
 	struct ll_element * elem;
 
@@ -46,7 +46,7 @@ exit:
 	return NULL;
 }
 
-static struct ll_element * __lookup_element(struct linked_list * list, size_t pos)
+static struct ll_element * __lookup_element(struct double_list * list, size_t pos)
 {
 	struct ll_element * current;
 
@@ -59,7 +59,7 @@ static struct ll_element * __lookup_element(struct linked_list * list, size_t po
 	return current;
 }
 
-static void __push_head(struct linked_list * list, struct ll_element * current)
+static void __push_head(struct double_list * list, struct ll_element * current)
 {
 	if(list->head)
 		list->head->prev = current;
@@ -74,7 +74,7 @@ static void __push_head(struct linked_list * list, struct ll_element * current)
 	(list->length)++;
 }
 
-static struct ll_element * __pop_head(struct linked_list * list)
+static struct ll_element * __pop_head(struct double_list * list)
 {
 	struct ll_element * current;
 
@@ -94,7 +94,7 @@ static struct ll_element * __pop_head(struct linked_list * list)
 	return current;
 }
 
-static void __push_tail(struct linked_list * list, struct ll_element * current)
+static void __push_tail(struct double_list * list, struct ll_element * current)
 {
 	if(list->tail)
 		list->tail->next = current;
@@ -109,7 +109,7 @@ static void __push_tail(struct linked_list * list, struct ll_element * current)
 	(list->length)++;
 }
 
-static struct ll_element * __pop_tail(struct linked_list * list)
+static struct ll_element * __pop_tail(struct double_list * list)
 {
 	struct ll_element * current;
 
@@ -129,7 +129,7 @@ static struct ll_element * __pop_tail(struct linked_list * list)
 	return current;
 }
 
-static bool __insert_element(struct linked_list * list, struct ll_element * current, size_t pos)
+static bool __insert_element(struct double_list * list, struct ll_element * current, size_t pos)
 {
 	struct ll_element * prev;
 
@@ -154,7 +154,7 @@ static bool __insert_element(struct linked_list * list, struct ll_element * curr
 	return true;
 }
 
-static struct ll_element * __remove_element(struct linked_list * list, size_t pos)
+static struct ll_element * __remove_element(struct double_list * list, size_t pos)
 {
 	struct ll_element * current;
 
@@ -176,7 +176,7 @@ static struct ll_element * __remove_element(struct linked_list * list, size_t po
 	return current;
 }
 
-static void __delete_element(struct linked_list * list, struct ll_element * elem)
+static void __delete_element(struct double_list * list, struct ll_element * elem)
 {
 	/* Fix head and tail. */
 	if(list->head == elem)
@@ -193,7 +193,7 @@ static void __delete_element(struct linked_list * list, struct ll_element * elem
 	(list->length)--;
 }
 
-static void __delete_before(struct linked_list * list, struct ll_element * mark)
+static void __delete_before(struct double_list * list, struct ll_element * mark)
 {
 	struct ll_element * current;
 
@@ -211,7 +211,7 @@ static void __delete_before(struct linked_list * list, struct ll_element * mark)
 		list->tail = NULL;
 }
 
-static void __delete_after(struct linked_list * list, struct ll_element * mark)
+static void __delete_after(struct double_list * list, struct ll_element * mark)
 {
 	struct ll_element * current;
 
@@ -229,7 +229,7 @@ static void __delete_after(struct linked_list * list, struct ll_element * mark)
 		list->head = NULL;
 }
 
-int dl_alloc(struct linked_list ** list, size_t data_size)
+int dl_alloc(struct double_list ** list, size_t data_size)
 {
 	int err;
 
@@ -251,7 +251,7 @@ exit:
 	return err;
 }
 
-void dl_free(struct linked_list ** list)
+void dl_free(struct double_list ** list)
 {
 	struct ll_element * current;
 
@@ -270,7 +270,7 @@ void dl_free(struct linked_list ** list)
 	free(*list);
 }
 
-bool dl_null(struct linked_list * list)
+bool dl_null(struct double_list * list)
 {
 	bool null;
 
@@ -281,7 +281,7 @@ bool dl_null(struct linked_list * list)
 	return null;
 }
 
-void dl_push_head(struct linked_list * list, void * data)
+void dl_push_head(struct double_list * list, void * data)
 {
 	struct ll_element * current;
 
@@ -292,7 +292,7 @@ void dl_push_head(struct linked_list * list, void * data)
 	rwlock_writer_exit(list->rwlock);
 }
 
-void dl_push_tail(struct linked_list * list, void * data)
+void dl_push_tail(struct double_list * list, void * data)
 {
 	struct ll_element * current;
 
@@ -303,7 +303,7 @@ void dl_push_tail(struct linked_list * list, void * data)
 	rwlock_writer_exit(list->rwlock);
 }
 
-void * dl_pop_head(struct linked_list * list)
+void * dl_pop_head(struct double_list * list)
 {
 	void * data = NULL;
 	struct ll_element * current;
@@ -320,7 +320,7 @@ void * dl_pop_head(struct linked_list * list)
 	return data;
 }
 
-void * dl_pop_tail(struct linked_list * list)
+void * dl_pop_tail(struct double_list * list)
 {
 	void * data = NULL;
 	struct ll_element * current;
@@ -337,7 +337,7 @@ void * dl_pop_tail(struct linked_list * list)
 	return data;
 }
 
-bool dl_insert(struct linked_list * list, void * data, size_t pos)
+bool dl_insert(struct double_list * list, void * data, size_t pos)
 {
 	bool success;
 	struct ll_element * current;
@@ -351,7 +351,7 @@ bool dl_insert(struct linked_list * list, void * data, size_t pos)
 	return success;
 }
 
-bool dl_delete(struct linked_list * list, size_t pos)
+bool dl_delete(struct double_list * list, size_t pos)
 {
 	struct ll_element * current;
 
@@ -369,7 +369,7 @@ bool dl_delete(struct linked_list * list, size_t pos)
 	return false;
 }
 
-void * dl_remove(struct linked_list * list, size_t pos)
+void * dl_remove(struct double_list * list, size_t pos)
 {
 	void * data = NULL;
 	struct ll_element * current;
@@ -386,7 +386,7 @@ void * dl_remove(struct linked_list * list, size_t pos)
 	return data;
 }
 
-void * dl_fetch(struct linked_list * list, size_t pos)
+void * dl_fetch(struct double_list * list, size_t pos)
 {
 	struct ll_element * current;
 
@@ -411,7 +411,7 @@ void * dl_fetch(struct linked_list * list, size_t pos)
  *
  * Return: ``true`` if a matching entry is found, otherwise ``false``
  */
-bool dl_contains(struct linked_list * list, void * data)
+bool dl_contains(struct double_list * list, void * data)
 {
 	bool success = false;
 	struct ll_element * current;
@@ -446,7 +446,7 @@ bool dl_contains(struct linked_list * list, void * data)
  * Return: ``true`` if there is at least one value that satisfies the predicate.
  * Otherwise, it returns ``false``.
  */
-bool dl_any(struct linked_list * list, pred_fn p)
+bool dl_any(struct double_list * list, pred_fn p)
 {
 	bool success = false;
 	struct ll_element * current;
@@ -484,7 +484,7 @@ bool dl_any(struct linked_list * list, pred_fn p)
  * Return: ``false`` if there is at least one value that does not satisfy the
  * predicate.  Otherwise, it returns ``true``.
  */
-bool dl_all(struct linked_list * list, pred_fn p)
+bool dl_all(struct double_list * list, pred_fn p)
 {
 	bool success = true;
 	struct ll_element * current;
@@ -506,7 +506,7 @@ bool dl_all(struct linked_list * list, pred_fn p)
 	return success;
 }
 
-bool dl_filter(struct linked_list * list, pred_fn p)
+bool dl_filter(struct double_list * list, pred_fn p)
 {
 	bool changed = false;
 	struct ll_element * current;
@@ -531,7 +531,7 @@ bool dl_filter(struct linked_list * list, pred_fn p)
 	return changed;
 }
 
-bool dl_drop_while(struct linked_list * list, pred_fn p)
+bool dl_drop_while(struct double_list * list, pred_fn p)
 {
 	size_t orig_length;
 	struct ll_element * current;
@@ -558,7 +558,7 @@ bool dl_drop_while(struct linked_list * list, pred_fn p)
 	return (orig_length != list->length);
 }
 
-bool dl_take_while(struct linked_list * list, pred_fn p)
+bool dl_take_while(struct double_list * list, pred_fn p)
 {
 	size_t orig_length;
 	struct ll_element * current;
@@ -594,7 +594,7 @@ bool dl_take_while(struct linked_list * list, pred_fn p)
  * for i from 0 to &list->length:
  * 	@list[i] = @fn(@list[i])
  */
-void dl_map(struct linked_list * list, map_fn fn)
+void dl_map(struct double_list * list, map_fn fn)
 {
 	void * result;
 	struct ll_element * current;
@@ -623,7 +623,7 @@ void dl_map(struct linked_list * list, map_fn fn)
  * Reverses a list in place so that the elements are in reverse order and the
  * head and tail are switched.
  */
-void dl_reverse(struct linked_list * list)
+void dl_reverse(struct double_list * list)
 {
 	struct ll_element * current;
 	struct ll_element * tmp;
@@ -654,7 +654,7 @@ void dl_reverse(struct linked_list * list)
  *
  * If @list is empty, the fold will be equal to the value of @init.
  */
-void * dl_foldr(const struct linked_list * list,
+void * dl_foldr(const struct double_list * list,
 		      foldr_fn fn,
 		      const void * init)
 {
@@ -698,7 +698,7 @@ void * dl_foldr(const struct linked_list * list,
  *
  * If @list is empty, the fold will be equal to the value of @init.
  */
-void * dl_foldl(const struct linked_list * list,
+void * dl_foldl(const struct double_list * list,
 		      foldl_fn fn,
 		      const void * init)
 {
