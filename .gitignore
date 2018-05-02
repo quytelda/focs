@@ -13,6 +13,7 @@
 *.xz
 
 # tests
+test/single_list
 test/double_list
 test/ring_buffer
 
