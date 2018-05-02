@@ -47,13 +47,17 @@ START_TEST(test_rb_push_head_single)
 {
 	bool success;
 	uint8_t in = 1;
+	uint8_t * out;
 	struct ring_buffer * buf = NULL;
 
 	rb_alloc(&buf, &props);
 
 	success = rb_push_head(buf, &in);
+	out = (uint8_t *) buf->head;
 
 	ck_assert(success);
+	ck_assert(out);
+	ck_assert_int_eq(*out, in);
 	ck_assert_int_eq(buf->length, 1);
 
 	rb_free(&buf);
