@@ -1,5 +1,5 @@
 /* ring_buffer.c - Ring Buffer Implementation
- * Copyright (C) 2016 Quytelda Kahja
+ * Copyright (C) 2018 Quytelda Kahja
  *
  * This file is part of focs.
  *
@@ -20,26 +20,42 @@
 #include "list/ring_buffer.h"
 #include "sync/rwlock.h"
 
-static inline void * __rbi_to_vmaddr(const struct ring_buffer * buf,
+static inline void * __rbpos_to_addr(const struct ring_buffer * buf,
 				     const ssize_t pos)
 {
+	/* ISO C99 doesn't allow arithmetic on void pointers,
+	 * so cast all pointers to size_t integers for arithmetic. */
+	const size_t start = (size_t) buf->data;
+	const size_t head  = (size_t) buf->head;
+
 	size_t offset;
 
-	offset = (DS_DATA_SIZE(buf) * pos) % DS_ENTRIES(buf);
+	offset = mod((ssize_t) DS_DATA_SIZE(buf) * pos, DS_ENTRIES(buf));
 
 	/* Return the calculated address only if it is in-bounds. */
 	if(((pos < 0) && (offset >= buf->length)) ||
-	   ((pos >= 0) && (offset < buf->length)))
-		return (void *) ((size_t) buf->head + offset);
+	   ((pos >= 0) && (offset < buf->length))) {
+		size_t roff;
+		size_t space;
+
+		roff  = (head - start) + offset;
+		space = DS_DATA_SIZE(buf) * DS_ENTRIES(buf);
+		return (void *) (start + (roff % space));
+	}
 
 	return NULL;
+}
+
+static inline bool __is_null(struct ring_buffer * buf)
+{
+	return (buf->length == 0);
 }
 
 static bool __push_head(struct ring_buffer * buf, const void * data)
 {
 	void * vm_addr;
 
-	vm_addr = __rbi_to_vmaddr(buf, -1);
+	vm_addr = __rbpos_to_addr(buf, -1);
 	if(!vm_addr)
 		return false;
 
@@ -55,11 +71,11 @@ static bool __push_tail(struct ring_buffer * buf, const void * data)
 {
 	void * vm_addr;
 
-	vm_addr = __rbi_to_vmaddr(buf, buf->length);
+	vm_addr = __rbpos_to_addr(buf, buf->length);
 	if(!vm_addr)
 		return false;
 
-	buf->tail = __rbi_to_vmaddr(buf, buf->length + 1);
+	buf->tail = __rbpos_to_addr(buf, buf->length + 1);
 	memcpy(vm_addr, data, DS_DATA_SIZE(buf));
 
 	(buf->length)++;
@@ -77,7 +93,7 @@ int rb_alloc(struct ring_buffer ** buf,
 	}
 	DS_SET_PROPS(*buf, props);
 
-	(*buf)->data = malloc(DS_DATA_SIZE(*buf) * DS_ENTRIES(*buf));
+	(*buf)->data = calloc(DS_ENTRIES(*buf), DS_DATA_SIZE(*buf));
 	if(!(*buf)->data) {
 		errno = ENOMEM;
 		goto exit;
