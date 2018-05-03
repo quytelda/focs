@@ -20,9 +20,9 @@
 #define NEXT_SAFE(current) ((current) ? (current)->next : NULL)
 
 /**
- * linked_list_foreach() - Advance through a linked list element by element.
- * @list: The list to iterate over
- * @current: A list element pointer that will point to the current element
+ * Advance through a linked list element by element.
+ * @param list The list to iterate over
+ * @param current A list element pointer that will point to the current element
  *
  * linked_list_foreach() should be used like a for loop; for example:
  * ```
@@ -39,9 +39,9 @@
 	for(current = (list)->head; current; current = current->next)
 
 /**
- * linked_list_foreach_safe() - Advance through a linked list element by element.
- * @list: The list to iterate over
- * @current: A list element pointer that will point to the current element
+ * Advance through a linked list element by element.
+ * @param list The list to iterate over
+ * @param current A list element pointer that will point to the current element
  *
  * The syntax of linked_list_foreach_safe() is the same as linked_list_foreach().
  * However, it is safe to change the `next` pointer in the current element
@@ -54,10 +54,10 @@
 	    current = _tmp, _tmp = NEXT_SAFE(current))
 
 /**
- * linked_list_while() - Advance through a linked list element by element.
- * @list: The list to iterate over
- * @current: A list element pointer that will point to the current element
- * @condition: A condition that will determine whether to continue iterating
+ * Advance through a linked list while some condition is true.
+ * @param list The list to iterate over
+ * @param current A list element pointer that will point to the current element
+ * @param condition A condition that will determine whether to continue iterating
  *
  * linked_list_while() should be used like a while loop; for example:
  * ```
@@ -76,10 +76,10 @@
 	    current = current->next)
 
 /**
- * linked_list_while_safe() - Advance through a linked list element by element.
- * @list: The list to iterate over
- * @current: A list element pointer that will point to the current element
- * @condition: A condition that will determine whether to continue iterating
+ * Advance through a linked list element by element.
+ * @param list The list to iterate over
+ * @param current A list element pointer that will point to the current element
+ * @param condition A condition that will determine whether to continue iterating
  *
  * The syntax of linked_list_while_safe() is the same as linked_list_while().
  * However, it is safe to change the `next` pointer in the current element
@@ -92,8 +92,8 @@
 	    current = _tmp, _tmp = NEXT_SAFE(current))
 
 /**
- * otherwise() - Run a block of code if the preceeding loop did not break.
- * @current: The same current element used in the preceeding loop.
+ * Run a block of code if the preceeding loop did not break.
+ * @param current The same current element used in the preceeding loop.
  *
  * otherwise() should directly follow a linklist loop in the same way an
  * `else` statement follows an `if` block.  It's function is the same as
