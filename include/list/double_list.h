@@ -24,16 +24,16 @@
 #include "list/linked_list.h"
 #include "sync/rwlock.h"
 
-struct ll_element {
-	struct ll_element * next;
-	struct ll_element * prev;
+struct dl_element {
+	struct dl_element * next;
+	struct dl_element * prev;
 
 	void * data;
 };
 
 struct double_list {
-	struct ll_element * head;
-	struct ll_element * tail;
+	struct dl_element * head;
+	struct dl_element * tail;
 	size_t length;
 	size_t data_size;
 
@@ -46,7 +46,7 @@ struct double_list {
 	for(current = (list)->tail; current; current = current->prev)
 
 #define double_list_foreach_rev_safe(list, current, _tmp)	\
-	struct ll_element * _tmp;				\
+	struct dl_element * _tmp;				\
 	for(current = (list)->tail, _tmp = PREV_SAFE(current);	\
 	    current;						\
 	    current = _tmp, _tmp = PREV_SAFE(current))
@@ -57,7 +57,7 @@ struct double_list {
 	    current = current->prev)
 
 #define double_list_while_rev_safe(list, current, condition)	\
-	struct ll_element * _tmp;				\
+	struct dl_element * _tmp;				\
 	for(current = (list)->tail, _tmp = PREV_SAFE(current);	\
 	    current && (condition);				\
 	    current = _tmp, _tmp = PREV_SAFE(current))

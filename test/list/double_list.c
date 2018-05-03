@@ -92,7 +92,7 @@ START_TEST(test_dl_push_head_multiple)
 	ck_assert(list->tail);
 	ck_assert_int_eq(list->length, 3);
 
-	struct ll_element * current = list->head;
+	struct dl_element * current = list->head;
 	ck_assert_int_eq(*(uint8_t *) current->data, val3);
 	current = current->next;
 	ck_assert_int_eq(*(uint8_t *) current->data, val2);
@@ -138,7 +138,7 @@ START_TEST(test_dl_push_tail_multiple)
 	ck_assert(list->tail);
 	ck_assert_int_eq(list->length, 3);
 
-	struct ll_element * current = list->head;
+	struct dl_element * current = list->head;
 	ck_assert_int_eq(*(uint8_t *) current->data, val1);
 	current = current->next;
 	ck_assert_int_eq(*(uint8_t *) current->data, val2);
