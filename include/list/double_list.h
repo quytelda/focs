@@ -24,16 +24,16 @@
 #include "list/linked_list.h"
 #include "sync/rwlock.h"
 
-struct ll_element {
-	struct ll_element * next;
-	struct ll_element * prev;
+struct dl_element {
+	struct dl_element * next;
+	struct dl_element * prev;
 
 	void * data;
 };
 
-struct linked_list {
-	struct ll_element * head;
-	struct ll_element * tail;
+struct double_list {
+	struct dl_element * head;
+	struct dl_element * tail;
 	size_t length;
 	size_t data_size;
 
@@ -42,59 +42,59 @@ struct linked_list {
 
 #define PREV_SAFE(current) ((current) ? (current)->prev : NULL)
 
-#define linklist_foreach_rev(list, current)				\
+#define double_list_foreach_rev(list, current)				\
 	for(current = (list)->tail; current; current = current->prev)
 
-#define linklist_foreach_rev_safe(list, current, _tmp)		\
-	struct ll_element * _tmp;					\
+#define double_list_foreach_rev_safe(list, current, _tmp)	\
+	struct dl_element * _tmp;				\
 	for(current = (list)->tail, _tmp = PREV_SAFE(current);	\
 	    current;						\
 	    current = _tmp, _tmp = PREV_SAFE(current))
 
-#define linklist_while_rev(list, current, condition)	\
+#define double_list_while_rev(list, current, condition)	\
 	for(current = (list)->tail;			\
 	    current && (condition);			\
 	    current = current->prev)
 
-#define linklist_while_rev_safe(list, current, condition)	\
-	struct ll_element * _tmp;					\
+#define double_list_while_rev_safe(list, current, condition)	\
+	struct dl_element * _tmp;				\
 	for(current = (list)->tail, _tmp = PREV_SAFE(current);	\
 	    current && (condition);				\
 	    current = _tmp, _tmp = PREV_SAFE(current))
 
 /* Creation & Destruction */
-int dl_alloc(struct linked_list ** list, size_t data_size);
-void dl_free(struct linked_list ** list);
+int dl_alloc(struct double_list ** list, size_t data_size);
+void dl_free(struct double_list ** list);
 
 /* Data Management */
-void dl_push_head(struct linked_list * list, void * data);
-void dl_push_tail(struct linked_list * list, void * data);
-void * dl_pop_head(struct linked_list * list);
-void * dl_pop_tail(struct linked_list * list);
-bool dl_insert(struct linked_list * list, void * data, size_t pos);
-bool dl_delete(struct linked_list * list, size_t pos);
-void * dl_remove(struct linked_list * list, size_t pos);
-void * dl_fetch(struct linked_list * list, size_t pos);
+void dl_push_head(struct double_list * list, void * data);
+void dl_push_tail(struct double_list * list, void * data);
+void * dl_pop_head(struct double_list * list);
+void * dl_pop_tail(struct double_list * list);
+bool dl_insert(struct double_list * list, void * data, size_t pos);
+bool dl_delete(struct double_list * list, size_t pos);
+void * dl_remove(struct double_list * list, size_t pos);
+void * dl_fetch(struct double_list * list, size_t pos);
 
 /* Transformations */
-void dl_map(struct linked_list * list, map_fn fn);
-void dl_reverse(struct linked_list * list);
-void * dl_foldr(const struct linked_list * list,
-		      foldr_fn fn,
-		      const void * init);
-void * dl_foldl(const struct linked_list * list,
-		      foldl_fn fn,
-		      const void * init);
+void dl_map(struct double_list * list, map_fn fn);
+void dl_reverse(struct double_list * list);
+void * dl_foldr(const struct double_list * list,
+		foldr_fn fn,
+		const void * init);
+void * dl_foldl(const struct double_list * list,
+		foldl_fn fn,
+		const void * init);
 
 /* Data Properties */
-bool dl_null(struct linked_list * list);
-bool dl_contains(struct linked_list * list, void * data);
-bool dl_any(struct linked_list * list, pred_fn p);
-bool dl_all(struct linked_list * list, pred_fn p);
+bool dl_null(struct double_list * list);
+bool dl_contains(struct double_list * list, void * data);
+bool dl_any(struct double_list * list, pred_fn p);
+bool dl_all(struct double_list * list, pred_fn p);
 
 /* Filtering */
-bool dl_filter(struct linked_list * list, pred_fn p);
-bool dl_drop_while(struct linked_list * list, pred_fn p);
-bool dl_take_while(struct linked_list * list, pred_fn p);
+bool dl_filter(struct double_list * list, pred_fn p);
+bool dl_drop_while(struct double_list * list, pred_fn p);
+bool dl_take_while(struct double_list * list, pred_fn p);
 
 #endif /* __LINKED_LIST_H */

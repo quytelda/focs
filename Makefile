@@ -10,6 +10,12 @@ SRCS=$(addprefix $(SRC_DIR)/, \
 	sync/rwlock.c)
 OBJS=$(SRCS:.c=.o)
 
+# Documentation Type (default to 'html')
+# This variable may be overriden by the user
+# in the environmental variable "$DOC_TYPE"
+DOC_TYPE := $(if $(DOC_TYPE), $(DOC_TYPE), html)
+DOXYFILE = $(DOC_DIR)/doxyfile
+
 # Installation Prefix (default to '/usr')
 # This variable may be overriden by the user
 # in the environmental variable "$PREFIX"
@@ -18,7 +24,7 @@ PREFIX := $(if $(PREFIX), $(PREFIX), /usr)
 LIB_PREFIX := $(PREFIX)/lib
 INC_PREFIX := $(PREFIX)/include
 
-.PHONY: all debug install uninstall clean check
+.PHONY: all debug docs install uninstall clean check
 
 all: $(BIN)
 
@@ -28,6 +34,10 @@ $(BIN): $(OBJS)
 debug: DEBUG_FLAGS = -g -DDEBUG
 debug: $(OBJS)
 	$(CC) -shared -o $(BIN) $(CFLAGS) $(LIBS) $(DEBUG_FLAGS) $(OBJS)
+
+docs: $(DOXYFILE)
+	doxygen $(DOXYFILE)
+	$(MAKE) -C $(DOC_DIR) $(DOC_TYPE)
 
 install: $(BIN) $(LIB_PREFIX) $(INC_PREFIX)
 	install --owner=0 --group=0 --mode=644 $(BIN) $(LIB_PREFIX)
