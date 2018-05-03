@@ -3,6 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+================================
 Welcome to FOCS's documentation!
 ================================
 
@@ -19,10 +20,8 @@ FOCS is a data structure library implemented in C, designed to provide common da
 
    installation/obtaining
    installation/makefile
-   api/single_list
-   api/double_list
-   api/linked_list
-   api/ring_buffer
+   api/list
+   api/sync
 
 Indices and tables
 ==================
