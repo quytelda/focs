@@ -34,12 +34,26 @@ struct ring_buffer {
 	void * data;
 };
 
+#define ABS_POS(buf, p) (((p) > 0) ? (p) : (DS_ENTRIES(buf) + (p)))
+
 int rb_alloc(struct ring_buffer ** buf,
 	     const struct data_properties * props);
 void rb_free(struct ring_buffer ** buf);
 
 /* Data Management */
-bool rb_push_head(struct ring_buffer * buf, void * data);
-bool rb_push_tail(struct ring_buffer * buf, void * data);
+bool rb_null(struct ring_buffer * buf);
+bool rb_push_head(struct ring_buffer * buf,
+		  const void * data);
+bool rb_push_tail(struct ring_buffer * buf,
+		  const void * data);
 void * rb_pop_head(struct ring_buffer * buf);
 void * rb_pop_tail(struct ring_buffer * buf);
+bool rb_insert(struct ring_buffer * buf,
+	       const void * data,
+	       const ssize_t pos);
+void * rb_fetch(struct ring_buffer * buf,
+		const ssize_t pos);
+
+#ifdef DEBUG
+void rb_show(struct ring_buffer * buf);
+#endif /* DEBUG */
