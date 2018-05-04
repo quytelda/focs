@@ -113,11 +113,11 @@ static void * __pop_head(struct ring_buffer * buf)
 	void * data;
 
 	if(__is_null(buf))
-		return NULL;
+		return_with_errno(EFAULT, NULL);
 
 	data = malloc(DS_DATA_SIZE(buf));
 	if(!data)
-		return NULL;
+		return_with_errno(ENOMEM, NULL);
 
 	__read(buf, data, 0);
 
@@ -132,11 +132,11 @@ static void * __pop_tail(struct ring_buffer * buf)
 	void * data;
 
 	if(__is_null(buf))
-		return NULL;
+		return_with_errno(EFAULT, NULL);
 
 	data = malloc(DS_DATA_SIZE(buf));
 	if(!data)
-		return NULL;
+		return_with_errno(ENOMEM, NULL);
 
 	buf->tail = __read(buf, data, buf->length - 1);
 	(buf->length)--;
@@ -152,7 +152,7 @@ static bool __push_head(struct ring_buffer * buf,
 		if(overwrite)
 			free(__pop_tail(buf));
 		else
-			return false;
+			return_with_errno(ENOMEM, false);
 	}
 
 	buf->head = __write(buf, data, -1);
@@ -169,7 +169,7 @@ static bool __push_tail(struct ring_buffer * buf,
 		if(overwrite)
 			free(__pop_head(buf));
 		else
-			return false;
+			return_with_errno(ENOMEM, false);
 	}
 
 	__write(buf, data, buf->length);
@@ -221,10 +221,10 @@ static bool __insert(struct ring_buffer * buf,
 		     const bool overwrite)
 {
 	if(__index_OOB(buf, pos, true))
-		return false;
+		return_with_errno(EFAULT, false);
 
 	if(!overwrite && __is_full(buf))
-		return false;
+		return_with_errno(ENOMEM, false);
 
 	/* If overwrite is disabled, we want to shift all the contents of the
 	 * buffer forward/backward by one so that we can insert the new element
