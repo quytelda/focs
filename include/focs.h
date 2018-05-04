@@ -50,4 +50,19 @@
  * See: https://en.wikipedia.org/wiki/Modulo_operation
  */
 #define mod(a, n) (((a) % (n) + (n)) % (n))
+
+/**
+ * Set errno and return from the current function with some value.
+ * @param err The error number to set errno to
+ * @param val The optional value to return
+ *
+ * Set errno to `err`, then execute `return val` inside the function,
+ * effectively return `val`, or nothing if `val` is left empty.
+ */
+#define return_with_errno(err, val...) \
+	do {			       \
+		errno = err;	       \
+		return val;	       \
+	} while(0)
+
 #endif /* __FOCS_H */

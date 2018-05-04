@@ -241,6 +241,23 @@ static bool __insert(struct ring_buffer * buf,
 	return true;
 }
 
+static void * __fetch(struct ring_buffer * buf,
+		      const ssize_t pos)
+{
+	void * data;
+
+	if(__is_null(buf) || __index_OOB(buf, pos, false))
+		return_with_errno(EFAULT, NULL);
+
+	data = malloc(DS_DATA_SIZE(buf));
+	if(!data)
+		return_with_errno(ENOMEM, NULL);
+
+	__read(buf, data, pos);
+
+	return data;
+}
+
 int rb_alloc(struct ring_buffer ** buf,
 	     const struct data_properties * props)
 {
@@ -361,6 +378,18 @@ bool rb_insert(struct ring_buffer * buf,
 	rwlock_writer_exit(buf->rwlock);
 
 	return success;
+}
+
+void * rb_fetch(struct ring_buffer * buf,
+		const ssize_t pos)
+{
+	void * data;
+
+	rwlock_writer_entry(buf->rwlock);
+	data = __fetch(buf, pos);
+	rwlock_writer_exit(buf->rwlock);
+
+	return data;
 }
 
 #ifdef DEBUG
