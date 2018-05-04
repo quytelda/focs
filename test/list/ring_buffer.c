@@ -356,6 +356,76 @@ START_TEST(test_rb_insert_multiple)
 }
 END_TEST
 
+START_TEST(test_rb_fetch_empty)
+{
+	uint8_t * out[2];
+	struct ring_buffer * buf;
+
+	rb_alloc(&buf, &props);
+
+	out[0] = rb_fetch(buf, 0);
+	out[1] = rb_fetch(buf, 1);
+
+	ck_assert(!out[0]);
+	ck_assert(!out[1]);
+	ck_assert_ptr_eq(buf->head, buf->data);
+	ck_assert_ptr_eq(buf->tail, buf->data);
+	ck_assert(rb_null(buf));
+
+	rb_free(&buf);
+}
+END_TEST
+
+START_TEST(test_rb_fetch_single)
+{
+	uint8_t in = 1;
+	uint8_t * out[2];
+	struct ring_buffer * buf = NULL;
+
+	/* Create list: [1] */
+	rb_alloc(&buf, &props);
+	rb_push_head(buf, &in);
+
+	out[0] = rb_fetch(buf, 0);
+	out[1] = rb_fetch(buf, 1);
+
+	ck_assert(out[0]);
+	ck_assert(!out[1]);
+	ck_assert_int_eq(*out[0], in);
+	ck_assert(buf->length == 1);
+
+	rb_free(&buf);
+}
+END_TEST
+
+START_TEST(test_rb_fetch_multiple)
+{
+	uint8_t in[] = {0, 1, 2};
+	uint8_t * out[3];
+	struct ring_buffer * buf = NULL;
+
+	/* Create list: [1, 2, 3] */
+	rb_alloc(&buf, &props);
+	rb_push_tail(buf, &in[0]);
+	rb_push_tail(buf, &in[1]);
+	rb_push_tail(buf, &in[2]);
+
+	out[0] = rb_fetch(buf, 1);
+	out[1] = rb_fetch(buf, 0);
+	out[2] = rb_fetch(buf, 2);
+
+	ck_assert(out[0]);
+	ck_assert(out[1]);
+	ck_assert(out[2]);
+
+	ck_assert_int_eq(*out[0], in[1]);
+	ck_assert_int_eq(*out[1], in[0]);
+	ck_assert_int_eq(*out[2], in[2]);
+
+	rb_free(&buf);
+}
+END_TEST
+
 Suite * rb_suite(void)
 {
 	Suite * suite;
@@ -365,6 +435,7 @@ Suite * rb_suite(void)
 	TCase * case_rb_pop_head;
 	TCase * case_rb_pop_tail;
 	TCase * case_rb_insert;
+	TCase * case_rb_fetch;
 
 	suite = suite_create("Ring Buffer");
 
@@ -374,6 +445,7 @@ Suite * rb_suite(void)
 	case_rb_pop_head = tcase_create("rb_pop_head");
 	case_rb_pop_tail = tcase_create("rb_pop_tail");
 	case_rb_insert = tcase_create("rb_insert");
+	case_rb_fetch = tcase_create("rb_fetch");
 
 	tcase_add_test(case_rb_alloc, test_rb_alloc);
 	tcase_add_test(case_rb_push_head, test_rb_push_head_single);
@@ -388,6 +460,9 @@ Suite * rb_suite(void)
 	tcase_add_test(case_rb_pop_tail, test_rb_pop_tail_multiple);
 	tcase_add_test(case_rb_insert, test_rb_insert_single);
 	tcase_add_test(case_rb_insert, test_rb_insert_multiple);
+	tcase_add_test(case_rb_fetch, test_rb_fetch_empty);
+	tcase_add_test(case_rb_fetch, test_rb_fetch_single);
+	tcase_add_test(case_rb_fetch, test_rb_fetch_multiple);
 
 	suite_add_tcase(suite, case_rb_alloc);
 	suite_add_tcase(suite, case_rb_push_head);
@@ -395,6 +470,7 @@ Suite * rb_suite(void)
 	suite_add_tcase(suite, case_rb_pop_head);
 	suite_add_tcase(suite, case_rb_pop_tail);
 	suite_add_tcase(suite, case_rb_insert);
+	suite_add_tcase(suite, case_rb_fetch);
 
 	return suite;
 }
