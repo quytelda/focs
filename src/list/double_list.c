@@ -400,17 +400,6 @@ void * dl_fetch(struct double_list * list, size_t pos)
 	return NULL;
 }
 
-/**
- * dl_contains() - Determines if a list contains a value
- * @list: The list to search
- * @data: The data to search for in the list
- *
- * Determines if @list contains an entry matching @data.
- * The operation compares the contents of the memory pointed to by @data, and
- * not the memory addresses of the data pointers.
- *
- * Return: ``true`` if a matching entry is found, otherwise ``false``
- */
 bool dl_contains(struct double_list * list, void * data)
 {
 	bool success = false;
@@ -430,22 +419,6 @@ bool dl_contains(struct double_list * list, void * data)
 	return success;
 }
 
-/**
- * dl_any() - Determines if any value in a list satisifies some condition
- * @list: A list of values
- * @p: The predicate function (representing a condition to be satisfied).
- *
- * Runtime:
- * * worst: O(n)
- * * average: O(n/2)
- * * best: O(1)
- *
- * Iterate over each value stored in @list, and determine if any of them
- * satisfies @p (e.g. @p returns true when passed that value).  This function
- *
- * Return: ``true`` if there is at least one value that satisfies the predicate.
- * Otherwise, it returns ``false``.
- */
 bool dl_any(struct double_list * list, pred_fn p)
 {
 	bool success = false;
@@ -468,22 +441,6 @@ bool dl_any(struct double_list * list, pred_fn p)
 	return success;
 }
 
-/**
- * dl_all() - Determines if all values in a list satisify some condition
- * @list: A list of values
- * @p: The predicate function (representing a condition to be satisfied).
- *
- * Runtime:
- * * worst: O(n)
- * * average: O(n/2)
- * * best: O(1)
- *
- * Iterate over each value stored in @list, and determine if all of them
- * satisfy @p (e.g. @p returns true when passed that value).
- *
- * Return: ``false`` if there is at least one value that does not satisfy the
- * predicate.  Otherwise, it returns ``true``.
- */
 bool dl_all(struct double_list * list, pred_fn p)
 {
 	bool success = true;
@@ -581,19 +538,6 @@ bool dl_take_while(struct double_list * list, pred_fn p)
 	return (orig_length != list->length);
 }
 
-/**
- * dl_map() - Map a function over a linked list in-place.
- * @list: A list of values
- * @fn: A function that will transform each value in the list
- *
- * Runtime: O(n)
- *
- * A map operation iterates over the provided list (@list) and transforms each
- * data element using the function @fn, replacing the old value with the result
- * of the transformation:
- * for i from 0 to &list->length:
- * 	@list[i] = @fn(@list[i])
- */
 void dl_map(struct double_list * list, map_fn fn)
 {
 	void * result;
@@ -616,13 +560,6 @@ void dl_map(struct double_list * list, map_fn fn)
 	rwlock_writer_exit(list->rwlock);
 }
 
-/**
- * dl_reverse() - Reverse a list in place.
- * @list: The list to reverse
- *
- * Reverses a list in place so that the elements are in reverse order and the
- * head and tail are switched.
- */
 void dl_reverse(struct double_list * list)
 {
 	struct dl_element * current;
@@ -640,20 +577,6 @@ void dl_reverse(struct double_list * list)
 	list->tail = tmp;
 }
 
-/**
- * dl_foldr() - Right associative fold for linked lists.
- * @list: A list of values to reduce
- * @fn: A binary function that will sequentially reduce values
- * @init: An initial value for the fold
- *
- * Runtime: O(n)
- *
- * A right associative fold uses the binary function @fn to sequentially reduce
- * a list of values to a single value, starting from some initial value @init:
- * @fn(@init, @fn(@list[0], fn(@list[1], ...)))
- *
- * If @list is empty, the fold will be equal to the value of @init.
- */
 void * dl_foldr(const struct double_list * list,
 		      foldr_fn fn,
 		      const void * init)
@@ -684,20 +607,6 @@ void * dl_foldr(const struct double_list * list,
 	return accumulator;
 }
 
-/**
- * dl_foldl() - Left associative fold for linked lists.
- * @list: A list of values to reduce
- * @fn: A binary function that will sequentially reduce values
- * @init: An initial value for the fold
- *
- * Runtime: O(n)
- *
- * A left associative fold uses the binary function @fn to sequentially reduce
- * a list of values to a single value, starting from some initial value @init:
- * @fn(@fn(@fn(..., @init), @list[0]), @list[1])
- *
- * If @list is empty, the fold will be equal to the value of @init.
- */
 void * dl_foldl(const struct double_list * list,
 		      foldl_fn fn,
 		      const void * init)
