@@ -67,4 +67,19 @@
 		return __VA_ARGS__;		\
 	} while(0)
 
+/**
+ * Set errno then jump to the specified label.
+ * @param err The error number to set errno to
+ * @param lable The label to jump to
+ *
+ * Set errno to `err`, then execute `goto label` inside the function,
+ * effectively jumping to `label`.
+ */
+#define goto_with_errno(err, label)		\
+	do {					\
+		errno = err;			\
+		goto label;			\
+	} while(0)
+
+
 #endif /* __FOCS_H */

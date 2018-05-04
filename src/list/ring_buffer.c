@@ -262,17 +262,14 @@ int rb_alloc(struct ring_buffer ** buf,
 	     const struct data_properties * props)
 {
 	*buf = malloc(sizeof(**buf));
-	if(!*buf) {
-		errno = ENOMEM;
-		goto exit;
-	}
+	if(!*buf)
+		goto_with_errno(ENOMEM, exit);
+
 	DS_SET_PROPS(*buf, props);
 
 	(*buf)->data = malloc(DS_ENTRIES(*buf) * DS_DATA_SIZE(*buf));
-	if(!(*buf)->data) {
-		errno = ENOMEM;
-		goto exit;
-	}
+	if(!(*buf)->data)
+		goto_with_errno(ENOMEM, exit);
 
 	(*buf)->head = (*buf)->data;
 	(*buf)->tail = (*buf)->data;
