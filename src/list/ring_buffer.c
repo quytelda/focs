@@ -23,27 +23,45 @@
 static inline void * __rbpos_to_addr(const struct ring_buffer * buf,
 				     const ssize_t pos)
 {
+	size_t roff;
+	size_t space;
+	size_t offset;
+
 	/* ISO C99 doesn't allow arithmetic on void pointers,
 	 * so cast all pointers to size_t integers for arithmetic. */
 	const size_t start = (size_t) buf->data;
 	const size_t head  = (size_t) buf->head;
 
-	size_t offset;
-
 	offset = mod((ssize_t) DS_DATA_SIZE(buf) * pos, DS_ENTRIES(buf));
 
-	/* Return the calculated address only if it is in-bounds. */
-	if(((pos < 0) && (offset >= buf->length)) ||
-	   ((pos >= 0) && (offset < buf->length))) {
-		size_t roff;
-		size_t space;
+	roff  = (head - start) + offset;
+	space = DS_DATA_SIZE(buf) * DS_ENTRIES(buf);
+	return (void *) (start + (roff % space));
+}
 
-		roff  = (head - start) + offset;
-		space = DS_DATA_SIZE(buf) * DS_ENTRIES(buf);
-		return (void *) (start + (roff % space));
-	}
+static inline ssize_t __addr_to_rbpos(const struct ring_buffer * buf,
+				      const void * vm_addr)
+{
+	ssize_t pos;
+	ssize_t distance;
 
-	return NULL;
+	/* ISO C99 doesn't allow arithmetic on void pointers,
+	 * so cast all pointers to size_t integers for arithmetic. */
+	const size_t head  = (size_t) buf->head;
+	const size_t addr  = (size_t) vm_addr;
+
+	distance = addr - head;
+	pos = distance / DS_DATA_SIZE(buf);
+
+	/* The address must be aligned to the beginning of the block.
+	 * Truncation of integer division is equivelent to floored division for
+	 * positive numbers (fine), but for negative numbers, it is equivelent
+	 * to ceiling division, so we must subtract one to align to the
+	 * beginning of the block. */
+	if((distance < 0) && (distance % DS_DATA_SIZE(buf) != 0))
+		pos--;
+
+	return pos;
 }
 
 static inline bool __is_null(struct ring_buffer * buf)
