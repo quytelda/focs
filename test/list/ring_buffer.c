@@ -181,6 +181,7 @@ START_TEST(test_rb_pop_head_single)
 	ck_assert_int_eq(*out, in);
 	ck_assert(buf->length == 0);
 
+	free(out);
 	rb_free(&buf);
 }
 END_TEST
@@ -209,6 +210,9 @@ START_TEST(test_rb_pop_head_multiple)
 	ck_assert_int_eq(*out[1], in[1]);
 	ck_assert_int_eq(*out[2], in[0]);
 
+	free(out[0]);
+	free(out[1]);
+	free(out[2]);
 	rb_free(&buf);
 }
 END_TEST
@@ -247,6 +251,8 @@ START_TEST(test_rb_pop_tail_single)
 	ck_assert_int_eq(*out, in);
 	ck_assert(buf->length == 0);
 
+	free(out);
+
 	rb_free(&buf);
 }
 END_TEST
@@ -275,6 +281,9 @@ START_TEST(test_rb_pop_tail_multiple)
 	ck_assert_int_eq(*out[1], in[1]);
 	ck_assert_int_eq(*out[2], in[2]);
 
+	free(out[0]);
+	free(out[1]);
+	free(out[2]);
 	rb_free(&buf);
 }
 END_TEST
@@ -299,6 +308,7 @@ START_TEST(test_rb_insert_single)
 	ck_assert_int_eq(*out, in);
 	ck_assert(buf->length == 0);
 
+	free(out);
 	rb_free(&buf);
 }
 END_TEST
@@ -338,6 +348,10 @@ START_TEST(test_rb_insert_multiple)
 	ck_assert_int_eq(*out[2], in[3]);
 	ck_assert_int_eq(*out[3], in[0]);
 
+	free(out[0]);
+	free(out[1]);
+	free(out[2]);
+	free(out[3]);
 	rb_free(&buf);
 }
 END_TEST
