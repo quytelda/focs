@@ -64,9 +64,14 @@ static inline ssize_t __addr_to_rbpos(const struct ring_buffer * buf,
 	return pos;
 }
 
-static inline bool __is_null(struct ring_buffer * buf)
+static inline bool __is_null(const struct ring_buffer * buf)
 {
 	return (buf->length == 0);
+}
+
+static inline bool __is_full(const struct ring_buffer * buf)
+{
+	return (buf->length >= DS_ENTRIES(buf));
 }
 
 static bool __push_head(struct ring_buffer * buf, const void * data)
@@ -246,3 +251,40 @@ void * rb_pop_tail(struct ring_buffer * buf)
 
 	return data;
 }
+
+#ifdef DEBUG
+#include <stdio.h>
+
+void rb_show(struct ring_buffer * buf)
+{
+	printf("Buffer length: %ld", buf->length);
+
+	if(__is_null(buf))
+		puts(" (empty)\n");
+	else if(__is_full(buf))
+		puts(" (full)\n");
+	else
+		puts("\n");
+
+	for(size_t i = 0; i < DS_ENTRIES(buf); i++) {
+		ssize_t pos;
+		uint8_t * vm_addr;
+
+		vm_addr = ((uint8_t *) buf->data) + i;
+		pos = __addr_to_rbpos(buf, vm_addr);
+
+		printf("%p (%ld): %#04x", vm_addr, ABS_POS(pos), *vm_addr);
+
+		if(vm_addr == buf->data)
+			printf(" (start)");
+		if(vm_addr == buf->end)
+			printf(" (end)");
+		if(vm_addr == buf->head)
+			printf(" (head)");
+		if(vm_addr == buf->tail)
+			printf(" (tail)");
+
+		putchar('\n');
+	}
+}
+#endif /* DEBUG */
