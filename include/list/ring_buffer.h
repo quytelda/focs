@@ -43,6 +43,7 @@ bool rb_push_head(struct ring_buffer * buf, void * data);
 bool rb_push_tail(struct ring_buffer * buf, void * data);
 void * rb_pop_head(struct ring_buffer * buf);
 void * rb_pop_tail(struct ring_buffer * buf);
+bool rb_insert(struct ring_buffer * buf, void * data, size_t pos);
 
 #ifdef DEBUG
 void rb_show(struct ring_buffer * buf);
