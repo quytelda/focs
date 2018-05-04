@@ -35,19 +35,21 @@
 	const struct data_operations * __DS_DOPS_NAME
 
 /**
- * mod() - Modulo operation
- * @a The divisor
- * @n The dividend
- *
- * Returns the remainder of the quotient `(@a / @n)`.  This operation is
- * guaranteed to always return a positive integer.  Both @a and @n should be
- * signed types if either @a or @n may be negative.
+ * Modulo operation
+ * @param a The divisor
+ * @param n The dividend
  *
  * This modulo operation is distinct from the ISO C99 remainder operation
  * represented by the operator '%', which will produce negative results
  * if the divisor is negative and always takes the sign of the dividend.
  *
+ * This operation is guaranteed to always return a positive integer.  Both `a`
+ * and `n` should be signed types if either `a` or `n` may be negative.
+ *
  * See: https://en.wikipedia.org/wiki/Modulo_operation
+ *
+ * @return The remainder of the quotient `(a / n)`.
+
  */
 #define mod(a, n) (((a) % (n) + (n)) % (n))
 #endif /* __FOCS_H */
