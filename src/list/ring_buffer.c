@@ -74,57 +74,54 @@ static inline bool __is_full(const struct ring_buffer * buf)
 	return (buf->length >= DS_ENTRIES(buf));
 }
 
-static bool __push_head(struct ring_buffer * buf, const void * data)
+static inline bool __index_OOB(const struct ring_buffer * buf,
+			     const ssize_t pos,
+			     const bool inclusive)
 {
-	void * vm_addr;
+	if(inclusive)
+		return ((pos < -1) || (pos > buf->length));
 
-	vm_addr = __rbpos_to_addr(buf, -1);
-	if(!vm_addr)
-		return false;
-
-	buf->head = vm_addr;
-	memcpy(vm_addr, data, DS_DATA_SIZE(buf));
-
-	(buf->length)++;
-
-	return true;
+	return ((pos < 0) || (pos >= buf->length));
 }
 
-static bool __push_tail(struct ring_buffer * buf, const void * data)
+static inline void * __write(struct ring_buffer * buf,
+			     const void * data,
+			     const ssize_t pos)
 {
-	void * vm_addr;
+	void * addr;
 
-	vm_addr = __rbpos_to_addr(buf, buf->length);
-	if(!vm_addr)
-		return false;
+	addr = __rbpos_to_addr(buf, pos);
+	memcpy(addr, data, DS_DATA_SIZE(buf));
 
-	buf->tail = __rbpos_to_addr(buf, buf->length + 1);
-	memcpy(vm_addr, data, DS_DATA_SIZE(buf));
+	return addr;
+}
 
-	(buf->length)++;
+static inline void * __read(struct ring_buffer * buf,
+			    void * data,
+			    const ssize_t pos)
+{
+	void * addr;
 
-	return true;
+	addr = __rbpos_to_addr(buf, pos);
+	memcpy(data, addr, DS_DATA_SIZE(buf));
+
+	return addr;
 }
 
 static void * __pop_head(struct ring_buffer * buf)
 {
-	void * addr;
 	void * data;
 
 	if(__is_null(buf))
-		return NULL;
-
-	addr = __rbpos_to_addr(buf, 0);
-	if(!addr)
 		return NULL;
 
 	data = malloc(DS_DATA_SIZE(buf));
 	if(!data)
 		return NULL;
 
-	buf->head = __rbpos_to_addr(buf, 1);
-	memcpy(data, addr, DS_DATA_SIZE(buf));
+	__read(buf, data, 0);
 
+	buf->head = __rbpos_to_addr(buf, 1);
 	(buf->length)--;
 
 	return data;
@@ -132,65 +129,120 @@ static void * __pop_head(struct ring_buffer * buf)
 
 static void * __pop_tail(struct ring_buffer * buf)
 {
-	void * addr;
 	void * data;
 
 	if(__is_null(buf))
-		return NULL;
-
-	addr = __rbpos_to_addr(buf, buf->length - 1);
-	if(!addr)
 		return NULL;
 
 	data = malloc(DS_DATA_SIZE(buf));
 	if(!data)
 		return NULL;
 
-	buf->tail = __rbpos_to_addr(buf, buf->length - 1);
-	memcpy(data, addr, DS_DATA_SIZE(buf));
-
+	buf->tail = __read(buf, data, buf->length - 1);
 	(buf->length)--;
 
 	return data;
 }
 
-static bool __insert(struct ring_buffer * buf, void * data, ssize_t pos)
+static bool __push_head(struct ring_buffer * buf,
+			const void * data,
+			const bool overwrite)
 {
-	void * addr;
+	if(__is_full(buf)) {
+		if(overwrite)
+			free(__pop_tail(buf));
+		else
+			return false;
+	}
+
+	buf->head = __write(buf, data, -1);
+	(buf->length)++;
+
+	return true;
+}
+
+static bool __push_tail(struct ring_buffer * buf,
+			const void * data,
+			const bool overwrite)
+{
+	if(__is_full(buf)) {
+		if(overwrite)
+			free(__pop_head(buf));
+		else
+			return false;
+	}
+
+	__write(buf, data, buf->length);
+	buf->tail = __rbpos_to_addr(buf, buf->length + 1);
+	(buf->length)++;
+
+	return true;
+}
+
+static inline void __shift_forward(struct ring_buffer * buf,
+				   const ssize_t pos)
+{
 	uint8_t * src;
 	uint8_t * dest;
 
-	if(__is_full(buf))
-		return false;
+	(buf->length)++;
 
-	if(pos >= DS_ENTRIES(buf))
-		return false;
-
-	addr = __rbpos_to_addr(buf, pos);
-	if(!addr)
-		return false;
-
-	if(ABS_POS(buf, pos) > buf->length) {
-		buf->length = pos + 1;
-	} else {
-		(buf->length)++;
-
-		dest = __rbpos_to_addr(buf, buf->length);
-		for(ssize_t i = buf->length - 1; i >= pos; i--) {
-			src = __rbpos_to_addr(buf, i);
-			memcpy(dest, src, DS_DATA_SIZE(buf));
-			dest = src;
-		}
+	dest = __rbpos_to_addr(buf, -1);
+	for(ssize_t i = 0; i <= pos; i++) {
+		src = __rbpos_to_addr(buf, i);
+		memcpy(dest, src, DS_DATA_SIZE(buf));
+		dest = src;
 	}
 
-	memcpy(addr, data, DS_DATA_SIZE(buf));
+	buf->head = __rbpos_to_addr(buf, -1);
+}
+
+static inline void __shift_backward(struct ring_buffer * buf,
+				    const ssize_t pos)
+{
+	uint8_t * src;
+	uint8_t * dest;
+
+	(buf->length)++;
+
+	dest = __rbpos_to_addr(buf, buf->length);
+	for(ssize_t i = buf->length - 1; i >= pos; i--) {
+		src = __rbpos_to_addr(buf, i);
+		memcpy(dest, src, DS_DATA_SIZE(buf));
+		dest = src;
+	}
+
 	buf->tail = __rbpos_to_addr(buf, buf->length);
+}
+
+static bool __insert(struct ring_buffer * buf,
+		     const void * data,
+		     const ssize_t pos,
+		     const bool overwrite)
+{
+	if(__index_OOB(buf, pos, true))
+		return false;
+
+	if(!overwrite && __is_full(buf))
+		return false;
+
+	/* If overwrite is disabled, we want to shift all the contents of the
+	 * buffer forward/backward by one so that we can insert the new element
+	 * into a blank slot. */
+	if(!overwrite) {
+		if(pos <= (buf->length - pos))
+			__shift_forward(buf, pos);
+		else
+			__shift_backward(buf, pos);
+	}
+
+	__write(buf, data, pos);
 
 	return true;
 }
 
 int rb_alloc(struct ring_buffer ** buf,
-		   const struct data_properties * props)
+	     const struct data_properties * props)
 {
 	*buf = malloc(sizeof(**buf));
 	if(!*buf) {
@@ -199,7 +251,7 @@ int rb_alloc(struct ring_buffer ** buf,
 	}
 	DS_SET_PROPS(*buf, props);
 
-	(*buf)->data = calloc(DS_ENTRIES(*buf), DS_DATA_SIZE(*buf));
+	(*buf)->data = malloc(DS_ENTRIES(*buf) * DS_DATA_SIZE(*buf));
 	if(!(*buf)->data) {
 		errno = ENOMEM;
 		goto exit;
@@ -243,23 +295,34 @@ void rb_free(struct ring_buffer ** buf)
 	free(*buf);
 }
 
-bool rb_push_head(struct ring_buffer * buf, void * data)
+bool rb_null(struct ring_buffer * buf)
+{
+	bool success;
+
+	rwlock_reader_entry(buf->rwlock);
+	success = __is_null(buf);
+	rwlock_reader_exit(buf->rwlock);
+
+	return success;
+}
+
+bool rb_push_head(struct ring_buffer * buf, const void * data)
 {
 	bool success;
 
 	rwlock_writer_entry(buf->rwlock);
-	success = __push_head(buf, data);
+	success = __push_head(buf, data, false);
 	rwlock_writer_exit(buf->rwlock);
 
 	return success;
 }
 
-bool rb_push_tail(struct ring_buffer * buf, void * data)
+bool rb_push_tail(struct ring_buffer * buf, const void * data)
 {
 	bool success;
 
 	rwlock_writer_entry(buf->rwlock);
-	success = __push_tail(buf, data);
+	success = __push_tail(buf, data, false);
 	rwlock_writer_exit(buf->rwlock);
 
 	return success;
@@ -287,12 +350,14 @@ void * rb_pop_tail(struct ring_buffer * buf)
 	return data;
 }
 
-bool rb_insert(struct ring_buffer * buf, void * data, size_t pos)
+bool rb_insert(struct ring_buffer * buf,
+	       const void * data,
+	       const ssize_t pos)
 {
 	bool success;
 
 	rwlock_writer_entry(buf->rwlock);
-	success = __insert(buf, data, pos);
+	success = __insert(buf, data, pos, false);
 	rwlock_writer_exit(buf->rwlock);
 
 	return success;
@@ -319,12 +384,10 @@ void rb_show(struct ring_buffer * buf)
 		vm_addr = ((uint8_t *) buf->data) + i;
 		pos = __addr_to_rbpos(buf, vm_addr);
 
-		printf("%p (%ld): %#04x", vm_addr, ABS_POS(pos), *vm_addr);
+		printf("%p (%ld): %#04x", vm_addr, ABS_POS(buf, pos), *vm_addr);
 
 		if(vm_addr == buf->data)
 			printf(" (start)");
-		if(vm_addr == buf->end)
-			printf(" (end)");
 		if(vm_addr == buf->head)
 			printf(" (head)");
 		if(vm_addr == buf->tail)
