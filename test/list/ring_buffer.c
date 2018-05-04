@@ -279,6 +279,69 @@ START_TEST(test_rb_pop_tail_multiple)
 }
 END_TEST
 
+START_TEST(test_rb_insert_single)
+{
+	bool success;
+	uint8_t in = 1;
+	uint8_t * out;
+	struct ring_buffer * buf = NULL;
+
+	/* Create list: [1] */
+	rb_alloc(&buf, &props);
+
+	success = rb_insert(buf, &in, 0);
+
+	ck_assert(success);
+
+	out = rb_pop_tail(buf);
+
+	ck_assert(out);
+	ck_assert_int_eq(*out, in);
+	ck_assert(buf->length == 0);
+
+	rb_free(&buf);
+}
+END_TEST
+
+START_TEST(test_rb_insert_multiple)
+{
+	uint8_t in[] = {1, 2, 3, 4};
+	bool success[sizeof(in)];
+	uint8_t * out[sizeof(in)];
+	struct ring_buffer * buf = NULL;
+
+	rb_alloc(&buf, &props);
+
+	/* [1, 4, 3, 2] */
+	success[0] = rb_insert(buf, &in[0], 0);
+	success[1] = rb_insert(buf, &in[1], 1);
+	success[2] = rb_insert(buf, &in[2], 1);
+	success[3] = rb_insert(buf, &in[3], 1);
+
+	ck_assert(success[0]);
+	ck_assert(success[1]);
+	ck_assert(success[2]);
+	ck_assert(success[3]);
+
+	out[0] = rb_pop_tail(buf);
+	out[1] = rb_pop_tail(buf);
+	out[2] = rb_pop_tail(buf);
+	out[3] = rb_pop_tail(buf);
+
+	ck_assert(out[0]);
+	ck_assert(out[1]);
+	ck_assert(out[2]);
+	ck_assert(out[3]);
+
+	ck_assert_int_eq(*out[0], in[1]);
+	ck_assert_int_eq(*out[1], in[2]);
+	ck_assert_int_eq(*out[2], in[3]);
+	ck_assert_int_eq(*out[3], in[0]);
+
+	rb_free(&buf);
+}
+END_TEST
+
 Suite * rb_suite(void)
 {
 	Suite * suite;
@@ -287,6 +350,7 @@ Suite * rb_suite(void)
 	TCase * case_rb_push_tail;
 	TCase * case_rb_pop_head;
 	TCase * case_rb_pop_tail;
+	TCase * case_rb_insert;
 
 	suite = suite_create("Ring Buffer");
 
@@ -295,6 +359,7 @@ Suite * rb_suite(void)
 	case_rb_push_head = tcase_create("rb_push_tail");
 	case_rb_pop_head = tcase_create("rb_pop_head");
 	case_rb_pop_tail = tcase_create("rb_pop_tail");
+	case_rb_insert = tcase_create("rb_insert");
 
 	tcase_add_test(case_rb_alloc, test_rb_alloc);
 	tcase_add_test(case_rb_push_head, test_rb_push_head_single);
@@ -307,12 +372,15 @@ Suite * rb_suite(void)
 	tcase_add_test(case_rb_pop_tail, test_rb_pop_tail_empty);
 	tcase_add_test(case_rb_pop_tail, test_rb_pop_tail_single);
 	tcase_add_test(case_rb_pop_tail, test_rb_pop_tail_multiple);
+	tcase_add_test(case_rb_insert, test_rb_insert_single);
+	tcase_add_test(case_rb_insert, test_rb_insert_multiple);
 
 	suite_add_tcase(suite, case_rb_alloc);
 	suite_add_tcase(suite, case_rb_push_head);
 	suite_add_tcase(suite, case_rb_push_tail);
 	suite_add_tcase(suite, case_rb_pop_head);
 	suite_add_tcase(suite, case_rb_pop_tail);
+	suite_add_tcase(suite, case_rb_insert);
 
 	return suite;
 }
