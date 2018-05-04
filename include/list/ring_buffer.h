@@ -34,7 +34,7 @@ struct ring_buffer {
 	void * data;
 };
 
-#define ABS_POS(buf, p) (((p) > 0) ? (p) : ((buf)->length + (p)))
+#define ABS_POS(buf, p) (((p) > 0) ? (p) : (DS_ENTRIES(buf) + (p)))
 
 int rb_alloc(struct ring_buffer ** buf,
 	     const struct data_properties * props);
