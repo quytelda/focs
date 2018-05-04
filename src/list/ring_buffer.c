@@ -154,6 +154,41 @@ static void * __pop_tail(struct ring_buffer * buf)
 	return data;
 }
 
+static bool __insert(struct ring_buffer * buf, void * data, ssize_t pos)
+{
+	void * addr;
+	uint8_t * src;
+	uint8_t * dest;
+
+	if(__is_full(buf))
+		return false;
+
+	if(pos >= DS_ENTRIES(buf))
+		return false;
+
+	addr = __rbpos_to_addr(buf, pos);
+	if(!addr)
+		return false;
+
+	if(ABS_POS(buf, pos) > buf->length) {
+		buf->length = pos + 1;
+	} else {
+		(buf->length)++;
+
+		dest = __rbpos_to_addr(buf, buf->length);
+		for(ssize_t i = buf->length - 1; i >= pos; i--) {
+			src = __rbpos_to_addr(buf, i);
+			memcpy(dest, src, DS_DATA_SIZE(buf));
+			dest = src;
+		}
+	}
+
+	memcpy(addr, data, DS_DATA_SIZE(buf));
+	buf->tail = __rbpos_to_addr(buf, buf->length);
+
+	return true;
+}
+
 int rb_alloc(struct ring_buffer ** buf,
 		   const struct data_properties * props)
 {
@@ -250,6 +285,17 @@ void * rb_pop_tail(struct ring_buffer * buf)
 	rwlock_writer_exit(buf->rwlock);
 
 	return data;
+}
+
+bool rb_insert(struct ring_buffer * buf, void * data, size_t pos)
+{
+	bool success;
+
+	rwlock_writer_entry(buf->rwlock);
+	success = __insert(buf, data, pos);
+	rwlock_writer_exit(buf->rwlock);
+
+	return success;
 }
 
 #ifdef DEBUG
