@@ -179,40 +179,44 @@ static bool __push_tail(struct ring_buffer * buf,
 	return true;
 }
 
-static inline void __shift_forward(struct ring_buffer * buf,
-				   const ssize_t pos)
+static void * __shift_forward(struct ring_buffer * buf,
+			      const ssize_t start,
+			      const ssize_t end)
 {
-	uint8_t * src;
-	uint8_t * dest;
+	void * src;
+	void * dest;
+	void * front;
 
 	(buf->length)++;
 
-	dest = __rbpos_to_addr(buf, -1);
-	for(ssize_t i = 0; i <= pos; i++) {
+	front = dest = __rbpos_to_addr(buf, start - 1);
+	for(ssize_t i = start; i <= end; i++) {
 		src = __rbpos_to_addr(buf, i);
 		memcpy(dest, src, DS_DATA_SIZE(buf));
 		dest = src;
 	}
 
-	buf->head = __rbpos_to_addr(buf, -1);
+	return front;
 }
 
-static inline void __shift_backward(struct ring_buffer * buf,
-				    const ssize_t pos)
+static void * __shift_backward(struct ring_buffer * buf,
+			       const ssize_t start,
+			       const ssize_t end)
 {
-	uint8_t * src;
-	uint8_t * dest;
+	void * src;
+	void * dest;
+	void * back;
 
 	(buf->length)++;
 
-	dest = __rbpos_to_addr(buf, buf->length);
-	for(ssize_t i = buf->length - 1; i >= pos; i--) {
+	back = dest = __rbpos_to_addr(buf, end + 1);
+	for(ssize_t i = end; i >= start; i--) {
 		src = __rbpos_to_addr(buf, i);
 		memcpy(dest, src, DS_DATA_SIZE(buf));
 		dest = src;
 	}
 
-	buf->tail = __rbpos_to_addr(buf, buf->length);
+	return back;
 }
 
 static bool __insert(struct ring_buffer * buf,
@@ -231,9 +235,9 @@ static bool __insert(struct ring_buffer * buf,
 	 * into a blank slot. */
 	if(!overwrite) {
 		if(pos <= (buf->length - pos))
-			__shift_forward(buf, pos);
+			buf->head = __shift_forward(buf, 0, pos);
 		else
-			__shift_backward(buf, pos);
+			buf->tail = __shift_backward(buf, pos, buf->length - 1);
 	}
 
 	__write(buf, data, pos);
