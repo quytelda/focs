@@ -323,7 +323,9 @@ void * dl_foldl(const struct double_list * list,
 		foldl_fn fn,
 		const void * init);
 
-/* Data Properties */
+/* ############################ *
+ * # Data Properties # *
+ * ############################ */
 /**
  * Determine if a list is empty.
  * @param list The list to check
@@ -371,7 +373,9 @@ bool dl_any(struct double_list * list, pred_fn p);
  */
 bool dl_all(struct double_list * list, pred_fn p);
 
-/* Filtering */
+/* ############################ *
+ * # Filtering # *
+ * ############################ */
 /**
  * Filter a list to contain only values that satisfy some predicate.
  * @param list The list to filter
