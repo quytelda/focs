@@ -105,7 +105,7 @@ void sl_push_tail(struct single_list * list, void * data);
  *
  * Remove and return the data element at the head of `list`.  After this
  * operation the returned data element *will no longer be stored in* `list`.
- * 
+ *
  * @return A pointer to the data element at the head of `list`.  This pointer
  * must be explicitly freed with free() when it is no longer needed.  It is
  * **not** equivalent to the pointer which was used to insert the data into
@@ -119,7 +119,7 @@ void * sl_pop_head(struct single_list * list);
  *
  * Remove and return the data element at the tail of `list`.  After this
  * operation the returned data element *will no longer be stored in* `list`.
- * 
+ *
  * @return A pointer to the data element at the tail of `list`.  This pointer
  * must be explicitly freed with free() when it is no longer needed.  It is
  * **not** equivalent to the pointer which was used to insert the data into
