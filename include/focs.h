@@ -62,16 +62,16 @@
 /**
  * Set errno and return from the current function with some value.
  * @param err The error number to set errno to
- * @param ... The optional value to return
+ * @param val The optional value to return
  *
- * Set errno to `err`, then execute `return ...` inside the function,
- * effectively returning the specified value, or nothing if `...` is left empty.
+ * Set errno to `err`, then return from the current function.  The value
+ * supplied as the second argument will be the return value of the function.
  */
-#define return_with_errno(err, ...)		\
-	do {					\
+#define return_with_errno(err, val)		\
+	({					\
 		errno = err;			\
-		return __VA_ARGS__;		\
-	} while(0)
+		return val;			\
+	})
 
 /**
  * Set errno then jump to the specified label.
