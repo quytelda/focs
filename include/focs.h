@@ -82,10 +82,10 @@
  * effectively jumping to `label`.
  */
 #define goto_with_errno(err, label)		\
-	do {					\
+	({					\
 		errno = err;			\
 		goto label;			\
-	} while(0)
+	})
 
 /**
  * Free a pointer, then set it's value to NULL.
