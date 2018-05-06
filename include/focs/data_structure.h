@@ -78,7 +78,7 @@ struct ds_properties {
 #define END_DS(ds_name) __DS_PRIV_NAME; } * ds_name
 
 #define DS_PROPS(ds) ((ds)->__DS_PROPS_NAME)
-#define DS_PRIV(ds) ((ds)->__DS_PRIV_NAME)
+#define DS_PRIV(ds) (&((ds)->__DS_PRIV_NAME))
 
 #define DS_ALLOC(ds) (ds = malloc(sizeof(*ds)))
 #define DS_FREE(ds) (free_null(*ds))
