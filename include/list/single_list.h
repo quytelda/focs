@@ -21,6 +21,7 @@
 #define __SINGLE_LIST_H
 
 #include "focs.h"
+#include "focs/hof.h"
 #include "list/linked_list.h"
 #include "sync/rwlock.h"
 

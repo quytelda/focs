@@ -17,9 +17,8 @@
  * along with focs.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <unistd.h>
-
 #include "focs.h"
+#include "focs/data_structure.h"
 #include "sync/rwlock.h"
 
 struct ring_buffer {

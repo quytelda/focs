@@ -1,4 +1,4 @@
-/* focs.h - Functional Open C Structures
+/* mgmt_operations.h - Data Structure Management Operations
  * Copyright (C) 2018 Quytelda Kahja
  *
  * This file is part of focs.
@@ -18,24 +18,17 @@
  * along with focs.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __PROPERTIES_H
-#define __PROPERTIES_H
+#ifndef __MGMT_OPERATIONS_H
+#define __MGMT_OPERATIONS_H
 
-struct data_properties {
-	size_t data_size;
-	ssize_t entries;
+#include "focs/data_structure.h"
+
+typedef void * (* create_mgmt_fn) (const struct ds_properties * props);
+typedef void   (* destroy_mgmt_fn)(void * ds);
+
+struct mgmt_operations {
+	create_mgmt_fn  create;
+	destroy_mgmt_fn destroy;
 };
 
-#define MAX_DATA_SIZE (~(size_t)  0)
-#define MAX_ENTRIES   (~(ssize_t) 0)
-
-#define __DS_PROPS_NAME props
-#define __ds_props(ds) ((ds)->__DS_PROPS_NAME)
-
-#define DS_SET_PROPS(ds, _props) (__ds_props(ds) = _props)
-
-/* Access individual data properties. */
-#define DS_DATA_SIZE(ds) (__ds_props(ds)->data_size)
-#define DS_ENTRIES(ds)   (__ds_props(ds)->entries)
-
-#endif /* __PROPERTIES_H */
+#endif /* __MGMT_OPERATIONS_H */

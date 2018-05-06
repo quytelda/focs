@@ -24,15 +24,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "focs/functional.h"
-#include "focs/properties.h"
-
 #ifndef __FOCS_H
 #define __FOCS_H
-
-#define DECLARE_DS(dops)				\
-	const struct data_properties * __DS_PROPS_NAME;	\
-	const struct data_operations * __DS_DOPS_NAME
 
 /**
  * Modulo operation
