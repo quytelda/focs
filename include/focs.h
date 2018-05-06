@@ -115,6 +115,11 @@
  *
  * @return The remainder of the quotient `(a / n)`.
  */
-#define mod(a, n) (((a) % (n) + (n)) % (n))
+#define mod(a, n)				\
+	({					\
+		typeof(a) a_ = (a);		\
+		typeof(n) n_ = (n);		\
+		((a_ % n_) + n_) % n_;		\
+	})
 
 #endif /* __FOCS_H */
