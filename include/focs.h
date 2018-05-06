@@ -134,4 +134,14 @@
 		((a_ % n_) + n_) % n_;		\
 	})
 
+/**
+ * Check if a memory address is block aligned.
+ * @param addr   The address or address span to check
+ * @param size   The block size in bytes
+ * @param offset The offset for the beginning of the block list
+ *
+ * @return `true` if `addr` is aligned to `size` with `offset`.
+ */
+#define aligned(addr, size, offset) (((addr) - (offset)) % (size) == 0)
+
 #endif /* __FOCS_H */
