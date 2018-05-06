@@ -28,23 +28,36 @@
 #define __FOCS_H
 
 /**
- * Modulo operation
- * @param a The divisor
- * @param n The dividend
+ * Pick the minimum of two comparable values.
+ * @param m First comparable value
+ * @param n Second comparable value
  *
- * This modulo operation is distinct from the ISO C99 remainder operation
- * represented by the operator '%', which will produce negative results
- * if the divisor is negative and always takes the sign of the dividend.
- *
- * This operation is guaranteed to always return a positive integer.  Both `a`
- * and `n` should be signed types if either `a` or `n` may be negative.
- *
- * See: https://en.wikipedia.org/wiki/Modulo_operation
- *
- * @return The remainder of the quotient `(a / n)`.
-
+ * @return the the lesser of two comparable parameters `m` and `n`.
+ * In the case that `m` and `n` are compared and found to be equal,
+ * then `m` is returned.
  */
-#define mod(a, n) (((a) % (n) + (n)) % (n))
+#define MIN(m, n)				\
+	({					\
+		typeof(m) m_ = m;		\
+		typeof(n) n_ = n;		\
+		((m_ <= n_) ? m_ : n_);		\
+	})
+
+/**
+ * Pick the maximum of two comparable values.
+ * @param m First comparable value
+ * @param n Second comparable value
+ *
+ * @return the the greater of two comparable parameters `m` and `n`.
+ * In the case that `m` and `n` are compared and found to be equal,
+ * then `m` is returned.
+ */
+#define MAX(m, n)				\
+	({					\
+		typeof(m) m_ = m;		\
+		typeof(n) n_ = n;		\
+		((m_ >= n_) ? m_ : n_);		\
+	})
 
 /**
  * Set errno and return from the current function with some value.
@@ -74,5 +87,22 @@
 		goto label;			\
 	} while(0)
 
+/**
+ * Modulo operation
+ * @param a The divisor
+ * @param n The dividend
+ *
+ * This modulo operation is distinct from the ISO C99 remainder operation
+ * represented by the operator '%', which will produce negative results
+ * if the divisor is negative and always takes the sign of the dividend.
+ *
+ * This operation is guaranteed to always return a positive integer.  Both `a`
+ * and `n` should be signed types if either `a` or `n` may be negative.
+ *
+ * See: https://en.wikipedia.org/wiki/Modulo_operation
+ *
+ * @return The remainder of the quotient `(a / n)`.
+ */
+#define mod(a, n) (((a) % (n) + (n)) % (n))
 
 #endif /* __FOCS_H */
