@@ -88,6 +88,18 @@
 	} while(0)
 
 /**
+ * Free a pointer, then set it's value to NULL.
+ * @param ptr A pointer to allocated memory to free
+ *
+ * If `ptr` is NULL already, this macro has no effect.
+ */
+#define free_null(ptr)				\
+	({					\
+		free(ptr);			\
+		ptr = NULL;			\
+	})
+
+/**
  * Modulo operation
  * @param a The divisor
  * @param n The dividend
