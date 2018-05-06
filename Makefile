@@ -60,6 +60,11 @@ uninstall: $(LIB_PREFIX)/$(BIN)
 
 clean:
 	-$(RM) $(BIN) $(OBJS)
+	-$(RM) -r $(DOC_DIR)/_build $(DOC_DIR)/xml
+	-find $(DOC_DIR)/sphinx/breathe \
+		-name "__pycache__"     \
+		-type d                 \
+		-exec rm -rv {} +
 	$(MAKE) -C $(CK_DIR) clean
 
 check:
