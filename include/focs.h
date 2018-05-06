@@ -88,6 +88,18 @@
 	})
 
 /**
+ * Create a static placeholder symbol that remain unused without warnings.
+ * @param name The name of the symbol to create
+ *
+ * This const static placeholder symbol is a single byte that will probably be
+ * optimized out by GCC, but can be used to satisfy argument requirements on
+ * macros such as DS_INIT() when conditional compilation compiles out support
+ * the "real" variables.
+ */
+#define __PLACEHOLDER_SYM(name)					\
+	const static uint8_t name __attribute__((unused)) = 0
+
+/**
  * Free a pointer, then set it's value to NULL.
  * @param ptr A pointer to allocated memory to free
  *
