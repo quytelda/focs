@@ -18,12 +18,13 @@
  * along with focs.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "data_structure.h"
+#include "focs/generics.h"
 
 #ifndef __MGMT_GENERICS_H
 #define __MGMT_GENERICS_H
 
 #define create(ds, props) (__DS_MGMT_OPS(ds)->create(ds, props))
 #define destroy(ds)       (__DS_MGMT_OPS(ds)->destroy(ds))
+#define size(ds)          (__DS_MGMT_OPS(ds)->size(ds))
 
 #endif /* __MGMT_GENERICS_H */

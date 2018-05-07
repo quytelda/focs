@@ -25,10 +25,12 @@
 
 typedef void * (* create_mgmt_fn) (const struct ds_properties * props);
 typedef void   (* destroy_mgmt_fn)(void * ds);
+typedef size_t (* size_mgmt_fn)   (void * ds);
 
 struct mgmt_operations {
 	create_mgmt_fn  create;
 	destroy_mgmt_fn destroy;
+	size_mgmt_fn    size;
 };
 
 #endif /* __MGMT_OPERATIONS_H */
