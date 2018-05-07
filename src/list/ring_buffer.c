@@ -20,206 +20,279 @@
 #include "list/ring_buffer.h"
 #include "sync/rwlock.h"
 
-static inline void * __rbpos_to_addr(const struct ring_buffer * buf,
+#ifdef GENERIC_OPS
+
+const static struct mgmt_operations mgmt_ops = {
+	.create  = (create_mgmt_fn)  rb_create,
+	.destroy = (destroy_mgmt_fn) rb_destroy,
+};
+
+const static struct hof_operations hof_ops = {
+	.empty = (empty_hof) rb_empty,
+};
+
+#else /* GENERIC_OPS */
+
+__PLACEHOLDER_SYM(mgmt_ops);
+__PLACEHOLDER_SYM(hof_ops);
+
+#endif /* GENERIC_OPS */
+
+#ifdef OVERWRITE
+static const bool rb_overwrite = true;
+#else /* OVERWRITE */
+static const bool rb_overwrite = false;
+#endif /* OVERWRITE */
+
+__attribute__((pure))
+static inline size_t __length(const ring_buffer buf)
+{
+	return DS_PRIV(buf)->length;
+}
+
+__attribute__((pure))
+static inline size_t __space(const ring_buffer buf)
+{
+	return DS_PROPS(buf)->data_size * DS_PROPS(buf)->entries;
+}
+
+__attribute__((pure))
+static inline bool __is_empty(const ring_buffer buf)
+{
+	return (__length(buf) <= 0);
+}
+
+__attribute__((pure))
+static inline bool __is_full(const ring_buffer buf)
+{
+	return (__length(buf) >= DS_PROPS(buf)->entries);
+}
+
+__attribute__((pure))
+static inline bool __index_OOB(const ring_buffer buf,
+			       const ssize_t pos,
+			       const bool inclusive)
+{
+	if(inclusive)
+		return ((pos < -1) || (pos > __length(buf)));
+
+	return ((pos < 0) || (pos >= __length(buf)));
+}
+
+__attribute__((pure))
+static inline void * __rbpos_to_addr(const ring_buffer buf,
 				     const ssize_t pos)
 {
-	size_t roff;
-	size_t space;
 	size_t offset;
 
 	/* ISO C99 doesn't allow arithmetic on void pointers,
 	 * so cast all pointers to size_t integers for arithmetic. */
-	const size_t start = (size_t) buf->data;
-	const size_t head  = (size_t) buf->head;
+	const size_t head  = (size_t) DS_PRIV(buf)->head;
+	const size_t start = (size_t) DS_PRIV(buf)->data;
 
-	offset = mod((ssize_t) DS_DATA_SIZE(buf) * pos, DS_ENTRIES(buf));
+	offset = head - start;
+	offset += mod((ssize_t) DS_PROPS(buf)->data_size * pos,
+		      (ssize_t) DS_PROPS(buf)->entries);
+	offset %= __space(buf);
 
-	roff  = (head - start) + offset;
-	space = DS_DATA_SIZE(buf) * DS_ENTRIES(buf);
-	return (void *) (start + (roff % space));
+	return (void *) (start + offset);
 }
 
-static inline ssize_t __addr_to_rbpos(const struct ring_buffer * buf,
-				      const void * vm_addr)
+__attribute__((pure))
+static inline ssize_t __addr_to_rbpos(const ring_buffer buf,
+				      const void * addr)
 {
-	ssize_t pos;
 	ssize_t distance;
+	ssize_t pos;
 
 	/* ISO C99 doesn't allow arithmetic on void pointers,
 	 * so cast all pointers to size_t integers for arithmetic. */
-	const size_t head  = (size_t) buf->head;
-	const size_t addr  = (size_t) vm_addr;
+	const size_t mark = (size_t) addr;
+	const size_t head = (size_t) DS_PRIV(buf)->head;
 
-	distance = addr - head;
-	pos = distance / DS_DATA_SIZE(buf);
+	distance = mark - head;
+	pos = distance / DS_PROPS(buf)->data_size;
 
 	/* The address must be aligned to the beginning of the block.
-	 * Truncation of integer division is equivelent to floored division for
-	 * positive numbers (fine), but for negative numbers, it is equivelent
-	 * to ceiling division, so we must subtract one to align to the
-	 * beginning of the block. */
-	if((distance < 0) && (distance % DS_DATA_SIZE(buf) != 0))
-		pos--;
+	 * Truncated division is floored division for positive results (good),
+	 * but for negative numbers it is division always rounded up (bad).
+	 * So, to align negative results we may need to subtract one. */
+	if((pos < 0) && !aligned(distance, DS_PROPS(buf)->data_size, 0))
+		pos -= 1;
 
 	return pos;
 }
 
-static inline bool __is_null(const struct ring_buffer * buf)
-{
-	return (buf->length == 0);
-}
-
-static inline bool __is_full(const struct ring_buffer * buf)
-{
-	return (buf->length >= DS_ENTRIES(buf));
-}
-
-static inline bool __index_OOB(const struct ring_buffer * buf,
-			     const ssize_t pos,
-			     const bool inclusive)
-{
-	if(inclusive)
-		return ((pos < -1) || (pos > buf->length));
-
-	return ((pos < 0) || (pos >= buf->length));
-}
-
-static inline void * __write(struct ring_buffer * buf,
+static inline void * __write(const ring_buffer buf,
 			     const void * data,
 			     const ssize_t pos)
 {
 	void * addr;
 
 	addr = __rbpos_to_addr(buf, pos);
-	memcpy(addr, data, DS_DATA_SIZE(buf));
+	memcpy(addr, data, DS_PROPS(buf)->data_size);
 
 	return addr;
 }
 
-static inline void * __read(struct ring_buffer * buf,
+static inline void * __read(const ring_buffer buf,
 			    void * data,
 			    const ssize_t pos)
 {
 	void * addr;
 
 	addr = __rbpos_to_addr(buf, pos);
-	memcpy(data, addr, DS_DATA_SIZE(buf));
+	memcpy(data, addr, DS_PROPS(buf)->data_size);
 
 	return addr;
 }
 
-static void * __pop_head(struct ring_buffer * buf)
+#ifdef ZERO
+
+static inline void * __zero(const ring_buffer buf,
+			    const ssize_t pos)
+{
+	void * addr;
+
+	addr = __rbpos_to_addr(buf, pos);
+	bzero(addr, DS_PROPS(buf)->data_size);
+
+	return addr;
+}
+
+#endif /* ZERO */
+
+static void * __pop_head(ring_buffer buf)
 {
 	void * data;
 
-	if(__is_null(buf))
+	if(__is_empty(buf))
 		return_with_errno(EFAULT, NULL);
 
-	data = malloc(DS_DATA_SIZE(buf));
+	data = malloc(DS_PROPS(buf)->data_size);
 	if(!data)
 		return_with_errno(ENOMEM, NULL);
 
 	__read(buf, data, 0);
 
-	buf->head = __rbpos_to_addr(buf, 1);
-	(buf->length)--;
+	DS_PRIV(buf)->head = __rbpos_to_addr(buf, 1);
+	DS_PRIV(buf)->length--;
 
 	return data;
 }
 
-static void * __pop_tail(struct ring_buffer * buf)
+static void * __pop_tail(ring_buffer buf)
 {
 	void * data;
 
-	if(__is_null(buf))
+	if(__is_empty(buf))
 		return_with_errno(EFAULT, NULL);
 
-	data = malloc(DS_DATA_SIZE(buf));
+	data = malloc(DS_PROPS(buf)->data_size);
 	if(!data)
 		return_with_errno(ENOMEM, NULL);
 
-	buf->tail = __read(buf, data, buf->length - 1);
-	(buf->length)--;
+	DS_PRIV(buf)->tail = __read(buf, data, DS_PRIV(buf)->length - 1);
+	DS_PRIV(buf)->length--;
 
 	return data;
 }
 
-static bool __push_head(struct ring_buffer * buf,
+static bool __push_head(ring_buffer buf,
 			const void * data,
 			const bool overwrite)
 {
-	if(__is_full(buf)) {
-		if(overwrite)
-			free(__pop_tail(buf));
-		else
-			return_with_errno(ENOMEM, false);
-	}
+	if(!overwrite && __is_full(buf))
+		return_with_errno(ENOBUFS, false);
 
-	buf->head = __write(buf, data, -1);
-	(buf->length)++;
-
+	DS_PRIV(buf)->head = __write(buf, data, -1);
+	DS_PRIV(buf)->length = MIN(DS_PRIV(buf)->length + 1,
+				   DS_PROPS(buf)->entries);
 	return true;
 }
 
-static bool __push_tail(struct ring_buffer * buf,
+static bool __push_tail(ring_buffer buf,
 			const void * data,
 			const bool overwrite)
 {
-	if(__is_full(buf)) {
-		if(overwrite)
-			free(__pop_head(buf));
-		else
-			return_with_errno(ENOMEM, false);
-	}
+	if(!overwrite && __is_full(buf))
+		return_with_errno(ENOBUFS, false);
 
-	__write(buf, data, buf->length);
-	buf->tail = __rbpos_to_addr(buf, buf->length + 1);
-	(buf->length)++;
-
+	__write(buf, data, DS_PRIV(buf)->length);
+	DS_PRIV(buf)->length = MIN(DS_PRIV(buf)->length + 1,
+				   DS_PROPS(buf)->entries);
+	DS_PRIV(buf)->tail = __rbpos_to_addr(buf, DS_PRIV(buf)->length);
 	return true;
 }
 
-static void * __shift_forward(struct ring_buffer * buf,
+static void * __shift_forward(const ring_buffer buf,
 			      const ssize_t start,
 			      const ssize_t end)
 {
-	void * src;
 	void * dest;
 	void * front;
-
-	(buf->length)++;
+	void * src;
 
 	front = dest = __rbpos_to_addr(buf, start - 1);
 	for(ssize_t i = start; i <= end; i++) {
 		src = __rbpos_to_addr(buf, i);
-		memcpy(dest, src, DS_DATA_SIZE(buf));
+		memcpy(dest, src, DS_PROPS(buf)->data_size);
 		dest = src;
 	}
 
 	return front;
 }
 
-static void * __shift_backward(struct ring_buffer * buf,
+static void * __shift_backward(const ring_buffer buf,
 			       const ssize_t start,
 			       const ssize_t end)
 {
-	void * src;
-	void * dest;
 	void * back;
-
-	(buf->length)++;
+	void * dest;
+	void * src;
 
 	back = dest = __rbpos_to_addr(buf, end + 1);
 	for(ssize_t i = end; i >= start; i--) {
 		src = __rbpos_to_addr(buf, i);
-		memcpy(dest, src, DS_DATA_SIZE(buf));
+		memcpy(dest, src, DS_PROPS(buf)->data_size);
 		dest = src;
 	}
 
 	return back;
 }
 
-static bool __insert(struct ring_buffer * buf,
+static inline void __open_gap(ring_buffer buf,
+			      const ssize_t pos)
+{
+	size_t last;
+
+	last = DS_PRIV(buf)->length - 1;
+	if(pos < (last - pos))
+		DS_PRIV(buf)->head = __shift_forward(buf, 0, pos);
+	else
+		DS_PRIV(buf)->tail = __shift_backward(buf, pos, last);
+
+	(DS_PRIV(buf)->length)++;
+}
+
+static inline void __close_gap(ring_buffer buf,
+			       const ssize_t pos)
+{
+	size_t last;
+
+	last = DS_PRIV(buf)->length - 1;
+	if(pos < (last - pos)) {
+		__shift_backward(buf, 0, pos - 1);
+		DS_PRIV(buf)->head = __rbpos_to_addr(buf, 1);
+	} else {
+		__shift_forward(buf, pos + 1, last);
+		DS_PRIV(buf)->tail = __rbpos_to_addr(buf, last);
+	}
+
+	(DS_PRIV(buf)->length)--;
+}
+
+static bool __insert(ring_buffer buf,
 		     const void * data,
 		     const ssize_t pos,
 		     const bool overwrite)
@@ -228,202 +301,246 @@ static bool __insert(struct ring_buffer * buf,
 		return_with_errno(EFAULT, false);
 
 	if(!overwrite && __is_full(buf))
-		return_with_errno(ENOMEM, false);
+		return_with_errno(ENOBUFS, false);
 
-	/* If overwrite is disabled, we want to shift all the contents of the
-	 * buffer forward/backward by one so that we can insert the new element
-	 * into a blank slot. */
-	if(!overwrite) {
-		if(pos <= (buf->length - pos))
-			buf->head = __shift_forward(buf, 0, pos);
-		else
-			buf->tail = __shift_backward(buf, pos, buf->length - 1);
-	}
+	/* If overwrite is disabled, open a gap at `pos` wide enough to fit a
+	 * new data block so none of the old data is overwritten. */
+	if(!overwrite)
+		__open_gap(buf, pos);
 
 	__write(buf, data, pos);
-
 	return true;
 }
 
-static void * __fetch(struct ring_buffer * buf,
-		      const ssize_t pos)
+static void * __remove(ring_buffer buf,
+		       const ssize_t pos,
+		       const bool overwrite)
 {
 	void * data;
 
-	if(__is_null(buf) || __index_OOB(buf, pos, false))
+	if(__index_OOB(buf, pos, true))
 		return_with_errno(EFAULT, NULL);
 
-	data = malloc(DS_DATA_SIZE(buf));
+	data = malloc(DS_PROPS(buf)->data_size);
 	if(!data)
 		return_with_errno(ENOMEM, NULL);
 
 	__read(buf, data, pos);
 
+	/* If overwrite is disabled, close the newly empty gap at `pos`.
+	 * This is both to make space for new data blocks at the head/tail, and
+	 * so this function behaves as the inverse of __insert(). */
+	if(!overwrite)
+		__close_gap(buf, pos);
+#ifdef ZERO
+	else
+		__zero(buf, pos);
+#endif /* ZERO */
+
 	return data;
 }
 
-int rb_alloc(struct ring_buffer ** buf,
-	     const struct data_properties * props)
+static bool __delete(ring_buffer buf,
+		     const ssize_t pos,
+		     const bool overwrite)
 {
-	*buf = malloc(sizeof(**buf));
-	if(!*buf)
+	if(__index_OOB(buf, pos, true))
+		return_with_errno(EFAULT, false);
+
+	/* If overwrite is disabled, close the newly empty gap at `pos`.
+	 * This is both to make space for new data blocks at the head/tail, and
+	 * so this function behaves as the inverse of __insert(). */
+	if(!overwrite)
+		__close_gap(buf, pos);
+#ifdef ZERO
+	else
+		__zero(buf, pos);
+#endif /* ZERO */
+
+	return true;
+}
+
+static void * __fetch(ring_buffer buffer,
+		      const ssize_t pos)
+{
+	void * data;
+
+	if(__is_empty(buffer) || __index_OOB(buffer, pos, false))
+		return_with_errno(EFAULT, NULL);
+
+	data = malloc(DS_PROPS(buffer)->data_size);
+	if(!data)
+		return_with_errno(ENOMEM, NULL);
+
+	__read(buffer, data, pos);
+	return data;
+}
+
+ring_buffer rb_create(const struct ds_properties * props)
+{
+	ring_buffer buf;
+	struct ring_buffer_priv * priv;
+
+	DS_ALLOC(buf);
+	if(!buf)
+		return_with_errno(ENOMEM, NULL);
+
+	DS_INIT(buf, props, &mgmt_ops, &hof_ops);
+
+	/* Set up private data section. */
+	priv = DS_PRIV(buf);
+	priv->data = malloc(__space(buf));
+	if(!priv->data)
 		goto_with_errno(ENOMEM, exit);
 
-	DS_SET_PROPS(*buf, props);
+	priv->head = priv->data;
+	priv->tail = priv->data;
+	priv->length = 0;
 
-	(*buf)->data = malloc(DS_ENTRIES(*buf) * DS_DATA_SIZE(*buf));
-	if(!(*buf)->data)
-		goto_with_errno(ENOMEM, exit);
+	if(rwlock_alloc(&priv->rwlock) < 0)
+		goto_with_errno(errno, exit);
 
-	(*buf)->head = (*buf)->data;
-	(*buf)->tail = (*buf)->data;
-	(*buf)->length = 0;
-
-	if(rwlock_alloc(&(*buf)->rwlock) < 0)
-		goto exit;
-
-	return 0;
+	return buf;
 
 exit:
-	if(*buf) {
-		if((*buf)->data)
-			free((*buf)->data);
-
-		if((*buf)->rwlock)
-			rwlock_free(&(*buf)->rwlock);
-
-		free(*buf);
-	}
-
-	return -1;
+	rb_destroy(&buf);
+	return NULL;
 }
 
-void rb_free(struct ring_buffer ** buf)
+void rb_destroy(ring_buffer * buf)
 {
-	rwlock_writer_entry((*buf)->rwlock);
+	struct ring_buffer_priv * priv = DS_PRIV(*buf);
 
-	(*buf)->length = 0;
-	(*buf)->head = NULL;
-	(*buf)->tail = NULL;
-	free((*buf)->data);
+	/* Destroy the private data section. */
+	priv->head = NULL;
+	priv->tail = NULL;
+	priv->length = 0;
+	free_null(priv->data);
 
-	rwlock_writer_exit((*buf)->rwlock);
-	rwlock_free(&(*buf)->rwlock);
+	/* TODO: destroy rwlock */
 
-	free(*buf);
+	/* Deallocate the data structure. */
+	DS_FREE(buf);
 }
 
-bool rb_null(struct ring_buffer * buf)
+bool rb_empty(const ring_buffer buf)
 {
 	bool success;
 
-	rwlock_reader_entry(buf->rwlock);
-	success = __is_null(buf);
-	rwlock_reader_exit(buf->rwlock);
+	rwlock_reader_entry(DS_PRIV(buf)->rwlock);
+	success = __is_empty(buf);
+	rwlock_reader_exit(DS_PRIV(buf)->rwlock);
 
 	return success;
 }
 
-bool rb_push_head(struct ring_buffer * buf, const void * data)
-{
-	bool success;
-
-	rwlock_writer_entry(buf->rwlock);
-	success = __push_head(buf, data, false);
-	rwlock_writer_exit(buf->rwlock);
-
-	return success;
-}
-
-bool rb_push_tail(struct ring_buffer * buf, const void * data)
-{
-	bool success;
-
-	rwlock_writer_entry(buf->rwlock);
-	success = __push_tail(buf, data, false);
-	rwlock_writer_exit(buf->rwlock);
-
-	return success;
-}
-
-void * rb_pop_head(struct ring_buffer * buf)
+void * rb_pop_head(ring_buffer buf)
 {
 	void * data;
 
-	rwlock_writer_entry(buf->rwlock);
+	rwlock_writer_entry(DS_PRIV(buf)->rwlock);
 	data = __pop_head(buf);
-	rwlock_writer_exit(buf->rwlock);
+	rwlock_writer_exit(DS_PRIV(buf)->rwlock);
 
 	return data;
 }
 
-void * rb_pop_tail(struct ring_buffer * buf)
+void * rb_pop_tail(ring_buffer buf)
 {
 	void * data;
 
-	rwlock_writer_entry(buf->rwlock);
+	rwlock_writer_entry(DS_PRIV(buf)->rwlock);
 	data = __pop_tail(buf);
-	rwlock_writer_exit(buf->rwlock);
+	rwlock_writer_exit(DS_PRIV(buf)->rwlock);
 
 	return data;
 }
 
-bool rb_insert(struct ring_buffer * buf,
+bool rb_push_head(ring_buffer buf, const void * data)
+{
+	bool success;
+
+	rwlock_writer_entry(DS_PRIV(buf)->rwlock);
+	success = __push_head(buf, data, rb_overwrite);
+	rwlock_writer_exit(DS_PRIV(buf)->rwlock);
+
+	return success;
+}
+
+bool rb_push_tail(ring_buffer buf, const void * data)
+{
+	bool success;
+
+	rwlock_writer_entry(DS_PRIV(buf)->rwlock);
+	success = __push_tail(buf, data, rb_overwrite);
+	rwlock_writer_exit(DS_PRIV(buf)->rwlock);
+
+	return success;
+}
+
+bool rb_insert(ring_buffer buf,
 	       const void * data,
 	       const ssize_t pos)
 {
 	bool success;
 
-	rwlock_writer_entry(buf->rwlock);
-	success = __insert(buf, data, pos, false);
-	rwlock_writer_exit(buf->rwlock);
+	rwlock_writer_entry(DS_PRIV(buf)->rwlock);
+	success = __insert(buf, data, pos, rb_overwrite);
+	rwlock_writer_exit(DS_PRIV(buf)->rwlock);
 
 	return success;
 }
 
-void * rb_fetch(struct ring_buffer * buf,
+void * rb_fetch(ring_buffer buf,
 		const ssize_t pos)
 {
 	void * data;
 
-	rwlock_writer_entry(buf->rwlock);
+	rwlock_writer_entry(DS_PRIV(buf)->rwlock);
 	data = __fetch(buf, pos);
-	rwlock_writer_exit(buf->rwlock);
+	rwlock_writer_exit(DS_PRIV(buf)->rwlock);
 
 	return data;
 }
 
 #ifdef DEBUG
-#include <stdio.h>
-
-void rb_show(struct ring_buffer * buf)
+void rb_dump(ring_buffer buf)
 {
-	printf("Buffer length: %ld", buf->length);
+	struct ring_buffer_priv * priv;
 
-	if(__is_null(buf))
+	if(!buf) {
+		printf("`buf` is unallocated/unitialized (NULL).\n");
+		return;
+	}
+
+	priv = DS_PRIV(buf);
+	printf("Buffer length: %ld", priv->length);
+
+	if(__is_empty(buf))
 		puts(" (empty)\n");
 	else if(__is_full(buf))
 		puts(" (full)\n");
 	else
 		puts("\n");
 
-	for(size_t i = 0; i < DS_ENTRIES(buf); i++) {
+	for(size_t i = 0; i < DS_PROPS(buf)->entries; i++) {
+		uint8_t * addr;
 		ssize_t pos;
-		uint8_t * vm_addr;
 
-		vm_addr = ((uint8_t *) buf->data) + i;
-		pos = __addr_to_rbpos(buf, vm_addr);
+		addr = ((uint8_t *) priv->data) + i;
+		pos  = __addr_to_rbpos(buf, addr);
 
-		printf("%p (%ld): %#04x", vm_addr, ABS_POS(buf, pos), *vm_addr);
+		printf("%p (%ld): %#04x", addr, pos, *addr);
 
-		if(vm_addr == buf->data)
+		if(addr == priv->data)
 			printf(" (start)");
-		if(vm_addr == buf->head)
+		if(addr == priv->head)
 			printf(" (head)");
-		if(vm_addr == buf->tail)
+		if(addr == priv->tail)
 			printf(" (tail)");
 
 		putchar('\n');
 	}
 }
 #endif /* DEBUG */
+
