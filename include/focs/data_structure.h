@@ -68,10 +68,7 @@ struct ds_properties {
 	const struct ds_properties * __DS_PROPS_NAME;	\
 	struct ds_name##_priv
 
-#define DS_INIT(ds, props, mgmt_ops, hof_ops)	\
-	({					\
-		DS_PROPS(ds) = props;		\
-	})
+#define DS_INIT(ds, props, mgmt_ops, hof_ops) (DS_PROPS(ds) = props)
 
 #endif /* GENERIC_OPS */
 
