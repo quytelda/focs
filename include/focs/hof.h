@@ -28,26 +28,4 @@ typedef void * (* foldl_fn)(void * acc, const void * c);
 typedef bool   (* comp_fn) (const void * a, const void * b);
 typedef bool   (* pred_fn) (const void * data);
 
-/* ################### *
- * # Transformations # *
- * ################### */
-typedef void   (* map_hof)  (void * ds, map_fn fn);
-typedef void * (* foldr_hof)(void * ds, foldr_fn fn, const void * init);
-typedef void * (* foldl_hof)(void * ds, foldl_fn fn, const void * init);
-
-/* ############## *
- * # Properties # *
- * ############## */
-typedef bool (* empty_hof)(void * ds);
-typedef bool (* elem_hof)(void * ds, void * data);
-typedef bool (* any_hof) (void * ds, pred_fn p);
-typedef bool (* all_hof) (void * ds, pred_fn p);
-
-/* ############# *
- * # Filtering # *
- * ############# */
-typedef bool (* filter_hof)    (void * ds, pred_fn p);
-typedef bool (* drop_while_hof)(void * ds, pred_fn p);
-typedef bool (* take_while_hof)(void * ds, pred_fn p);
-
 #endif /* __HOF_H */

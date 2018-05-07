@@ -18,7 +18,7 @@
  * along with focs.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "focs/data_structure.h"
+#include "focs/generics.h"
 
 #ifndef __HOF_GENERICS_H
 #define __HOF_GENERICS_H
@@ -26,8 +26,8 @@
 #define map(ds, fn)          (__DS_DOPS(ds)->map(ds, fn))
 #define foldr(ds, fn, init)  (__DS_DOPS(ds)->foldr(ds, fn, init))
 #define foldl(ds, fn, init)  (__DS_DOPS(ds)->foldl(ds, fn, init))
-#define null(ds)             (__DS_DOPS(ds)->null(ds))
-#define contains(ds, datum)  (__DS_DOPS(ds)->contains(ds, datum))
+#define empty(ds)            (__DS_DOPS(ds)->empty(ds))
+#define elem(ds, datum)      (__DS_DOPS(ds)->elem(ds, datum))
 #define any(ds, pred)        (__DS_DOPS(ds)->any(ds, pred))
 #define all(ds, pred)        (__DS_DOPS(ds)->all(ds, pred))
 #define filter(ds, pred)     (__DS_DOPS(ds)->filter(ds, pred))

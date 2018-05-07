@@ -23,33 +23,44 @@
 #ifndef __HOF_OPERATIONS_H
 #define __HOF_OPERATIONS_H
 
+/* ################### *
+ * # Transformations # *
+ * ################### */
+typedef void   (* map_hof_fn)  (void * ds, map_fn fn);
+typedef void * (* foldr_hof_fn)(void * ds, foldr_fn fn, const void * init);
+typedef void * (* foldl_hof_fn)(void * ds, foldl_fn fn, const void * init);
+
+/* ############## *
+ * # Properties # *
+ * ############## */
+typedef bool (* empty_hof_fn)(void * ds);
+typedef bool (* elem_hof_fn)(void * ds, void * data);
+typedef bool (* any_hof_fn) (void * ds, pred_fn p);
+typedef bool (* all_hof_fn) (void * ds, pred_fn p);
+
+/* ############# *
+ * # Filtering # *
+ * ############# */
+typedef bool (* filter_hof_fn)    (void * ds, pred_fn p);
+typedef bool (* drop_while_hof_fn)(void * ds, pred_fn p);
+typedef bool (* take_while_hof_fn)(void * ds, pred_fn p);
+
 struct hof_operations {
 	/* Transformations */
-	map_hof   map;
-	foldr_hof foldr;
-	foldl_hof foldl;
+	map_hof_fn   map;
+	foldr_hof_fn foldr;
+	foldl_hof_fn foldl;
 		
 	/* Properties */
-	empty_hof empty;
-	elem_hof  contains;
-	any_hof   any;
-	all_hof   all;
+	empty_hof_fn empty;
+	elem_hof_fn  contains;
+	any_hof_fn   any;
+	all_hof_fn   all;
 
 	/* Filtering */
-	filter_hof     filter;
-	drop_while_hof drop_while;
-	take_while_hof take_while;
+	filter_hof_fn     filter;
+	drop_while_hof_fn drop_while;
+	take_while_hof_fn take_while;
 };
-
-#define map(ds, fn)          (__DS_DOPS(ds)->map(ds, fn))
-#define foldr(ds, fn, init)  (__DS_DOPS(ds)->foldr(ds, fn, init))
-#define foldl(ds, fn, init)  (__DS_DOPS(ds)->foldl(ds, fn, init))
-#define null(ds)             (__DS_DOPS(ds)->null(ds))
-#define contains(ds, datum)  (__DS_DOPS(ds)->contains(ds, datum))
-#define any(ds, pred)        (__DS_DOPS(ds)->any(ds, pred))
-#define all(ds, pred)        (__DS_DOPS(ds)->all(ds, pred))
-#define filter(ds, pred)     (__DS_DOPS(ds)->filter(ds, pred))
-#define drop_while(ds, pred) (__DS_DOPS(ds)->drop_while(ds, pred))
-#define take_while(ds, pred) (__DS_DOPS(ds)->take_while(ds, pred))
 
 #endif /* __HOF_OPERATIONS_H */
