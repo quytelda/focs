@@ -21,25 +21,20 @@
 
 #include "list/ring_buffer.h"
 
-static const struct data_properties props = {
+static const struct ds_properties props = {
 	.data_size = sizeof(uint8_t), /* Data size is 1B. */
-	.entries   = 10,
+	.entries   = 10,              /* 10 Data Blocks. */
 };
 
-START_TEST(test_rb_alloc)
+START_TEST(test_rb_create)
 {
-	int err;
-	struct ring_buffer * buf = NULL;
+	ring_buffer buf;
 
-	err = rb_alloc(&buf, &props);
+	buf = rb_create(&props);
 
-	ck_assert(!err);
 	ck_assert(buf);
-	ck_assert_int_eq(buf->length, 0);
-	ck_assert_int_eq(DS_DATA_SIZE(buf), sizeof(uint8_t));
-	ck_assert_int_eq(DS_ENTRIES(buf), 10);
 
-	rb_free(&buf);
+	rb_destroy(&buf);
 }
 END_TEST
 
@@ -48,19 +43,19 @@ START_TEST(test_rb_push_head_single)
 	bool success;
 	uint8_t in = 1;
 	uint8_t * out;
-	struct ring_buffer * buf = NULL;
+	ring_buffer buf;
 
-	rb_alloc(&buf, &props);
+	buf = rb_create(&props);
 
 	success = rb_push_head(buf, &in);
-	out = (uint8_t *) buf->head;
+	out = rb_pop_head(buf);
 
 	ck_assert(success);
 	ck_assert(out);
 	ck_assert_int_eq(*out, in);
-	ck_assert_int_eq(buf->length, 1);
 
-	rb_free(&buf);
+	free(out);
+	rb_destroy(&buf);
 }
 END_TEST
 
@@ -69,9 +64,9 @@ START_TEST(test_rb_push_head_multiple)
 	bool success[3];
 	uint8_t in[] = {1, 2, 3};
 	uint8_t * out[3];
-	struct ring_buffer * buf = NULL;
+	ring_buffer buf = NULL;
 
-	rb_alloc(&buf, &props);
+	buf = rb_create(&props);
 
 	/* Create list: [3, 2, 1] */
 	success[0] = rb_push_head(buf, &in[0]);
@@ -81,17 +76,19 @@ START_TEST(test_rb_push_head_multiple)
 	ck_assert(success[0]);
 	ck_assert(success[1]);
 	ck_assert(success[2]);
-	ck_assert_int_eq(buf->length, 3);
 
-	out[0] = (uint8_t *) buf->head + (0 * sizeof(uint8_t));
-	out[1] = (uint8_t *) buf->head + (1 * sizeof(uint8_t));
-	out[2] = (uint8_t *) buf->head + (2 * sizeof(uint8_t));
+	out[0] = rb_pop_head(buf);
+	out[1] = rb_pop_head(buf);
+	out[2] = rb_pop_head(buf);
 
 	ck_assert_int_eq(*out[0], in[2]);
 	ck_assert_int_eq(*out[1], in[1]);
 	ck_assert_int_eq(*out[2], in[0]);
 
-	rb_free(&buf);
+	free(out[0]);
+	free(out[1]);
+	free(out[2]);	
+	rb_destroy(&buf);
 }
 END_TEST
 
@@ -100,19 +97,19 @@ START_TEST(test_rb_push_tail_single)
 	bool success;
 	uint8_t in = 1;
 	uint8_t * out;
-	struct ring_buffer * buf = NULL;
+	ring_buffer buf;
 
-	rb_alloc(&buf, &props);
+	buf = rb_create(&props);
 
 	success = rb_push_tail(buf, &in);
-	out = (uint8_t *) buf->tail - sizeof(uint8_t);
+	out = rb_pop_tail(buf);
 
 	ck_assert(success);
 	ck_assert(out);
 	ck_assert_int_eq(*out, in);
-	ck_assert_int_eq(buf->length, 1);
 
-	rb_free(&buf);
+	free(out);
+	rb_destroy(&buf);
 }
 END_TEST
 
@@ -121,9 +118,9 @@ START_TEST(test_rb_push_tail_multiple)
 	bool success[3];
 	uint8_t in[] = {1, 2, 3};
 	uint8_t * out[3];
-	struct ring_buffer * buf = NULL;
+	ring_buffer buf = NULL;
 
-	rb_alloc(&buf, &props);
+	buf = rb_create(&props);
 
 	/* Create list: [3, 2, 1] */
 	success[0] = rb_push_tail(buf, &in[0]);
@@ -133,35 +130,35 @@ START_TEST(test_rb_push_tail_multiple)
 	ck_assert(success[0]);
 	ck_assert(success[1]);
 	ck_assert(success[2]);
-	ck_assert_int_eq(buf->length, 3);
 
-	out[0] = (uint8_t *) buf->tail - (1 * sizeof(uint8_t));
-	out[1] = (uint8_t *) buf->tail - (2 * sizeof(uint8_t));
-	out[2] = (uint8_t *) buf->tail - (3 * sizeof(uint8_t));
+	out[0] = rb_pop_tail(buf);
+	out[1] = rb_pop_tail(buf);
+	out[2] = rb_pop_tail(buf);
 
 	ck_assert_int_eq(*out[0], in[2]);
 	ck_assert_int_eq(*out[1], in[1]);
 	ck_assert_int_eq(*out[2], in[0]);
 
-	rb_free(&buf);
+	free(out[0]);
+	free(out[1]);
+	free(out[2]);
+	rb_destroy(&buf);
 }
 END_TEST
 
 START_TEST(test_rb_pop_head_empty)
 {
+	ring_buffer buf;
 	uint8_t * out;
-	struct ring_buffer * buf = NULL;
 
-	rb_alloc(&buf, &props);
+	buf = rb_create(&props);
 
 	out = rb_pop_head(buf);
 
 	ck_assert(!out);
-	ck_assert_ptr_eq(buf->head, buf->data);
-	ck_assert_ptr_eq(buf->tail, buf->data);
-	ck_assert(buf->length == 0);
+	ck_assert(rb_empty(buf));
 
-	rb_free(&buf);
+	rb_destroy(&buf);
 }
 END_TEST
 
@@ -169,20 +166,20 @@ START_TEST(test_rb_pop_head_single)
 {
 	uint8_t in = 1;
 	uint8_t * out;
-	struct ring_buffer * buf = NULL;
+	ring_buffer buf = NULL;
 
 	/* Create list: [1] */
-	rb_alloc(&buf, &props);
+	buf = rb_create(&props);
 	rb_push_head(buf, &in);
 
 	out = rb_pop_head(buf);
 
 	ck_assert(out);
 	ck_assert_int_eq(*out, in);
-	ck_assert(buf->length == 0);
+	ck_assert(rb_empty(buf));
 
 	free(out);
-	rb_free(&buf);
+	rb_destroy(&buf);
 }
 END_TEST
 
@@ -190,10 +187,10 @@ START_TEST(test_rb_pop_head_multiple)
 {
 	uint8_t in[] = {1, 2, 3};
 	uint8_t * out[3];
-	struct ring_buffer * buf = NULL;
+	ring_buffer buf = NULL;
 
 	/* Create list: [3, 2, 1] */
-	rb_alloc(&buf, &props);
+	buf = rb_create(&props);
 	rb_push_head(buf, &in[0]);
 	rb_push_head(buf, &in[1]);
 	rb_push_head(buf, &in[2]);
@@ -213,25 +210,23 @@ START_TEST(test_rb_pop_head_multiple)
 	free(out[0]);
 	free(out[1]);
 	free(out[2]);
-	rb_free(&buf);
+	rb_destroy(&buf);
 }
 END_TEST
 
 START_TEST(test_rb_pop_tail_empty)
 {
 	uint8_t * out;
-	struct ring_buffer * buf = NULL;
+	ring_buffer buf = NULL;
 
-	rb_alloc(&buf, &props);
+	buf = rb_create(&props);
 
 	out = rb_pop_tail(buf);
 
 	ck_assert(!out);
-	ck_assert_ptr_eq(buf->head, buf->data);
-	ck_assert_ptr_eq(buf->tail, buf->data);
-	ck_assert(buf->length == 0);
+	ck_assert(rb_empty(buf));
 
-	rb_free(&buf);
+	rb_destroy(&buf);
 }
 END_TEST
 
@@ -239,21 +234,21 @@ START_TEST(test_rb_pop_tail_single)
 {
 	uint8_t in = 1;
 	uint8_t * out;
-	struct ring_buffer * buf = NULL;
+	ring_buffer buf = NULL;
 
 	/* Create list: [1] */
-	rb_alloc(&buf, &props);
+	buf = rb_create(&props);
 	rb_push_head(buf, &in);
 
 	out = rb_pop_tail(buf);
 
 	ck_assert(out);
 	ck_assert_int_eq(*out, in);
-	ck_assert(buf->length == 0);
+	ck_assert(rb_empty(buf));
 
 	free(out);
 
-	rb_free(&buf);
+	rb_destroy(&buf);
 }
 END_TEST
 
@@ -261,10 +256,10 @@ START_TEST(test_rb_pop_tail_multiple)
 {
 	uint8_t in[] = {1, 2, 3};
 	uint8_t * out[3];
-	struct ring_buffer * buf = NULL;
+	ring_buffer buf = NULL;
 
 	/* Create list: [3, 2, 1] */
-	rb_alloc(&buf, &props);
+	buf = rb_create(&props);
 	rb_push_head(buf, &in[0]);
 	rb_push_head(buf, &in[1]);
 	rb_push_head(buf, &in[2]);
@@ -284,7 +279,7 @@ START_TEST(test_rb_pop_tail_multiple)
 	free(out[0]);
 	free(out[1]);
 	free(out[2]);
-	rb_free(&buf);
+	rb_destroy(&buf);
 }
 END_TEST
 
@@ -293,23 +288,23 @@ START_TEST(test_rb_insert_single)
 	bool success;
 	uint8_t in = 1;
 	uint8_t * out;
-	struct ring_buffer * buf = NULL;
+	ring_buffer buf = NULL;
 
 	/* Create list: [1] */
-	rb_alloc(&buf, &props);
+	buf = rb_create(&props);
 
 	success = rb_insert(buf, &in, 0);
 
 	ck_assert(success);
 
-	out = rb_pop_tail(buf);
+	out = rb_pop_head(buf);
 
 	ck_assert(out);
 	ck_assert_int_eq(*out, in);
-	ck_assert(buf->length == 0);
+	ck_assert(rb_empty(buf));
 
 	free(out);
-	rb_free(&buf);
+	rb_destroy(&buf);
 }
 END_TEST
 
@@ -318,9 +313,9 @@ START_TEST(test_rb_insert_multiple)
 	uint8_t in[] = {1, 2, 3, 4};
 	bool success[sizeof(in)];
 	uint8_t * out[sizeof(in)];
-	struct ring_buffer * buf = NULL;
+	ring_buffer buf = NULL;
 
-	rb_alloc(&buf, &props);
+	buf = rb_create(&props);
 
 	/* [1, 4, 3, 2] */
 	success[0] = rb_insert(buf, &in[0], 0);
@@ -352,27 +347,25 @@ START_TEST(test_rb_insert_multiple)
 	free(out[1]);
 	free(out[2]);
 	free(out[3]);
-	rb_free(&buf);
+	rb_destroy(&buf);
 }
 END_TEST
 
 START_TEST(test_rb_fetch_empty)
 {
 	uint8_t * out[2];
-	struct ring_buffer * buf;
+	ring_buffer buf;
 
-	rb_alloc(&buf, &props);
+	buf = rb_create(&props);
 
 	out[0] = rb_fetch(buf, 0);
 	out[1] = rb_fetch(buf, 1);
 
 	ck_assert(!out[0]);
 	ck_assert(!out[1]);
-	ck_assert_ptr_eq(buf->head, buf->data);
-	ck_assert_ptr_eq(buf->tail, buf->data);
-	ck_assert(rb_null(buf));
+	ck_assert(rb_empty(buf));
 
-	rb_free(&buf);
+	rb_destroy(&buf);
 }
 END_TEST
 
@@ -380,10 +373,10 @@ START_TEST(test_rb_fetch_single)
 {
 	uint8_t in = 1;
 	uint8_t * out[2];
-	struct ring_buffer * buf = NULL;
+	ring_buffer buf = NULL;
 
 	/* Create list: [1] */
-	rb_alloc(&buf, &props);
+	buf = rb_create(&props);
 	rb_push_head(buf, &in);
 
 	out[0] = rb_fetch(buf, 0);
@@ -392,9 +385,8 @@ START_TEST(test_rb_fetch_single)
 	ck_assert(out[0]);
 	ck_assert(!out[1]);
 	ck_assert_int_eq(*out[0], in);
-	ck_assert(buf->length == 1);
 
-	rb_free(&buf);
+	rb_destroy(&buf);
 }
 END_TEST
 
@@ -402,10 +394,10 @@ START_TEST(test_rb_fetch_multiple)
 {
 	uint8_t in[] = {0, 1, 2};
 	uint8_t * out[3];
-	struct ring_buffer * buf = NULL;
+	ring_buffer buf = NULL;
 
 	/* Create list: [1, 2, 3] */
-	rb_alloc(&buf, &props);
+	buf = rb_create(&props);
 	rb_push_tail(buf, &in[0]);
 	rb_push_tail(buf, &in[1]);
 	rb_push_tail(buf, &in[2]);
@@ -422,14 +414,14 @@ START_TEST(test_rb_fetch_multiple)
 	ck_assert_int_eq(*out[1], in[0]);
 	ck_assert_int_eq(*out[2], in[2]);
 
-	rb_free(&buf);
+	rb_destroy(&buf);
 }
 END_TEST
 
 Suite * rb_suite(void)
 {
 	Suite * suite;
-	TCase * case_rb_alloc;
+	TCase * case_rb_create;
 	TCase * case_rb_push_head;
 	TCase * case_rb_push_tail;
 	TCase * case_rb_pop_head;
@@ -439,7 +431,7 @@ Suite * rb_suite(void)
 
 	suite = suite_create("Ring Buffer");
 
-	case_rb_alloc = tcase_create("rb_alloc");
+	case_rb_create = tcase_create("rb_create");
 	case_rb_push_head = tcase_create("rb_push_head");
 	case_rb_push_head = tcase_create("rb_push_tail");
 	case_rb_pop_head = tcase_create("rb_pop_head");
@@ -447,7 +439,7 @@ Suite * rb_suite(void)
 	case_rb_insert = tcase_create("rb_insert");
 	case_rb_fetch = tcase_create("rb_fetch");
 
-	tcase_add_test(case_rb_alloc, test_rb_alloc);
+	tcase_add_test(case_rb_create, test_rb_create);
 	tcase_add_test(case_rb_push_head, test_rb_push_head_single);
 	tcase_add_test(case_rb_push_head, test_rb_push_head_multiple);
 	tcase_add_test(case_rb_push_tail, test_rb_push_tail_single);
@@ -464,7 +456,7 @@ Suite * rb_suite(void)
 	tcase_add_test(case_rb_fetch, test_rb_fetch_single);
 	tcase_add_test(case_rb_fetch, test_rb_fetch_multiple);
 
-	suite_add_tcase(suite, case_rb_alloc);
+	suite_add_tcase(suite, case_rb_create);
 	suite_add_tcase(suite, case_rb_push_head);
 	suite_add_tcase(suite, case_rb_push_tail);
 	suite_add_tcase(suite, case_rb_pop_head);
