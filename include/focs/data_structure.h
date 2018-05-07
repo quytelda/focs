@@ -77,6 +77,10 @@ struct ds_properties {
 #define DS_PROPS(ds) ((ds)->__DS_PROPS_NAME)
 #define DS_PRIV(ds) (&((ds)->__DS_PRIV_NAME))
 
+#define DS_DATA_SIZE(ds) (DS_PROPS(ds)->data_size)
+#define DS_ENTRIES(ds)   (DS_PROPS(ds)->entries)
+#define DS_OVERWRITE(ds) (DS_PROPS(ds)->overwrite)
+
 #define DS_ALLOC(ds) (ds = malloc(sizeof(*ds)))
 #define DS_FREE(ds) (free_null(*ds))
 
