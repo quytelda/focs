@@ -20,26 +20,22 @@
 #include "list/ring_buffer.h"
 #include "sync/rwlock.h"
 
-__attribute__((pure))
-static inline size_t __length(const ring_buffer buf)
+static inline __pure size_t __length(const ring_buffer buf)
 {
 	return DS_PRIV(buf)->length;
 }
 
-__attribute__((pure))
-static inline size_t __space(const ring_buffer buf)
+static inline __pure size_t __space(const ring_buffer buf)
 {
 	return DS_DATA_SIZE(buf) * DS_ENTRIES(buf);
 }
 
-__attribute__((pure))
-static inline bool __is_empty(const ring_buffer buf)
+static inline __pure bool __is_empty(const ring_buffer buf)
 {
 	return (__length(buf) <= 0);
 }
 
-__attribute__((pure))
-static inline bool __is_full(const ring_buffer buf)
+static inline __pure bool __is_full(const ring_buffer buf)
 {
 	return (__length(buf) >= DS_ENTRIES(buf));
 }
