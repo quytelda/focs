@@ -1,8 +1,7 @@
 include global.mk
 
 LIBS = -lpthread
-CFLAGS := -std=gnu99 -I $(INC_DIR) -fpic -Wall \
-	-DGENERIC_OPS $(CFLAGS)
+CFLAGS := -std=gnu99 -I $(INC_DIR) -fpic -Wall $(CFLAGS)
 
 SRCS=$(addprefix $(SRC_DIR)/, \
 	list/single_list.c    \
