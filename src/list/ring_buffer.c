@@ -29,7 +29,7 @@ static inline size_t __length(const ring_buffer buf)
 __attribute__((pure))
 static inline size_t __space(const ring_buffer buf)
 {
-	return DS_PROPS(buf)->data_size * DS_PROPS(buf)->entries;
+	return DS_DATA_SIZE(buf) * DS_ENTRIES(buf);
 }
 
 __attribute__((pure))
@@ -41,7 +41,7 @@ static inline bool __is_empty(const ring_buffer buf)
 __attribute__((pure))
 static inline bool __is_full(const ring_buffer buf)
 {
-	return (__length(buf) >= DS_PROPS(buf)->entries);
+	return (__length(buf) >= DS_ENTRIES(buf));
 }
 
 __attribute__((pure))
@@ -55,9 +55,8 @@ static inline bool __index_OOB(const ring_buffer buf,
 	return ((pos < 0) || (pos >= __length(buf)));
 }
 
-__attribute__((pure))
-static inline void * __rbpos_to_addr(const ring_buffer buf,
-				     const ssize_t pos)
+static inline __pure void * __phy_to_addr(const ring_buffer buf,
+					  const ssize_t pos)
 {
 	size_t offset;
 
@@ -67,16 +66,15 @@ static inline void * __rbpos_to_addr(const ring_buffer buf,
 	const size_t start = (size_t) DS_PRIV(buf)->data;
 
 	offset = head - start;
-	offset += mod((ssize_t) DS_PROPS(buf)->data_size * pos,
-		      (ssize_t) DS_PROPS(buf)->entries);
+	offset += mod((ssize_t) DS_DATA_SIZE(buf) * pos,
+		      (ssize_t) DS_ENTRIES(buf));
 	offset %= __space(buf);
 
 	return (void *) (start + offset);
 }
 
-__attribute__((pure))
-static inline ssize_t __addr_to_rbpos(const ring_buffer buf,
-				      const void * addr)
+static inline __pure size_t __addr_to_phy(const ring_buffer buf,
+					   const void * addr)
 {
 	ssize_t distance;
 	ssize_t pos;
@@ -87,16 +85,16 @@ static inline ssize_t __addr_to_rbpos(const ring_buffer buf,
 	const size_t head = (size_t) DS_PRIV(buf)->head;
 
 	distance = mark - head;
-	pos = distance / DS_PROPS(buf)->data_size;
+	pos = distance / DS_DATA_SIZE(buf);
 
 	/* The address must be aligned to the beginning of the block.
 	 * Truncated division is floored division for positive results (good),
 	 * but for negative numbers it is division always rounded up (bad).
 	 * So, to align negative results we may need to subtract one. */
-	if((pos < 0) && !aligned(distance, DS_PROPS(buf)->data_size, 0))
+	if((pos < 0) && !aligned(distance, DS_DATA_SIZE(buf), 0))
 		pos -= 1;
 
-	return pos;
+	return (pos <= 0) ? (size_t) pos : DS_ENTRIES(buf) + pos;
 }
 
 static inline void * __write(const ring_buffer buf,
@@ -105,8 +103,8 @@ static inline void * __write(const ring_buffer buf,
 {
 	void * addr;
 
-	addr = __rbpos_to_addr(buf, pos);
-	memcpy(addr, data, DS_PROPS(buf)->data_size);
+	addr = __phy_to_addr(buf, pos);
+	memcpy(addr, data, DS_DATA_SIZE(buf));
 
 	return addr;
 }
@@ -117,8 +115,8 @@ static inline void * __read(const ring_buffer buf,
 {
 	void * addr;
 
-	addr = __rbpos_to_addr(buf, pos);
-	memcpy(data, addr, DS_PROPS(buf)->data_size);
+	addr = __phy_to_addr(buf, pos);
+	memcpy(data, addr, DS_DATA_SIZE(buf));
 
 	return addr;
 }
@@ -130,13 +128,13 @@ static void * __pop_head(ring_buffer buf)
 	if(__is_empty(buf))
 		return_with_errno(EFAULT, NULL);
 
-	data = malloc(DS_PROPS(buf)->data_size);
+	data = malloc(DS_DATA_SIZE(buf));
 	if(!data)
 		return_with_errno(ENOMEM, NULL);
 
 	__read(buf, data, 0);
 
-	DS_PRIV(buf)->head = __rbpos_to_addr(buf, 1);
+	DS_PRIV(buf)->head = __phy_to_addr(buf, 1);
 	DS_PRIV(buf)->length--;
 
 	return data;
@@ -149,7 +147,7 @@ static void * __pop_tail(ring_buffer buf)
 	if(__is_empty(buf))
 		return_with_errno(EFAULT, NULL);
 
-	data = malloc(DS_PROPS(buf)->data_size);
+	data = malloc(DS_DATA_SIZE(buf));
 	if(!data)
 		return_with_errno(ENOMEM, NULL);
 
@@ -168,7 +166,7 @@ static bool __push_head(ring_buffer buf,
 
 	DS_PRIV(buf)->head = __write(buf, data, -1);
 	DS_PRIV(buf)->length = MIN(DS_PRIV(buf)->length + 1,
-				   DS_PROPS(buf)->entries);
+				   DS_ENTRIES(buf));
 	return true;
 }
 
@@ -181,8 +179,8 @@ static bool __push_tail(ring_buffer buf,
 
 	__write(buf, data, DS_PRIV(buf)->length);
 	DS_PRIV(buf)->length = MIN(DS_PRIV(buf)->length + 1,
-				   DS_PROPS(buf)->entries);
-	DS_PRIV(buf)->tail = __rbpos_to_addr(buf, DS_PRIV(buf)->length);
+				   DS_ENTRIES(buf));
+	DS_PRIV(buf)->tail = __phy_to_addr(buf, DS_PRIV(buf)->length);
 	return true;
 }
 
@@ -194,10 +192,10 @@ static void * __shift_forward(const ring_buffer buf,
 	void * front;
 	void * src;
 
-	front = dest = __rbpos_to_addr(buf, start - 1);
+	front = dest = __phy_to_addr(buf, start - 1);
 	for(ssize_t i = start; i <= end; i++) {
-		src = __rbpos_to_addr(buf, i);
-		memcpy(dest, src, DS_PROPS(buf)->data_size);
+		src = __phy_to_addr(buf, i);
+		memcpy(dest, src, DS_DATA_SIZE(buf));
 		dest = src;
 	}
 
@@ -212,10 +210,10 @@ static void * __shift_backward(const ring_buffer buf,
 	void * dest;
 	void * src;
 
-	back = dest = __rbpos_to_addr(buf, end + 1);
+	back = dest = __phy_to_addr(buf, end + 1);
 	for(ssize_t i = end; i >= start; i--) {
-		src = __rbpos_to_addr(buf, i);
-		memcpy(dest, src, DS_PROPS(buf)->data_size);
+		src = __phy_to_addr(buf, i);
+		memcpy(dest, src, DS_DATA_SIZE(buf));
 		dest = src;
 	}
 
@@ -244,10 +242,10 @@ static inline void __close_gap(ring_buffer buf,
 	last = DS_PRIV(buf)->length - 1;
 	if(pos < (last - pos)) {
 		__shift_backward(buf, 0, pos - 1);
-		DS_PRIV(buf)->head = __rbpos_to_addr(buf, 1);
+		DS_PRIV(buf)->head = __phy_to_addr(buf, 1);
 	} else {
 		__shift_forward(buf, pos + 1, last);
-		DS_PRIV(buf)->tail = __rbpos_to_addr(buf, last);
+		DS_PRIV(buf)->tail = __phy_to_addr(buf, last);
 	}
 
 	(DS_PRIV(buf)->length)--;
@@ -491,12 +489,12 @@ void rb_dump(ring_buffer buf)
 	else
 		puts("\n");
 
-	for(size_t i = 0; i < DS_PROPS(buf)->entries; i++) {
+	for(size_t i = 0; i < DS_ENTRIES(buf); i++) {
 		uint8_t * addr;
 		ssize_t pos;
 
 		addr = ((uint8_t *) priv->data) + i;
-		pos  = __addr_to_rbpos(buf, addr);
+		pos  = __addr_to_phy(buf, addr);
 
 		printf("%p (%ld): %#04x", addr, pos, *addr);
 
