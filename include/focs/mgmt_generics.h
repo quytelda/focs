@@ -1,4 +1,4 @@
-/* focs.h - Functional Open C Structures
+/* mgmt_generics.h - Generic Data Structure Management Macros
  * Copyright (C) 2018 Quytelda Kahja
  *
  * This file is part of focs.
@@ -18,24 +18,13 @@
  * along with focs.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __PROPERTIES_H
-#define __PROPERTIES_H
+#include "focs/generics.h"
 
-struct data_properties {
-	size_t data_size;
-	ssize_t entries;
-};
+#ifndef __MGMT_GENERICS_H
+#define __MGMT_GENERICS_H
 
-#define MAX_DATA_SIZE (~(size_t)  0)
-#define MAX_ENTRIES   (~(ssize_t) 0)
+#define create(ds, props) (__DS_MGMT_OPS(ds)->create(ds, props))
+#define destroy(ds)       (__DS_MGMT_OPS(ds)->destroy(ds))
+#define size(ds)          (__DS_MGMT_OPS(ds)->size(ds))
 
-#define __DS_PROPS_NAME props
-#define __ds_props(ds) ((ds)->__DS_PROPS_NAME)
-
-#define DS_SET_PROPS(ds, _props) (__ds_props(ds) = _props)
-
-/* Access individual data properties. */
-#define DS_DATA_SIZE(ds) (__ds_props(ds)->data_size)
-#define DS_ENTRIES(ds)   (__ds_props(ds)->entries)
-
-#endif /* __PROPERTIES_H */
+#endif /* __MGMT_GENERICS_H */

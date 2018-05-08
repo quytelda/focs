@@ -3,9 +3,9 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-================================
+################################
 Welcome to FOCS's documentation!
-================================
+################################
 
 Functional Open C Structures - C Data Structures Library
 
@@ -22,6 +22,7 @@ FOCS is a data structure library implemented in C, designed to provide common da
    installation/makefile
    api/list
    api/sync
+   dev
 
 Indices and tables
 ==================
