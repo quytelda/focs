@@ -22,10 +22,18 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
+#include <sys/cdefs.h>
 
 #ifndef __FOCS_H
 #define __FOCS_H
+
+#define __pure __attribute_pure__
+
+#if __GNUC_PREREQ(3, 1)
+#  define __unused __attribute__((unused))
+#else
+#  define __unused
+#endif
 
 /**
  * Pick the minimum of two comparable values.
