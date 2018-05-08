@@ -54,6 +54,17 @@ void rb_destroy(ring_buffer * buf)
 	__attribute__((nonnull));
 
 /**
+ * Determine the number of data blocks stored in a ring buffer.
+ * @param buf The ring buffer to check (non-NULL)
+ *
+ * @return This function shall return the number of data blocks stored in the
+ * ring buffer `buf`.  This is distinct from the capacity of the ring buffer,
+ * which is the number of entries it may contain when full.
+ */
+size_t rb_size(ring_buffer buf)
+	__attribute__((nonnull));
+
+/**
  * Determine if a ring buffer is empty.
  * @param buf The ring buffer to check (non-NULL)
  *

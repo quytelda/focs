@@ -379,6 +379,17 @@ void rb_destroy(ring_buffer * buf)
 	DS_FREE(buf);
 }
 
+size_t rb_size(ring_buffer buf)
+{
+	size_t size;
+
+	rwlock_reader_entry(DS_PRIV(buf)->rwlock);
+	size = __length(buf);
+	rwlock_reader_exit(DS_PRIV(buf)->rwlock);
+
+	return size;
+}
+
 bool rb_empty(const ring_buffer buf)
 {
 	bool success;
