@@ -7,6 +7,7 @@ SRCS=$(addprefix $(SRC_DIR)/, \
 	list/single_list.c    \
 	list/double_list.c    \
 	list/ring_buffer.c    \
+	map/hash_map.c        \
 	sync/rwlock.c)
 OBJS=$(SRCS:.c=.o)
 
