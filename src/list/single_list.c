@@ -20,176 +20,170 @@
 
 #include "list/single_list.h"
 
-static struct sl_element * __element_init(struct single_list * list, void * data)
+static struct sl_element * __create_element(void * data,
+					    size_t data_size)
 {
 	struct sl_element * elem;
 
 	elem = malloc(sizeof(*elem));
 	if(!elem)
-		goto exit;
+		return_with_errno(ENOMEM, NULL);
 
-	elem->data = malloc(list->data_size);
+	elem->data = malloc(data_size);
 	if(!elem->data)
-		goto exit;
-
-	memcpy(elem->data, data, list->data_size);
+		goto_with_errno(ENOMEM, exit);
 
 	return elem;
 
 exit:
-	if(elem) {
-		if(elem->data)
-			free(elem->data);
-		free(elem);
-	}
-
+	free(elem);
 	return NULL;
 }
 
-static struct sl_element * __lookup_element(struct single_list * list, size_t pos)
+static struct sl_element * __lookup_element(single_list list, size_t pos)
 {
 	struct sl_element * current;
 
-	if(pos >= list->length)
+	if(pos >= DS_PRIV(list)->length)
 		return NULL;
 
-	current = list->head;
+	current = DS_PRIV(list)->head;
 	for(size_t i = 0; i < pos; i++)
 		current = current->next;
 	return current;
 }
 
-static void __push_head(struct single_list * list, struct sl_element * current)
+static void __push_head(single_list list, struct sl_element * current)
 {
-	current->next = list->head;
-	list->head = current;
+	current->next = DS_PRIV(list)->head;
+	DS_PRIV(list)->head = current;
 
-	if(!list->tail)
-		list->tail = current;
+	if(!DS_PRIV(list)->tail)
+		DS_PRIV(list)->tail = current;
 
-	(list->length)++;
+	(DS_PRIV(list)->length)++;
 }
 
-static void __push_tail(struct single_list * list, struct sl_element * current)
+static void __push_tail(single_list list, struct sl_element * current)
 {
-	if(list->tail)
-		list->tail->next = current;
+	if(DS_PRIV(list)->tail)
+		DS_PRIV(list)->tail->next = current;
 
 	current->next = NULL;
-	list->tail = current;
+	DS_PRIV(list)->tail = current;
 
-	if(!list->head)
-		list->head = current;
+	if(!DS_PRIV(list)->head)
+		DS_PRIV(list)->head = current;
 
-	(list->length)++;
+	(DS_PRIV(list)->length)++;
 }
 
-static struct sl_element * __pop_head(struct single_list * list)
+static struct sl_element * __pop_head(single_list list)
 {
 	struct sl_element * current;
 
-	if(list->length == 0)
+	if(DS_PRIV(list)->length == 0)
 		return NULL;
 
-	current = list->head;
-	list->head = current->next;
+	current = DS_PRIV(list)->head;
+	DS_PRIV(list)->head = current->next;
 
-	if(!list->head)
-		list->tail = NULL;
+	if(!DS_PRIV(list)->head)
+		DS_PRIV(list)->tail = NULL;
 
-	(list->length)--;
+	(DS_PRIV(list)->length)--;
 
 	return current;
 }
 
-static struct sl_element * __pop_tail(struct single_list * list)
+static struct sl_element * __pop_tail(single_list list)
 {
 	struct sl_element * current;
 	struct sl_element * prev;
 
-	if(list->length == 0)
+	if(DS_PRIV(list)->length == 0)
 		return NULL;
 
 	/* Find the previous element. */
-	linked_list_while(list, prev, prev->next != list->tail) {}
+	linked_list_while(list, prev, prev->next != DS_PRIV(list)->tail) {}
 
-	current = list->tail;
-	list->tail = prev;
+	current = DS_PRIV(list)->tail;
+	DS_PRIV(list)->tail = prev;
 
-	if(list->tail)
-		list->tail->next = NULL;
+	if(DS_PRIV(list)->tail)
+		DS_PRIV(list)->tail->next = NULL;
 	else
-		list->head = NULL;
+		DS_PRIV(list)->head = NULL;
 
-	(list->length)--;
+	(DS_PRIV(list)->length)--;
 
 	return current;
 }
 
-static bool __insert_element(struct single_list * list, struct sl_element * current, size_t pos)
+static bool __insert_element(single_list list, struct sl_element * current, size_t pos)
 {
 	struct sl_element * prev;
 
-	if(pos > list->length)
+	if(pos > DS_PRIV(list)->length)
 		return false;
 
 	if(pos == 0) {
 		__push_head(list, current);
-	} else if(pos == list->length) {
+	} else if(pos == DS_PRIV(list)->length) {
 		__push_tail(list, current);
 	} else {
 		prev = __lookup_element(list, pos - 1);
 		current->next = prev->next;
 		prev->next = current;
 
-		(list->length)++;
+		(DS_PRIV(list)->length)++;
 	}
 
 	return true;
 }
 
-static struct sl_element * __remove_element(struct single_list * list, size_t pos)
+static struct sl_element * __remove_element(single_list list, size_t pos)
 {
 	struct sl_element * current;
 	struct sl_element * prev;
 
-	if(pos >= list->length)
+	if(pos >= DS_PRIV(list)->length)
 		return NULL;
 
 	if(pos == 0) {
 		current = __pop_head(list);
-	} else if(pos == list->length - 1) {
+	} else if(pos == DS_PRIV(list)->length - 1) {
 		current = __pop_tail(list);
 	} else {
 		prev = __lookup_element(list, pos - 1);
 		current = prev->next;
 		prev->next = current->next;
 
-		(list->length)--;
+		(DS_PRIV(list)->length)--;
 	}
 
 	return current;
 }
 
-static void __delete_element(struct single_list * list, struct sl_element * elem)
+static void __delete_element(single_list list, struct sl_element * elem)
 {
 	struct sl_element * prev;
 
 	linked_list_while(list, prev, prev->next != elem) {}
 
 	/* Fix head and tail. */
-	if(list->head == elem)
-		list->head = elem->next;
-	if(list->tail == elem)
-		list->tail = prev;
+	if(DS_PRIV(list)->head == elem)
+		DS_PRIV(list)->head = elem->next;
+	if(DS_PRIV(list)->tail == elem)
+		DS_PRIV(list)->tail = prev;
 
 	if(prev)
 		prev->next = elem->next;
 
-	(list->length)--;
+	(DS_PRIV(list)->length)--;
 }
 
-static void __delete_before(struct single_list * list, struct sl_element * mark)
+static void __delete_before(single_list list, struct sl_element * mark)
 {
 	struct sl_element * current;
 
@@ -197,15 +191,15 @@ static void __delete_before(struct single_list * list, struct sl_element * mark)
 		free(current->data);
 		free(current);
 
-		(list->length)--;
+		(DS_PRIV(list)->length)--;
 	}
 
-	list->head = mark;
+	DS_PRIV(list)->head = mark;
 	if(!mark)
-		list->tail = NULL;
+		DS_PRIV(list)->tail = NULL;
 }
 
-static void __delete_after(struct single_list * list, struct sl_element * mark)
+static void __delete_after(single_list list, struct sl_element * mark)
 {
 	bool passover = true;
 	struct sl_element * current;
@@ -215,32 +209,31 @@ static void __delete_after(struct single_list * list, struct sl_element * mark)
 			free(current->data);
 			free(current);
 
-			(list->length)--;
+			(DS_PRIV(list)->length)--;
 		}
 
 		if(current == mark)
 			passover = false;
 	}
 
-	list->tail = mark;
+	DS_PRIV(list)->tail = mark;
 	if(mark)
 		mark->next = NULL;
 	else
-		list->head = NULL;
+		DS_PRIV(list)->head = NULL;
 }
 
-int sl_alloc(struct single_list ** list, size_t data_size)
+int sl_alloc(single_list * list, struct ds_properties * props)
 {
 	int err;
 
 	*list = calloc(1, sizeof(**list));
-	if(!*list) {
-		err = -ENOMEM;
-		goto exit;
-	}
+	if(!*list)
+		goto_with_errno(ENOMEM, exit);
 
-	(*list)->data_size = data_size;
-	err = rwlock_alloc(&(*list)->rwlock);
+	DS_INIT(*list, props, NULL, NULL);
+
+	err = rwlock_alloc(&DS_PRIV(*list)->rwlock);
 	if(err)
 		goto exit;
 
@@ -251,66 +244,64 @@ exit:
 	return err;
 }
 
-void sl_free(struct single_list ** list)
+void sl_free(single_list* list)
 {
 	struct sl_element * current;
 
-	rwlock_writer_entry((*list)->rwlock);
-
-	(*list)->length = 0;
+	rwlock_writer_entry(DS_PRIV(*list)->rwlock);
 
 	linked_list_foreach_safe(*list, current) {
 		free(current->data);
 		free(current);
 	}
 
-	rwlock_writer_exit((*list)->rwlock);
-	rwlock_free(&(*list)->rwlock);
+	rwlock_writer_exit(DS_PRIV(*list)->rwlock);
+	rwlock_free(&DS_PRIV(*list)->rwlock);
 
-	free(*list);
+	DS_FREE(list);
 }
 
-bool sl_null(struct single_list * list)
+bool sl_null(single_list list)
 {
 	bool null;
 
-	rwlock_reader_entry(list->rwlock);
-	null = (list->length == 0);
-	rwlock_reader_exit(list->rwlock);
+	rwlock_reader_entry(DS_PRIV(list)->rwlock);
+	null = (DS_PRIV(list)->length == 0);
+	rwlock_reader_exit(DS_PRIV(list)->rwlock);
 
 	return null;
 }
 
-void sl_push_head(struct single_list * list, void * data)
+void sl_push_head(single_list list, void * data)
 {
 	struct sl_element * current;
 
-	current = __element_init(list, data);
+	current = __create_element(data, DS_DATA_SIZE(list));
 
-	rwlock_writer_entry(list->rwlock);
+	rwlock_writer_entry(DS_PRIV(list)->rwlock);
 	__push_head(list, current);
-	rwlock_writer_exit(list->rwlock);
+	rwlock_writer_exit(DS_PRIV(list)->rwlock);
 }
 
-void sl_push_tail(struct single_list * list, void * data)
+void sl_push_tail(single_list list, void * data)
 {
 	struct sl_element * current;
 
-	current = __element_init(list, data);
+	current = __create_element(data, DS_DATA_SIZE(list));
 
-	rwlock_writer_entry(list->rwlock);
+	rwlock_writer_entry(DS_PRIV(list)->rwlock);
 	__push_tail(list, current);
-	rwlock_writer_exit(list->rwlock);
+	rwlock_writer_exit(DS_PRIV(list)->rwlock);
 }
 
-void * sl_pop_head(struct single_list * list)
+void * sl_pop_head(single_list list)
 {
 	void * data = NULL;
 	struct sl_element * current;
 
-	rwlock_writer_entry(list->rwlock);
+	rwlock_writer_entry(DS_PRIV(list)->rwlock);
 	current = __pop_head(list);
-	rwlock_writer_exit(list->rwlock);
+	rwlock_writer_exit(DS_PRIV(list)->rwlock);
 
 	if(current) {
 		data = current->data;
@@ -320,14 +311,14 @@ void * sl_pop_head(struct single_list * list)
 	return data;
 }
 
-void * sl_pop_tail(struct single_list * list)
+void * sl_pop_tail(single_list list)
 {
 	void * data = NULL;
 	struct sl_element * current;
 
-	rwlock_writer_entry(list->rwlock);
+	rwlock_writer_entry(DS_PRIV(list)->rwlock);
 	current = __pop_tail(list);
-	rwlock_writer_exit(list->rwlock);
+	rwlock_writer_exit(DS_PRIV(list)->rwlock);
 
 	if(current) {
 		data = current->data;
@@ -337,27 +328,27 @@ void * sl_pop_tail(struct single_list * list)
 	return data;
 }
 
-bool sl_insert(struct single_list * list, void * data, size_t pos)
+bool sl_insert(single_list list, void * data, size_t pos)
 {
 	bool success;
 	struct sl_element * current;
 
-	current = __element_init(list, data);
+	current = __create_element(data, DS_DATA_SIZE(list));
 
-	rwlock_writer_entry(list->rwlock);
+	rwlock_writer_entry(DS_PRIV(list)->rwlock);
 	success = __insert_element(list, current, pos);
-	rwlock_writer_exit(list->rwlock);
+	rwlock_writer_exit(DS_PRIV(list)->rwlock);
 
 	return success;
 }
 
-bool sl_delete(struct single_list * list, size_t pos)
+bool sl_delete(single_list list, size_t pos)
 {
 	struct sl_element * current;
 
-	rwlock_writer_entry(list->rwlock);
+	rwlock_writer_entry(DS_PRIV(list)->rwlock);
 	current = __remove_element(list, pos);
-	rwlock_writer_exit(list->rwlock);
+	rwlock_writer_exit(DS_PRIV(list)->rwlock);
 
 	if(current) {
 		free(current->data);
@@ -369,14 +360,14 @@ bool sl_delete(struct single_list * list, size_t pos)
 	return false;
 }
 
-void * sl_remove(struct single_list * list, size_t pos)
+void * sl_remove(single_list list, size_t pos)
 {
 	void * data = NULL;
 	struct sl_element * current;
 
-	rwlock_writer_entry(list->rwlock);
+	rwlock_writer_entry(DS_PRIV(list)->rwlock);
 	current = __remove_element(list, pos);
-	rwlock_writer_exit(list->rwlock);
+	rwlock_writer_exit(DS_PRIV(list)->rwlock);
 
 	if(current) {
 		data = current->data;
@@ -386,13 +377,13 @@ void * sl_remove(struct single_list * list, size_t pos)
 	return data;
 }
 
-void * sl_fetch(struct single_list * list, size_t pos)
+void * sl_fetch(single_list list, size_t pos)
 {
 	struct sl_element * current;
 
-	rwlock_reader_entry(list->rwlock);
+	rwlock_reader_entry(DS_PRIV(list)->rwlock);
 	current = __lookup_element(list, pos);
-	rwlock_reader_exit(list->rwlock);
+	rwlock_reader_exit(DS_PRIV(list)->rwlock);
 
 	if(current)
 		return current->data;
@@ -411,21 +402,21 @@ void * sl_fetch(struct single_list * list, size_t pos)
  *
  * Return: ``true`` if a matching entry is found, otherwise ``false``
  */
-bool sl_contains(struct single_list * list, void * data)
+bool sl_contains(single_list list, void * data)
 {
 	bool success = false;
 	struct sl_element * current;
 
-	rwlock_reader_entry(list->rwlock);
+	rwlock_reader_entry(DS_PRIV(list)->rwlock);
 
 	linked_list_foreach(list, current) {
-		if(memcmp(current->data, data, list->data_size) == 0) {
+		if(memcmp(current->data, data, DS_PRIV(list)->data_size) == 0) {
 			success = true;
 			break;
 		}
 	}
 
-	rwlock_reader_exit(list->rwlock);
+	rwlock_reader_exit(DS_PRIV(list)->rwlock);
 
 	return success;
 }
@@ -446,7 +437,7 @@ bool sl_contains(struct single_list * list, void * data)
  * Return: ``true`` if there is at least one value that satisfies the predicate.
  * Otherwise, it returns ``false``.
  */
-bool sl_any(struct single_list * list, pred_fn p)
+bool sl_any(single_list list, pred_fn p)
 {
 	bool success = false;
 	struct sl_element * current;
@@ -454,7 +445,7 @@ bool sl_any(struct single_list * list, pred_fn p)
 	if(sl_null(list))
 		return false;
 
-	rwlock_reader_entry(list->rwlock);
+	rwlock_reader_entry(DS_PRIV(list)->rwlock);
 
 	linked_list_foreach(list, current) {
 		if(p(current->data)) {
@@ -463,7 +454,7 @@ bool sl_any(struct single_list * list, pred_fn p)
 		}
 	}
 
-	rwlock_reader_exit(list->rwlock);
+	rwlock_reader_exit(DS_PRIV(list)->rwlock);
 
 	return success;
 }
@@ -484,7 +475,7 @@ bool sl_any(struct single_list * list, pred_fn p)
  * Return: ``false`` if there is at least one value that does not satisfy the
  * predicate.  Otherwise, it returns ``true``.
  */
-bool sl_all(struct single_list * list, pred_fn p)
+bool sl_all(single_list list, pred_fn p)
 {
 	bool success = true;
 	struct sl_element * current;
@@ -492,7 +483,7 @@ bool sl_all(struct single_list * list, pred_fn p)
 	if(sl_null(list))
 		return false;
 
-	rwlock_reader_entry(list->rwlock);
+	rwlock_reader_entry(DS_PRIV(list)->rwlock);
 
 	linked_list_foreach(list, current) {
 		if(!p(current->data)) {
@@ -501,12 +492,12 @@ bool sl_all(struct single_list * list, pred_fn p)
 		}
 	}
 
-	rwlock_reader_exit(list->rwlock);
+	rwlock_reader_exit(DS_PRIV(list)->rwlock);
 
 	return success;
 }
 
-bool sl_filter(struct single_list * list, pred_fn p)
+bool sl_filter(single_list list, pred_fn p)
 {
 	bool changed = false;
 	struct sl_element * current;
@@ -514,7 +505,7 @@ bool sl_filter(struct single_list * list, pred_fn p)
 	if(sl_null(list))
 		return false;
 
-	rwlock_writer_entry(list->rwlock);
+	rwlock_writer_entry(DS_PRIV(list)->rwlock);
 
 	linked_list_foreach_safe(list, current) {
 		if(!p(current->data)) {
@@ -526,19 +517,19 @@ bool sl_filter(struct single_list * list, pred_fn p)
 		}
 	}
 
-	rwlock_writer_exit(list->rwlock);
+	rwlock_writer_exit(DS_PRIV(list)->rwlock);
 
 	return changed;
 }
 
-bool sl_drop_while(struct single_list * list, pred_fn p)
+bool sl_drop_while(single_list list, pred_fn p)
 {
 	size_t orig_length;
 	struct sl_element * current;
 
-	rwlock_writer_entry(list->rwlock);
+	rwlock_writer_entry(DS_PRIV(list)->rwlock);
 
-	orig_length = list->length;
+	orig_length = DS_PRIV(list)->length;
 
 	/* Iterate over the list until we find the first element that doesn't
 	 * satisfy the predicate; delete everything before that element.
@@ -553,20 +544,20 @@ bool sl_drop_while(struct single_list * list, pred_fn p)
 		__delete_before(list, NULL);
 	}
 
-	rwlock_writer_exit(list->rwlock);
+	rwlock_writer_exit(DS_PRIV(list)->rwlock);
 
-	return (orig_length != list->length);
+	return (orig_length != DS_PRIV(list)->length);
 }
 
-bool sl_take_while(struct single_list * list, pred_fn p)
+bool sl_take_while(single_list list, pred_fn p)
 {
 	size_t orig_length;
 	struct sl_element * current;
 	struct sl_element * prev = NULL;
 
-	rwlock_writer_entry(list->rwlock);
+	rwlock_writer_entry(DS_PRIV(list)->rwlock);
 
-	orig_length = list->length;
+	orig_length = DS_PRIV(list)->length;
 
 	/* Iterate over the list until we find the first element that doesn't
 	 * satisfy the predicate; delete that element and every one after. */
@@ -579,9 +570,9 @@ bool sl_take_while(struct single_list * list, pred_fn p)
 		prev = current;
 	}
 
-	rwlock_writer_exit(list->rwlock);
+	rwlock_writer_exit(DS_PRIV(list)->rwlock);
 
-	return (orig_length != list->length);
+	return (orig_length != DS_PRIV(list)->length);
 }
 
 /**
@@ -594,15 +585,15 @@ bool sl_take_while(struct single_list * list, pred_fn p)
  * A map operation iterates over the provided list (@list) and transforms each
  * data element using the function @fn, replacing the old value with the result
  * of the transformation:
- * for i from 0 to &list->length:
+ * for i from 0 to &DS_PRIV(list)->length:
  * 	@list[i] = @fn(@list[i])
  */
-void sl_map(struct single_list * list, map_fn fn)
+void sl_map(single_list list, map_fn fn)
 {
 	void * result;
 	struct sl_element * current;
 
-	rwlock_writer_entry(list->rwlock);
+	rwlock_writer_entry(DS_PRIV(list)->rwlock);
 	linked_list_foreach(list, current) {
 		result = fn(current->data);
 
@@ -612,11 +603,11 @@ void sl_map(struct single_list * list, map_fn fn)
 		 * reference is lost in the next iteration.
 		 */
 		if(result != current->data) {
-			memcpy(current->data, result, list->data_size);
+			memcpy(current->data, result, DS_PRIV(list)->data_size);
 			free(result);
 		}
 	}
-	rwlock_writer_exit(list->rwlock);
+	rwlock_writer_exit(DS_PRIV(list)->rwlock);
 }
 
 /**
@@ -626,7 +617,7 @@ void sl_map(struct single_list * list, map_fn fn)
  * Reverses a list in place so that the elements are in reverse order and the
  * head and tail are switched.
  */
-void sl_reverse(struct single_list * list)
+void sl_reverse(single_list list)
 {
 	struct sl_element * current;
 	struct sl_element * tmp = NULL;
@@ -637,9 +628,9 @@ void sl_reverse(struct single_list * list)
 	}
 
 	/* Swap the list head and tail */
-	tmp = list->head;
-	list->head = list->tail;
-	list->tail = tmp;
+	tmp = DS_PRIV(list)->head;
+	DS_PRIV(list)->head = DS_PRIV(list)->tail;
+	DS_PRIV(list)->tail = tmp;
 }
 
 /**
@@ -656,7 +647,7 @@ void sl_reverse(struct single_list * list)
  *
  * If @list is empty, the fold will be equal to the value of @init.
  */
-void * sl_foldr(const struct single_list * list,
+void * sl_foldr(const single_list list,
 		foldr_fn fn,
 		const void * init)
 {
@@ -664,10 +655,10 @@ void * sl_foldr(const struct single_list * list,
 	void * accumulator;
 	struct sl_element * current;
 
-	accumulator = malloc(list->data_size);
-	memcpy(accumulator, init, list->data_size);
+	accumulator = malloc(DS_PRIV(list)->data_size);
+	memcpy(accumulator, init, DS_PRIV(list)->data_size);
 
-	rwlock_reader_entry(list->rwlock);
+	rwlock_reader_entry(DS_PRIV(list)->rwlock);
 	linked_list_foreach(list, current) {
 		result = fn(current->data, accumulator);
 
@@ -677,11 +668,11 @@ void * sl_foldr(const struct single_list * list,
 		 * reference is lost in the next iteration.
 		 */
 		if(result != accumulator) {
-			memcpy(accumulator, result, list->data_size);
+			memcpy(accumulator, result, DS_PRIV(list)->data_size);
 			free(result);
 		}
 	}
-	rwlock_reader_exit(list->rwlock);
+	rwlock_reader_exit(DS_PRIV(list)->rwlock);
 
 	return accumulator;
 }
@@ -700,7 +691,7 @@ void * sl_foldr(const struct single_list * list,
  *
  * If @list is empty, the fold will be equal to the value of @init.
  */
-void * sl_foldl(const struct single_list * list,
+void * sl_foldl(const single_list list,
 		foldl_fn fn,
 		const void * init)
 {
@@ -708,10 +699,10 @@ void * sl_foldl(const struct single_list * list,
 	void * accumulator;
 	struct sl_element * current;
 
-	accumulator = malloc(list->data_size);
-	memcpy(accumulator, init, list->data_size);
+	accumulator = malloc(DS_PRIV(list)->data_size);
+	memcpy(accumulator, init, DS_PRIV(list)->data_size);
 
-	rwlock_reader_entry(list->rwlock);
+	rwlock_reader_entry(DS_PRIV(list)->rwlock);
 	linked_list_foreach(list, current) {
 		result = fn(accumulator, current->data);
 
@@ -721,11 +712,11 @@ void * sl_foldl(const struct single_list * list,
 		 * reference is lost in the next iteration.
 		 */
 		if(result != accumulator) {
-			memcpy(accumulator, result, list->data_size);
+			memcpy(accumulator, result, DS_PRIV(list)->data_size);
 			free(result);
 		}
 	}
-	rwlock_reader_exit(list->rwlock);
+	rwlock_reader_exit(DS_PRIV(list)->rwlock);
 
 	return accumulator;
 }

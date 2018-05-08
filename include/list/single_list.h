@@ -22,7 +22,7 @@
 
 #include "focs.h"
 #include "focs/hof.h"
-#include "list/linked_list.h"
+#include "focs/data_structure.h"
 #include "sync/rwlock.h"
 
 /**
@@ -42,14 +42,14 @@ struct sl_element {
  *
  * Initialize this structure with sl_alloc(), and destroy it with sl_free().
  */
-struct single_list {
+START_DS(single_list) {
 	struct sl_element * head;
 	struct sl_element * tail;
 	size_t length;
 	size_t data_size;
 
 	struct rwlock * rwlock;
-};
+} END_DS(single_list);
 
 /* ########################## *
  * # Creation & Destruction # *
@@ -66,7 +66,7 @@ struct single_list {
  * @return Upon successful completion, sl_alloc() shall return `0`.  Otherwise,
  * `-1` shall be returned and `errno` set to indicate the error.
  */
-int sl_alloc(struct single_list ** list, size_t data_size);
+int sl_alloc(single_list * list, struct ds_properties * props);
 
 /**
  * Destroy and deallocate a singly linked list.
@@ -76,7 +76,7 @@ int sl_alloc(struct single_list ** list, size_t data_size);
  * De-allocates the singly linked list at the structure pointer pointed to by
  * `list`, as well as de-allocating all data elements contained within `list`.
  */
-void sl_free(struct single_list ** list);
+void sl_free(single_list * list);
 
 /* ############################# *
  * # Data Management Functions # *
@@ -89,7 +89,7 @@ void sl_free(struct single_list ** list);
  *
  * Push a newly allocated copy of `data` onto the head of `list`.
  */
-void sl_push_head(struct single_list * list, void * data);
+void sl_push_head(single_list list, void * data);
 
 /**
  * Push a new data element to the tail of the list.
@@ -98,7 +98,7 @@ void sl_push_head(struct single_list * list, void * data);
  *
  * Push a newly allocated copy of `data` onto the tail of `list`.
  */
-void sl_push_tail(struct single_list * list, void * data);
+void sl_push_tail(single_list list, void * data);
 
 /**
  * Pop a data element from the head of a list.
@@ -112,7 +112,7 @@ void sl_push_tail(struct single_list * list, void * data);
  * **not** equivalent to the pointer which was used to insert the data into
  * `list`.
  */
-void * sl_pop_head(struct single_list * list);
+void * sl_pop_head(single_list list);
 
 /**
  * Pop a data element from the tail of a list.
@@ -126,7 +126,7 @@ void * sl_pop_head(struct single_list * list);
  * **not** equivalent to the pointer which was used to insert the data into
  * `list`.
  */
-void * sl_pop_tail(struct single_list * list);
+void * sl_pop_tail(single_list list);
 
 /**
  * Insert a new data element to a given position in a list.
@@ -140,7 +140,7 @@ void * sl_pop_tail(struct single_list * list);
  *
  * @return `true` if the insertion succeeds, otherwise `false`.
  */
-bool sl_insert(struct single_list * list, void * data, size_t pos);
+bool sl_insert(single_list list, void * data, size_t pos);
 
 /**
  * Delete a data element from a given position in a list.
@@ -152,7 +152,7 @@ bool sl_insert(struct single_list * list, void * data, size_t pos);
  *
  * @return `true` if the deletion succeeds, otherwise `false`.
  */
-bool sl_delete(struct single_list * list, size_t pos);
+bool sl_delete(single_list list, size_t pos);
 
 /**
  * Delete and return a data element from a given position in a list.
@@ -168,7 +168,7 @@ bool sl_delete(struct single_list * list, size_t pos);
  * needed.  It is **not** equivalent to the pointer which was used to insert
  * the data into `list`.
  */
-void * sl_remove(struct single_list * list, size_t pos);
+void * sl_remove(single_list list, size_t pos);
 
 /**
  * Fetch a data element from a given position in a list.
@@ -184,7 +184,7 @@ void * sl_remove(struct single_list * list, size_t pos);
  * the data is needed after the list is destroyed, make a copy of it, or make
  * sure to call sl_remove() on the data's index before destroying the list.
  */
-void * sl_fetch(struct single_list * list, size_t pos);
+void * sl_fetch(single_list list, size_t pos);
 
 /* ############################ *
  * # Transformation Functions # *
@@ -202,7 +202,7 @@ void * sl_fetch(struct single_list * list, size_t pos);
  * 	list[i] = fn(list[i])
  * ```
  */
-void sl_map(struct single_list * list, map_fn fn);
+void sl_map(single_list list, map_fn fn);
 
 /**
  * Reverse a list in place.
@@ -211,7 +211,7 @@ void sl_map(struct single_list * list, map_fn fn);
  * Reverses a list in place so that the elements are in reverse order and the
  * head and tail are switched.
  */
-void sl_reverse(struct single_list * list);
+void sl_reverse(single_list list);
 
 /**
  * Right associative fold for singly linked lists.
@@ -228,7 +228,7 @@ void sl_reverse(struct single_list * list);
  * @return The result of a right associate fold over `list`.  If `list` is
  * empty, the fold will be equal to the value of `init`.
  */
-void * sl_foldr(const struct single_list * list,
+void * sl_foldr(const single_list list,
 		foldr_fn fn,
 		const void * init);
 
@@ -247,7 +247,7 @@ void * sl_foldr(const struct single_list * list,
  * @return The result of a left associate fold over `list`.  If `list` is
  * empty, the fold will be equal to the value of `init`.
  */
-void * sl_foldl(const struct single_list * list,
+void * sl_foldl(const single_list list,
 		foldl_fn fn,
 		const void * init);
 
@@ -260,7 +260,7 @@ void * sl_foldl(const struct single_list * list,
  *
  * @return `true` if `list` is empty, `false` otherwise.
  */
-bool sl_null(struct single_list * list);
+bool sl_null(single_list list);
 
 /**
  * Determine if a list contains a value.
@@ -273,7 +273,7 @@ bool sl_null(struct single_list * list);
  *
  * @return `true` if a matching entry is found, otherwise `false`
  */
-bool sl_contains(struct single_list * list, void * data);
+bool sl_contains(single_list list, void * data);
 
 /**
  * Determine if any value in a list satisifies some condition.
@@ -286,7 +286,7 @@ bool sl_contains(struct single_list * list, void * data);
  * @return `true` if there is at least one value that satisfies the predicate.
  * Otherwise, it returns `false`.
  */
-bool sl_any(struct single_list * list, pred_fn p);
+bool sl_any(single_list list, pred_fn p);
 
 /**
  * Determines if all values in a list satisify some condition
@@ -299,7 +299,7 @@ bool sl_any(struct single_list * list, pred_fn p);
  * @return `false` if there is at least one value that does not satisfy the
  * predicate.  Otherwise, it returns `true`.
  */
-bool sl_all(struct single_list * list, pred_fn p);
+bool sl_all(single_list list, pred_fn p);
 
 /* ############################ *
  * # Filtering # *
@@ -313,7 +313,7 @@ bool sl_all(struct single_list * list, pred_fn p);
  * predicate `p`.  Elements that do satisfy the predicate `p` are not removed
  * from the list.
  */
-bool sl_filter(struct single_list * list, pred_fn p);
+bool sl_filter(single_list list, pred_fn p);
 
 /**
  * Drop elements from the head of the list until the predicate is unsatisfied.
@@ -324,7 +324,7 @@ bool sl_filter(struct single_list * list, pred_fn p);
  *
  * This function is an in-place equivalent of Haskell's dropWhile.
  */
-bool sl_drop_while(struct single_list * list, pred_fn p);
+bool sl_drop_while(single_list list, pred_fn p);
 
 /**
  * Keep elements from the head of the list until the predicate is unsatisfied.
@@ -335,6 +335,102 @@ bool sl_drop_while(struct single_list * list, pred_fn p);
  *
  * This function is an in-place equivalent of Haskell's takeWhile.
  */
-bool sl_take_while(struct single_list * list, pred_fn p);
+bool sl_take_while(single_list list, pred_fn p);
+
+#define NEXT_SAFE(current) ((current) ? (current)->next : NULL)
+
+/**
+ * Advance through a linked list element by element.
+ * @param list The list to iterate over
+ * @param current A list element pointer that will point to the current element
+ *
+ * linked_list_foreach() should be used like a for loop; for example:
+ * ```
+ * struct element_type * current;
+ * linked_list_foreach(list, current) {
+ *         do_something(current);
+ * }
+ * ```
+ * Do not modify the element's `next` pointer inside the body of the loop, or
+ * the behavior of linked_list_foreach() is undefined.  See linked_list_foreach_safe()
+ * instead.
+ */
+#define linked_list_foreach(list, current)	\
+	for(current = DS_PRIV(list)->head;	\
+	    current;				\
+	    current = current->next)
+
+/**
+ * Advance through a linked list element by element.
+ * @param list The list to iterate over
+ * @param current A list element pointer that will point to the current element
+ *
+ * The syntax of linked_list_foreach_safe() is the same as linked_list_foreach().
+ * However, it is safe to change the `next` pointer in the current element
+ * during the loop body.
+ */
+#define linked_list_foreach_safe(list, current)				\
+	void * _tmp;							\
+	for(current = DS_PRIV(list)->head, _tmp = NEXT_SAFE(current);	\
+	    current;							\
+	    current = _tmp, _tmp = NEXT_SAFE(current))
+
+/**
+ * Advance through a linked list while some condition is true.
+ * @param list The list to iterate over
+ * @param current A list element pointer that will point to the current element
+ * @param condition A condition that will determine whether to continue iterating
+ *
+ * linked_list_while() should be used like a while loop; for example:
+ * ```
+ * struct element_type * current;
+ * linked_list_while(list, current, current->data != NULL) {
+ *         do_something(current->data);
+ * }
+ * ```
+ * Do not modify the element's `next` pointer inside the body of the loop, or
+ * the behavior of linked_list_while() is undefined.  See linked_list_while_safe()
+ * instead.
+ */
+#define linked_list_while(list, current, condition)	\
+	for(current = DS_PRIV(list)->head;		\
+	    current && (condition);			\
+	    current = current->next)
+
+/**
+ * Advance through a linked list element by element.
+ * @param list The list to iterate over
+ * @param current A list element pointer that will point to the current element
+ * @param condition A condition that will determine whether to continue iterating
+ *
+ * The syntax of linked_list_while_safe() is the same as linked_list_while().
+ * However, it is safe to change the `next` pointer in the current element
+ * during the loop body.
+ */
+#define linked_list_while_safe(list, current, condition)		\
+	void * _tmp;							\
+	for(current = DS_PRIV(list)->head, _tmp = NEXT_SAFE(current);	\
+	    current && (condition);					\
+	    current = _tmp, _tmp = NEXT_SAFE(current))
+
+/**
+ * Run a block of code if the preceeding loop did not break.
+ * @param current The same current element used in the preceeding loop.
+ *
+ * otherwise() should directly follow a linklist loop in the same way an
+ * `else` statement follows an `if` block.  It's function is the same as
+ * the `for/else` construction in Python.  If the preceeding loop advanced
+ * all the way through the list and did not break or exit the loop on any
+ * element, the otherwise block will be called.  For example:
+ * ```
+ * linked_list_foreach(list, current) {
+ *         if(!current->data)
+ *                 break;
+ * } otherwise(current) {
+ *         puts("No NULL data elements.");
+ * }
+ * ```
+ */
+#define otherwise(current) if(!current)
 
 #endif /* __SINGLE_LIST_H */
