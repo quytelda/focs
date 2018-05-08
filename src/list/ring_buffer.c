@@ -93,6 +93,17 @@ static inline __pure size_t __addr_to_phy(const ring_buffer buf,
 	return (pos <= 0) ? (size_t) pos : DS_ENTRIES(buf) + pos;
 }
 
+static inline __pure size_t __virt_to_phy(const ring_buffer buf,
+					  const ssize_t virt)
+{
+	size_t abs_virt;
+	size_t phy_head;
+
+	phy_head = __addr_to_phy(buf, DS_PRIV(buf)->head);
+	abs_virt = mod(virt, (ssize_t) __length(buf));
+	return (abs_virt + phy_head) % DS_ENTRIES(buf);
+}
+
 static inline void * __write(const ring_buffer buf,
 			     const void * data,
 			     const ssize_t pos)
