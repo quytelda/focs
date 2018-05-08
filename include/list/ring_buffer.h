@@ -169,3 +169,40 @@ void * rb_fetch(ring_buffer buf,
  */
 void rb_dump(ring_buffer buf);
 #endif /* DEBUG */
+
+#ifdef ZERO
+
+static inline void __zero(const ring_buffer buf,
+			  const ssize_t pos)
+{
+	addr = __rbpos_to_addr(buf, pos);
+	bzero(addr, DS_PROPS(buf)->data_size);
+}
+
+#else /* ZERO */
+
+static inline void __zero(const ring_buffer buf,
+			  const ssize_t pos)
+{}
+
+#endif /* ZERO */
+
+
+#ifdef GENERIC_OPS
+
+const static struct mgmt_operations mgmt_ops = {
+	.create  = (create_mgmt_fn)  rb_create,
+	.destroy = (destroy_mgmt_fn) rb_destroy,
+	.size    = (size_mgmt_fn)    rb_size,
+};
+
+const static struct hof_operations hof_ops = {
+	.empty = (empty_hof_fn) rb_empty,
+};
+
+#else /* GENERIC_OPS */
+
+__PLACEHOLDER_SYM(mgmt_ops);
+__PLACEHOLDER_SYM(hof_ops);
+
+#endif /* GENERIC_OPS */

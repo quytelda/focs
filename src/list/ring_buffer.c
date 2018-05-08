@@ -20,30 +20,6 @@
 #include "list/ring_buffer.h"
 #include "sync/rwlock.h"
 
-#ifdef GENERIC_OPS
-
-const static struct mgmt_operations mgmt_ops = {
-	.create  = (create_mgmt_fn)  rb_create,
-	.destroy = (destroy_mgmt_fn) rb_destroy,
-};
-
-const static struct hof_operations hof_ops = {
-	.empty = (empty_hof) rb_empty,
-};
-
-#else /* GENERIC_OPS */
-
-__PLACEHOLDER_SYM(mgmt_ops);
-__PLACEHOLDER_SYM(hof_ops);
-
-#endif /* GENERIC_OPS */
-
-#ifdef OVERWRITE
-static const bool rb_overwrite = true;
-#else /* OVERWRITE */
-static const bool rb_overwrite = false;
-#endif /* OVERWRITE */
-
 __attribute__((pure))
 static inline size_t __length(const ring_buffer buf)
 {
@@ -146,21 +122,6 @@ static inline void * __read(const ring_buffer buf,
 
 	return addr;
 }
-
-#ifdef ZERO
-
-static inline void * __zero(const ring_buffer buf,
-			    const ssize_t pos)
-{
-	void * addr;
-
-	addr = __rbpos_to_addr(buf, pos);
-	bzero(addr, DS_PROPS(buf)->data_size);
-
-	return addr;
-}
-
-#endif /* ZERO */
 
 static void * __pop_head(ring_buffer buf)
 {
@@ -332,11 +293,8 @@ static void * __remove(ring_buffer buf,
 	 * so this function behaves as the inverse of __insert(). */
 	if(!overwrite)
 		__close_gap(buf, pos);
-#ifdef ZERO
 	else
 		__zero(buf, pos);
-#endif /* ZERO */
-
 	return data;
 }
 
@@ -352,10 +310,8 @@ static bool __delete(ring_buffer buf,
 	 * so this function behaves as the inverse of __insert(). */
 	if(!overwrite)
 		__close_gap(buf, pos);
-#ifdef ZERO
 	else
 		__zero(buf, pos);
-#endif /* ZERO */
 
 	return true;
 }
@@ -461,7 +417,7 @@ bool rb_push_head(ring_buffer buf, const void * data)
 	bool success;
 
 	rwlock_writer_entry(DS_PRIV(buf)->rwlock);
-	success = __push_head(buf, data, rb_overwrite);
+	success = __push_head(buf, data, DS_PROPS(buf)->overwrite);
 	rwlock_writer_exit(DS_PRIV(buf)->rwlock);
 
 	return success;
@@ -472,7 +428,7 @@ bool rb_push_tail(ring_buffer buf, const void * data)
 	bool success;
 
 	rwlock_writer_entry(DS_PRIV(buf)->rwlock);
-	success = __push_tail(buf, data, rb_overwrite);
+	success = __push_tail(buf, data, DS_PROPS(buf)->overwrite);
 	rwlock_writer_exit(DS_PRIV(buf)->rwlock);
 
 	return success;
@@ -485,7 +441,7 @@ bool rb_insert(ring_buffer buf,
 	bool success;
 
 	rwlock_writer_entry(DS_PRIV(buf)->rwlock);
-	success = __insert(buf, data, pos, rb_overwrite);
+	success = __insert(buf, data, pos, DS_PROPS(buf)->overwrite);
 	rwlock_writer_exit(DS_PRIV(buf)->rwlock);
 
 	return success;
@@ -504,6 +460,7 @@ void * rb_fetch(ring_buffer buf,
 }
 
 #ifdef DEBUG
+
 void rb_dump(ring_buffer buf)
 {
 	struct ring_buffer_priv * priv;
@@ -542,5 +499,5 @@ void rb_dump(ring_buffer buf)
 		putchar('\n');
 	}
 }
-#endif /* DEBUG */
 
+#endif /* DEBUG */
