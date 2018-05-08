@@ -66,7 +66,7 @@ START_DS(single_list) {
  * @return Upon successful completion, sl_alloc() shall return `0`.  Otherwise,
  * `-1` shall be returned and `errno` set to indicate the error.
  */
-int sl_alloc(single_list * list, struct ds_properties * props);
+single_list sl_create(const struct ds_properties * props);
 
 /**
  * Destroy and deallocate a singly linked list.
@@ -336,6 +336,12 @@ bool sl_drop_while(single_list list, pred_fn p);
  * This function is an in-place equivalent of Haskell's takeWhile.
  */
 bool sl_take_while(single_list list, pred_fn p);
+
+#ifdef DEBUG
+#include <stdio.h>
+
+void sl_dump(single_list list);
+#endif /* DEBUG */
 
 #define NEXT_SAFE(current) ((current) ? (current)->next : NULL)
 

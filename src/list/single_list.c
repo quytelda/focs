@@ -33,6 +33,7 @@ static struct sl_element * __create_element(void * data,
 	if(!elem->data)
 		goto_with_errno(ENOMEM, exit);
 
+	memcpy(elem->data, data, data_size);
 	return elem;
 
 exit:
@@ -223,28 +224,34 @@ static void __delete_after(single_list list, struct sl_element * mark)
 		DS_PRIV(list)->head = NULL;
 }
 
-int sl_alloc(single_list * list, struct ds_properties * props)
+single_list sl_create(const struct ds_properties * props)
 {
-	int err;
+	single_list list;
+	struct single_list_priv * priv;
 
-	*list = calloc(1, sizeof(**list));
-	if(!*list)
-		goto_with_errno(ENOMEM, exit);
+	list = malloc(sizeof(*list));
+	if(!list)
+		return_with_errno(ENOMEM, NULL);
 
-	DS_INIT(*list, props, NULL, NULL);
+	DS_INIT(list, props, NULL, NULL);
 
-	err = rwlock_alloc(&DS_PRIV(*list)->rwlock);
-	if(err)
+	priv = DS_PRIV(list);
+	priv->head = NULL;
+	priv->tail = NULL;
+	priv->length = 0;
+
+	if(rwlock_alloc(&priv->rwlock) < 0)
 		goto exit;
 
-	return 0;
+	return list;
 
 exit:
-	free(*list);
-	return err;
+	sl_free(&list);
+
+	return NULL;
 }
 
-void sl_free(single_list* list)
+void sl_free(single_list * list)
 {
 	struct sl_element * current;
 
@@ -410,7 +417,7 @@ bool sl_contains(single_list list, void * data)
 	rwlock_reader_entry(DS_PRIV(list)->rwlock);
 
 	linked_list_foreach(list, current) {
-		if(memcmp(current->data, data, DS_PRIV(list)->data_size) == 0) {
+		if(memcmp(current->data, data, DS_DATA_SIZE(list)) == 0) {
 			success = true;
 			break;
 		}
@@ -603,7 +610,7 @@ void sl_map(single_list list, map_fn fn)
 		 * reference is lost in the next iteration.
 		 */
 		if(result != current->data) {
-			memcpy(current->data, result, DS_PRIV(list)->data_size);
+			memcpy(current->data, result, DS_DATA_SIZE(list));
 			free(result);
 		}
 	}
@@ -655,8 +662,8 @@ void * sl_foldr(const single_list list,
 	void * accumulator;
 	struct sl_element * current;
 
-	accumulator = malloc(DS_PRIV(list)->data_size);
-	memcpy(accumulator, init, DS_PRIV(list)->data_size);
+	accumulator = malloc(DS_DATA_SIZE(list));
+	memcpy(accumulator, init, DS_DATA_SIZE(list));
 
 	rwlock_reader_entry(DS_PRIV(list)->rwlock);
 	linked_list_foreach(list, current) {
@@ -668,7 +675,7 @@ void * sl_foldr(const single_list list,
 		 * reference is lost in the next iteration.
 		 */
 		if(result != accumulator) {
-			memcpy(accumulator, result, DS_PRIV(list)->data_size);
+			memcpy(accumulator, result, DS_DATA_SIZE(list));
 			free(result);
 		}
 	}
@@ -699,8 +706,8 @@ void * sl_foldl(const single_list list,
 	void * accumulator;
 	struct sl_element * current;
 
-	accumulator = malloc(DS_PRIV(list)->data_size);
-	memcpy(accumulator, init, DS_PRIV(list)->data_size);
+	accumulator = malloc(DS_DATA_SIZE(list));
+	memcpy(accumulator, init, DS_DATA_SIZE(list));
 
 	rwlock_reader_entry(DS_PRIV(list)->rwlock);
 	linked_list_foreach(list, current) {
@@ -712,7 +719,7 @@ void * sl_foldl(const single_list list,
 		 * reference is lost in the next iteration.
 		 */
 		if(result != accumulator) {
-			memcpy(accumulator, result, DS_PRIV(list)->data_size);
+			memcpy(accumulator, result, DS_DATA_SIZE(list));
 			free(result);
 		}
 	}
@@ -720,3 +727,9 @@ void * sl_foldl(const single_list list,
 
 	return accumulator;
 }
+
+#ifdef DEBUG
+void sl_dump(single_list list)
+{
+}
+#endif /* DEBUG */
