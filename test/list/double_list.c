@@ -21,16 +21,19 @@
 
 #include "list/double_list.h"
 
+static const struct ds_properties props = {
+	.data_size = sizeof(uint8_t),
+};
+
 START_TEST(test_dl_alloc)
 {
 	int err;
-	struct double_list * list = NULL;
+	double_list list = NULL;
 
-	err = dl_alloc(&list, 0);
+	list = dl_create(&props);
 
-	ck_assert(!err);
 	ck_assert(list);
-	ck_assert_int_eq(list->length, 0);
+	ck_assert(dl_null(list));
 
 	dl_free(&list);
 }
@@ -38,9 +41,9 @@ END_TEST
 
 START_TEST(test_dl_null_true)
 {
-	struct double_list * list;
+	double_list list;
 
-	dl_alloc(&list, 0);
+	list = dl_create(&props);
 	ck_assert(dl_null(list));
 	dl_free(&list);
 }
@@ -49,9 +52,9 @@ END_TEST
 START_TEST(test_dl_null_false)
 {
 	uint8_t val = 1;
-	struct double_list * list;
+	double_list list;
 
-	dl_alloc(&list, sizeof(val));
+	list = dl_create(&props);
 	dl_push_head(list, &val);
 	ck_assert(!dl_null(list));
 	dl_free(&list);
@@ -61,15 +64,15 @@ END_TEST
 START_TEST(test_dl_push_head_single)
 {
 	uint8_t val = 1;
-	struct double_list * list;
+	double_list list;
 
-	dl_alloc(&list, sizeof(val));
+	list = dl_create(&props);
 	dl_push_head(list, &val);
 
-	ck_assert(list->head);
-	ck_assert(list->tail);
-	ck_assert_int_eq(list->length, 1);
-	ck_assert_int_eq(*(uint8_t *) list->head->data, val);
+	ck_assert(DS_PRIV(list)->head);
+	ck_assert(DS_PRIV(list)->tail);
+	ck_assert_int_eq(DS_PRIV(list)->length, 1);
+	ck_assert_int_eq(*(uint8_t *) DS_PRIV(list)->head->data, val);
 
 	dl_free(&list);
 }
@@ -80,19 +83,19 @@ START_TEST(test_dl_push_head_multiple)
 	uint8_t val1 = 1;
 	uint8_t val2 = 2;
 	uint8_t val3 = 3;
-	struct double_list * list;
+	double_list list;
 
-	dl_alloc(&list, sizeof(val1));
+	list = dl_create(&props);
 
 	dl_push_head(list, &val1);
 	dl_push_head(list, &val2);
 	dl_push_head(list, &val3);
 
-	ck_assert(list->head);
-	ck_assert(list->tail);
-	ck_assert_int_eq(list->length, 3);
+	ck_assert(DS_PRIV(list)->head);
+	ck_assert(DS_PRIV(list)->tail);
+	ck_assert_int_eq(DS_PRIV(list)->length, 3);
 
-	struct dl_element * current = list->head;
+	struct dl_element * current = DS_PRIV(list)->head;
 	ck_assert_int_eq(*(uint8_t *) current->data, val3);
 	current = current->next;
 	ck_assert_int_eq(*(uint8_t *) current->data, val2);
@@ -107,15 +110,15 @@ END_TEST
 START_TEST(test_dl_push_tail_single)
 {
 	uint8_t val = 1;
-	struct double_list * list;
+	double_list list;
 
-	dl_alloc(&list, sizeof(uint8_t));
+	list = dl_create(&props);
 	dl_push_tail(list, &val);
 
-	ck_assert(list->head);
-	ck_assert(list->tail);
-	ck_assert_int_eq(list->length, 1);
-	ck_assert_int_eq(*(uint8_t *) list->head->data, val);
+	ck_assert(DS_PRIV(list)->head);
+	ck_assert(DS_PRIV(list)->tail);
+	ck_assert_int_eq(DS_PRIV(list)->length, 1);
+	ck_assert_int_eq(*(uint8_t *) DS_PRIV(list)->head->data, val);
 
 	dl_free(&list);
 }
@@ -126,19 +129,19 @@ START_TEST(test_dl_push_tail_multiple)
 	uint8_t val1 = 1;
 	uint8_t val2 = 2;
 	uint8_t val3 = 3;
-	struct double_list * list;
+	double_list list;
 
-	dl_alloc(&list, sizeof(uint8_t));
+	list = dl_create(&props);
 
 	dl_push_tail(list, &val1);
 	dl_push_tail(list, &val2);
 	dl_push_tail(list, &val3);
 
-	ck_assert(list->head);
-	ck_assert(list->tail);
-	ck_assert_int_eq(list->length, 3);
+	ck_assert(DS_PRIV(list)->head);
+	ck_assert(DS_PRIV(list)->tail);
+	ck_assert_int_eq(DS_PRIV(list)->length, 3);
 
-	struct dl_element * current = list->head;
+	struct dl_element * current = DS_PRIV(list)->head;
 	ck_assert_int_eq(*(uint8_t *) current->data, val1);
 	current = current->next;
 	ck_assert_int_eq(*(uint8_t *) current->data, val2);
@@ -153,15 +156,15 @@ END_TEST
 START_TEST(test_dl_pop_head_empty)
 {
 	void * val;
-	struct double_list * list;
+	double_list list;
 
-	dl_alloc(&list, 0);
+	list = dl_create(&props);
 
 	val = dl_pop_head(list);
 
 	ck_assert(!val);
-	ck_assert(!list->head);
-	ck_assert(!list->tail);
+	ck_assert(!DS_PRIV(list)->head);
+	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_null(list));
 
 	dl_free(&list);
@@ -172,15 +175,15 @@ START_TEST(test_dl_pop_head_single)
 {
 	uint8_t val = 1;
 	uint8_t * out;
-	struct double_list * list;
+	double_list list;
 
-	dl_alloc(&list, sizeof(val));
+	list = dl_create(&props);
 	dl_push_head(list, &val);
 
 	out = dl_pop_head(list);
 
-	ck_assert(!list->head);
-	ck_assert(!list->tail);
+	ck_assert(!DS_PRIV(list)->head);
+	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_null(list));
 
 	free(out);
@@ -197,9 +200,9 @@ START_TEST(test_dl_pop_head_multiple)
 	uint8_t * out1;
 	uint8_t * out2;
 	uint8_t * out3;
-	struct double_list * list;
+	double_list list;
 
-	dl_alloc(&list, sizeof(uint8_t));
+	list = dl_create(&props);
 
 	dl_push_head(list, &in1);
 	dl_push_head(list, &in2);
@@ -217,8 +220,8 @@ START_TEST(test_dl_pop_head_multiple)
 	ck_assert_int_eq(*out2, in2);
 	ck_assert_int_eq(*out3, in1);
 
-	ck_assert(!list->head);
-	ck_assert(!list->tail);
+	ck_assert(!DS_PRIV(list)->head);
+	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_null(list));
 
 	free(out1);
@@ -231,15 +234,15 @@ END_TEST
 START_TEST(test_dl_pop_tail_empty)
 {
 	void * val;
-	struct double_list * list;
+	double_list list;
 
-	dl_alloc(&list, 0);
+	list = dl_create(&props);
 
 	val = dl_pop_tail(list);
 
 	ck_assert(!val);
-	ck_assert(!list->head);
-	ck_assert(!list->tail);
+	ck_assert(!DS_PRIV(list)->head);
+	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_null(list));
 
 	dl_free(&list);
@@ -250,15 +253,15 @@ START_TEST(test_dl_pop_tail_single)
 {
 	uint8_t in = 1;
 	uint8_t * out;
-	struct double_list * list;
-	dl_alloc(&list, sizeof(in));
+	double_list list;
+	list = dl_create(&props);
 	dl_push_tail(list, &in);
 
 	out = dl_pop_tail(list);
 
 	ck_assert_int_eq(*out, in);
-	ck_assert(!list->head);
-	ck_assert(!list->tail);
+	ck_assert(!DS_PRIV(list)->head);
+	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_null(list));
 
 	free(out);
@@ -274,9 +277,9 @@ START_TEST(test_dl_pop_tail_multiple)
 	uint8_t * out1;
 	uint8_t * out2;
 	uint8_t * out3;
-	struct double_list * list;
+	double_list list;
 
-	dl_alloc(&list, sizeof(uint8_t));
+	list = dl_create(&props);
 
 	dl_push_tail(list, &in1);
 	dl_push_tail(list, &in2);
@@ -290,8 +293,8 @@ START_TEST(test_dl_pop_tail_multiple)
 	ck_assert_int_eq(*out2, in2);
 	ck_assert_int_eq(*out3, in1);
 
-	ck_assert(!list->head);
-	ck_assert(!list->tail);
+	ck_assert(!DS_PRIV(list)->head);
+	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_null(list));
 
 	free(out1);
@@ -305,16 +308,16 @@ START_TEST(test_dl_insert_single)
 {
 	uint8_t in = 1;
 	bool success;
-	struct double_list * list;
+	double_list list;
 
-	dl_alloc(&list, sizeof(uint8_t));
+	list = dl_create(&props);
 
 	success = dl_insert(list, &in, 0);
 
 	ck_assert(success);
-	ck_assert(list->head);
-	ck_assert(list->tail);
-	ck_assert_int_eq(list->length, 1);
+	ck_assert(DS_PRIV(list)->head);
+	ck_assert(DS_PRIV(list)->tail);
+	ck_assert_int_eq(DS_PRIV(list)->length, 1);
 
 	dl_free(&list);
 }
@@ -335,9 +338,9 @@ START_TEST(test_dl_insert_multiple)
 	uint8_t * out3;
 	uint8_t * out4;
 
-	struct double_list * list;
+	double_list list;
 
-	dl_alloc(&list, sizeof(uint8_t));
+	list = dl_create(&props);
 
 	/* Insert the elements out of order. */
 	/* [4 1 2 3] */
@@ -351,9 +354,9 @@ START_TEST(test_dl_insert_multiple)
 	ck_assert(r3);
 	ck_assert(r4);
 
-	ck_assert(list->head);
-	ck_assert(list->tail);
-	ck_assert_int_eq(list->length, 4);
+	ck_assert(DS_PRIV(list)->head);
+	ck_assert(DS_PRIV(list)->tail);
+	ck_assert_int_eq(DS_PRIV(list)->length, 4);
 
 	out1 = dl_pop_head(list); /* 4 */
 	out2 = dl_pop_head(list); /* 1 */
@@ -377,9 +380,9 @@ START_TEST(test_dl_delete_empty)
 {
 	bool r1;
 	bool r2;
-	struct double_list * list;
+	double_list list;
 
-	dl_alloc(&list, sizeof(uint8_t));
+	list = dl_create(&props);
 
 	r1 = dl_delete(list, 0);
 	r2 = dl_delete(list, 1);
@@ -387,8 +390,8 @@ START_TEST(test_dl_delete_empty)
 	ck_assert(!r1);
 	ck_assert(!r2);
 
-	ck_assert(!list->head);
-	ck_assert(!list->tail);
+	ck_assert(!DS_PRIV(list)->head);
+	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_null(list));
 
 	dl_free(&list);
@@ -401,9 +404,9 @@ START_TEST(test_dl_delete_single)
 	bool r1;
 	bool r2;
 	bool r3;
-	struct double_list * list;
+	double_list list;
 
-	dl_alloc(&list, sizeof(in));
+	list = dl_create(&props);
 	dl_push_head(list, &in);
 
 	r1 = dl_delete(list, 1); /* [1] -> [1] (false) */
@@ -414,8 +417,8 @@ START_TEST(test_dl_delete_single)
 	ck_assert(r2);
 	ck_assert(!r3);
 
-	ck_assert(!list->head);
-	ck_assert(!list->tail);
+	ck_assert(!DS_PRIV(list)->head);
+	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_null(list));
 
 	dl_free(&list);
@@ -433,10 +436,10 @@ START_TEST(test_dl_delete_multiple)
 	bool r3;
 	bool r4;
 	bool r5;
-	struct double_list * list;
+	double_list list;
 
 	/* Create linked list: [1, 2, 3, 4] */
-	dl_alloc(&list, sizeof(uint8_t));
+	list = dl_create(&props);
 	dl_push_tail(list, &in1);
 	dl_push_tail(list, &in2);
 	dl_push_tail(list, &in3);
@@ -454,8 +457,8 @@ START_TEST(test_dl_delete_multiple)
 	/* [] -> [] (false) */
 	r5 = dl_delete(list, 0);
 
-	ck_assert(!list->head);
-	ck_assert(!list->tail);
+	ck_assert(!DS_PRIV(list)->head);
+	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_null(list));
 
 	ck_assert(r1);
@@ -472,9 +475,9 @@ START_TEST(test_dl_remove_empty)
 {
 	void * val1;
 	void * val2;
-	struct double_list * list;
+	double_list list;
 
-	dl_alloc(&list, sizeof(uint8_t));
+	list = dl_create(&props);
 
 	val1 = dl_remove(list, 0);
 	val2 = dl_remove(list, 1);
@@ -482,8 +485,8 @@ START_TEST(test_dl_remove_empty)
 	ck_assert(!val1);
 	ck_assert(!val2);
 
-	ck_assert(!list->head);
-	ck_assert(!list->tail);
+	ck_assert(!DS_PRIV(list)->head);
+	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_null(list));
 
 	dl_free(&list);
@@ -494,9 +497,9 @@ START_TEST(test_dl_remove_single)
 {
 	uint8_t in = 1;
 	uint8_t * out;
-	struct double_list * list;
+	double_list list;
 
-	dl_alloc(&list, sizeof(uint8_t));
+	list = dl_create(&props);
 
 	dl_push_head(list, &in);
 	out = dl_remove(list, 0);
@@ -504,8 +507,8 @@ START_TEST(test_dl_remove_single)
 	ck_assert(out);
 	ck_assert_int_eq(*out, in);
 
-	ck_assert(!list->head);
-	ck_assert(!list->tail);
+	ck_assert(!DS_PRIV(list)->head);
+	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_null(list));
 
 	free(out);
@@ -524,10 +527,10 @@ START_TEST(test_dl_remove_multiple)
 	uint8_t * out3;
 	uint8_t * out4;
 	uint8_t * out5;
-	struct double_list * list;
+	double_list list;
 
 	/* Create linked list: [1, 2, 3, 4] */
-	dl_alloc(&list, sizeof(uint8_t));
+	list = dl_create(&props);
 	dl_push_tail(list, &in1);
 	dl_push_tail(list, &in2);
 	dl_push_tail(list, &in3);
@@ -545,8 +548,8 @@ START_TEST(test_dl_remove_multiple)
 	/* [] -> [] (NULL) */
 	out5 = dl_remove(list, 0);
 
-	ck_assert(!list->head);
-	ck_assert(!list->tail);
+	ck_assert(!DS_PRIV(list)->head);
+	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_null(list));
 
 	ck_assert(out1);
@@ -572,9 +575,9 @@ START_TEST(test_dl_fetch_empty)
 {
 	void * val1;
 	void * val2;
-	struct double_list * list;
+	double_list list;
 
-	dl_alloc(&list, 0);
+	list = dl_create(&props);
 
 	val1 = dl_fetch(list, 0);
 	val2 = dl_fetch(list, 1);
@@ -582,8 +585,8 @@ START_TEST(test_dl_fetch_empty)
 	ck_assert(!val1);
 	ck_assert(!val2);
 
-	ck_assert(!list->head);
-	ck_assert(!list->tail);
+	ck_assert(!DS_PRIV(list)->head);
+	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_null(list));
 
 	dl_free(&list);
@@ -594,9 +597,9 @@ START_TEST(test_dl_fetch_single)
 {
 	uint8_t in = 1;
 	uint8_t * out;
-	struct double_list * list;
+	double_list list;
 
-	dl_alloc(&list, sizeof(in));
+	list = dl_create(&props);
 	dl_push_head(list, &in);
 
 	out = dl_fetch(list, 0);
@@ -604,9 +607,9 @@ START_TEST(test_dl_fetch_single)
 	ck_assert(out);
 	ck_assert_int_eq(*out, in);
 
-	ck_assert(list->head);
-	ck_assert(list->tail);
-	ck_assert_int_eq(list->length, 1);
+	ck_assert(DS_PRIV(list)->head);
+	ck_assert(DS_PRIV(list)->tail);
+	ck_assert_int_eq(DS_PRIV(list)->length, 1);
 
 	dl_free(&list);
 }
@@ -623,9 +626,9 @@ START_TEST(test_dl_fetch_multiple)
 	uint8_t * out3;
 	uint8_t * out4;
 	uint8_t * out5;
-	struct double_list * list;
+	double_list list;
 
-	dl_alloc(&list, sizeof(uint8_t));
+	list = dl_create(&props);
 
 	/* Create linked list: [1, 2, 3, 4] */
 	dl_push_tail(list, &in1);
@@ -640,9 +643,9 @@ START_TEST(test_dl_fetch_multiple)
 	out4 = dl_fetch(list, 3); /* 4 */
 	out5 = dl_fetch(list, 4); /* NULL */
 
-	ck_assert(list->head);
-	ck_assert(list->tail);
-	ck_assert_int_eq(list->length, 4);
+	ck_assert(DS_PRIV(list)->head);
+	ck_assert(DS_PRIV(list)->tail);
+	ck_assert_int_eq(DS_PRIV(list)->length, 4);
 
 	ck_assert(out1);
 	ck_assert(out2);
@@ -663,16 +666,16 @@ START_TEST(test_dl_contains_empty)
 {
 	bool found;
 	uint8_t val = 1;
-	struct double_list * list;
+	double_list list;
 
-	dl_alloc(&list, sizeof(uint8_t));
+	list = dl_create(&props);
 
 	found = dl_contains(list, &val);
 
 	ck_assert(!found);
 
-	ck_assert(!list->head);
-	ck_assert(!list->tail);
+	ck_assert(!DS_PRIV(list)->head);
+	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_null(list));
 
 	dl_free(&list);
@@ -686,9 +689,9 @@ START_TEST(test_dl_contains_single)
 	uint8_t in = 1;
 	uint8_t val1 = 1;
 	uint8_t val2 = 2;
-	struct double_list * list;
+	double_list list;
 
-	dl_alloc(&list, sizeof(in));
+	list = dl_create(&props);
 	dl_push_head(list, &in);
 
 	found1 = dl_contains(list, &val1);
@@ -697,9 +700,9 @@ START_TEST(test_dl_contains_single)
 	ck_assert(found1);
 	ck_assert(!found2);
 
-	ck_assert(list->head);
-	ck_assert(list->tail);
-	ck_assert_int_eq(list->length, 1);
+	ck_assert(DS_PRIV(list)->head);
+	ck_assert(DS_PRIV(list)->tail);
+	ck_assert_int_eq(DS_PRIV(list)->length, 1);
 
 	dl_free(&list);
 }
@@ -710,10 +713,10 @@ START_TEST(test_dl_contains_multiple)
 	bool found[5];
 	uint8_t in[] = {1, 2, 3, 4};
 	uint8_t val[] = {1, 2, 3, 4, 5};
-	struct double_list * list;
+	double_list list;
 
 	/* Create linked list: [1, 2, 3, 4] */
-	dl_alloc(&list, sizeof(uint8_t));
+	list = dl_create(&props);
 	dl_push_tail(list, &in[0]);
 	dl_push_tail(list, &in[1]);
 	dl_push_tail(list, &in[2]);
@@ -726,9 +729,9 @@ START_TEST(test_dl_contains_multiple)
 	found[3] = dl_contains(list, &val[3]);
 	found[4] = dl_contains(list, &val[4]);
 
-	ck_assert(list->head);
-	ck_assert(list->tail);
-	ck_assert_int_eq(list->length, sizeof(in));
+	ck_assert(DS_PRIV(list)->head);
+	ck_assert(DS_PRIV(list)->tail);
+	ck_assert_int_eq(DS_PRIV(list)->length, sizeof(in));
 
 	ck_assert(found[0]);
 	ck_assert(found[1]);
@@ -753,16 +756,16 @@ bool pred_lte1(uint8_t * n)
 START_TEST(test_dl_any_empty)
 {
 	bool any;
-	struct double_list * list;
+	double_list list;
 
-	dl_alloc(&list, sizeof(uint8_t));
+	list = dl_create(&props);
 
 	any = dl_any(list, (pred_fn) pred_gte1);
 
 	ck_assert(!any);
 
-	ck_assert(!list->head);
-	ck_assert(!list->tail);
+	ck_assert(!DS_PRIV(list)->head);
+	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_null(list));
 
 	dl_free(&list);
@@ -773,9 +776,9 @@ START_TEST(test_dl_any_single)
 {
 	bool any[2];
 	uint8_t in = 0;
-	struct double_list * list;
+	double_list list;
 
-	dl_alloc(&list, sizeof(in));
+	list = dl_create(&props);
 	dl_push_head(list, &in);
 
 	any[0] = dl_any(list, (pred_fn) pred_gte1);
@@ -784,9 +787,9 @@ START_TEST(test_dl_any_single)
 	ck_assert(!any[0]);
 	ck_assert(any[1]);
 
-	ck_assert(list->head);
-	ck_assert(list->tail);
-	ck_assert_int_eq(list->length, 1);
+	ck_assert(DS_PRIV(list)->head);
+	ck_assert(DS_PRIV(list)->tail);
+	ck_assert_int_eq(DS_PRIV(list)->length, 1);
 
 	dl_free(&list);
 }
@@ -796,10 +799,10 @@ START_TEST(test_dl_any_multiple)
 {
 	bool any[2];
 	uint8_t in[] = {2, 3, 4};
-	struct double_list * list;
+	double_list list;
 
 	/* Create linked list: [1, 2, 3, 4] */
-	dl_alloc(&list, sizeof(uint8_t));
+	list = dl_create(&props);
 	dl_push_tail(list, &in[0]);
 	dl_push_tail(list, &in[1]);
 	dl_push_tail(list, &in[2]);
@@ -808,9 +811,9 @@ START_TEST(test_dl_any_multiple)
 	any[0] = dl_any(list, (pred_fn) pred_gte1);
 	any[1] = dl_any(list, (pred_fn) pred_lte1);
 
-	ck_assert(list->head);
-	ck_assert(list->tail);
-	ck_assert_int_eq(list->length, sizeof(in));
+	ck_assert(DS_PRIV(list)->head);
+	ck_assert(DS_PRIV(list)->tail);
+	ck_assert_int_eq(DS_PRIV(list)->length, sizeof(in));
 
 	ck_assert(any[0]);
 	ck_assert(!any[1]);
@@ -822,16 +825,16 @@ END_TEST
 START_TEST(test_dl_all_empty)
 {
 	bool all;
-	struct double_list * list;
+	double_list list;
 
-	dl_alloc(&list, sizeof(uint8_t));
+	list = dl_create(&props);
 
 	all = dl_all(list, (pred_fn) pred_gte1);
 
 	ck_assert(!all);
 
-	ck_assert(!list->head);
-	ck_assert(!list->tail);
+	ck_assert(!DS_PRIV(list)->head);
+	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_null(list));
 
 	dl_free(&list);
@@ -842,9 +845,9 @@ START_TEST(test_dl_all_single)
 {
 	bool all[2];
 	uint8_t in = 0;
-	struct double_list * list;
+	double_list list;
 
-	dl_alloc(&list, sizeof(in));
+	list = dl_create(&props);
 	dl_push_head(list, &in);
 
 	all[0] = dl_all(list, (pred_fn) pred_gte1);
@@ -853,9 +856,9 @@ START_TEST(test_dl_all_single)
 	ck_assert(!all[0]);
 	ck_assert(all[1]);
 
-	ck_assert(list->head);
-	ck_assert(list->tail);
-	ck_assert_int_eq(list->length, 1);
+	ck_assert(DS_PRIV(list)->head);
+	ck_assert(DS_PRIV(list)->tail);
+	ck_assert_int_eq(DS_PRIV(list)->length, 1);
 
 	dl_free(&list);
 }
@@ -865,10 +868,10 @@ START_TEST(test_dl_all_multiple)
 {
 	bool all[2];
 	uint8_t in[] = {2, 3, 4};
-	struct double_list * list;
+	double_list list;
 
 	/* Create linked list: [1, 2, 3, 4] */
-	dl_alloc(&list, sizeof(uint8_t));
+	list = dl_create(&props);
 	dl_push_tail(list, &in[0]);
 	dl_push_tail(list, &in[1]);
 	dl_push_tail(list, &in[2]);
@@ -877,9 +880,9 @@ START_TEST(test_dl_all_multiple)
 	all[0] = dl_all(list, (pred_fn) pred_gte1);
 	all[1] = dl_all(list, (pred_fn) pred_lte1);
 
-	ck_assert(list->head);
-	ck_assert(list->tail);
-	ck_assert_int_eq(list->length, sizeof(in));
+	ck_assert(DS_PRIV(list)->head);
+	ck_assert(DS_PRIV(list)->tail);
+	ck_assert_int_eq(DS_PRIV(list)->length, sizeof(in));
 
 	ck_assert(all[0]);
 	ck_assert(!all[1]);
@@ -891,16 +894,16 @@ END_TEST
 START_TEST(test_dl_filter_empty)
 {
 	bool changed;
-	struct double_list * list;
+	double_list list;
 
-	dl_alloc(&list, sizeof(uint8_t));
+	list = dl_create(&props);
 
 	changed = dl_filter(list, (pred_fn) pred_gte1);
 
 	ck_assert(!changed);
 
-	ck_assert(!list->head);
-	ck_assert(!list->tail);
+	ck_assert(!DS_PRIV(list)->head);
+	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_null(list));
 
 	dl_free(&list);
@@ -911,23 +914,23 @@ START_TEST(test_dl_filter_single)
 {
 	bool changed;
 	uint8_t in = 0;
-	struct double_list * list;
+	double_list list;
 
-	dl_alloc(&list, sizeof(in));
+	list = dl_create(&props);
 	dl_push_head(list, &in);
 
 	changed = dl_filter(list, (pred_fn) pred_lte1);
 	ck_assert(!changed);
 
-	ck_assert(list->head);
-	ck_assert(list->tail);
-	ck_assert_int_eq(list->length, 1);
+	ck_assert(DS_PRIV(list)->head);
+	ck_assert(DS_PRIV(list)->tail);
+	ck_assert_int_eq(DS_PRIV(list)->length, 1);
 
 	changed = dl_filter(list, (pred_fn) pred_gte1);
 	ck_assert(changed);
 
-	ck_assert(!list->head);
-	ck_assert(!list->tail);
+	ck_assert(!DS_PRIV(list)->head);
+	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_null(list));
 
 	dl_free(&list);
@@ -938,10 +941,10 @@ START_TEST(test_dl_filter_multiple)
 {
 	bool changed;
 	uint8_t in[] = {0, 2, 0, 2};
-	struct double_list * list;
+	double_list list;
 
 	/* Create linked list: [0, 2, 0, 2] */
-	dl_alloc(&list, sizeof(uint8_t));
+	list = dl_create(&props);
 	dl_push_tail(list, &in[0]);
 	dl_push_tail(list, &in[1]);
 	dl_push_tail(list, &in[2]);
@@ -952,17 +955,17 @@ START_TEST(test_dl_filter_multiple)
 
 	ck_assert(changed);
 
-	ck_assert(list->head);
-	ck_assert(list->tail);
-	ck_assert_int_eq(list->length, 2);
+	ck_assert(DS_PRIV(list)->head);
+	ck_assert(DS_PRIV(list)->tail);
+	ck_assert_int_eq(DS_PRIV(list)->length, 2);
 
 	/* filter (<= 1) [0, 0] -> [] */
 	changed = dl_filter(list, (pred_fn) pred_lte1);
 
 	ck_assert(changed);
 
-	ck_assert(!list->head);
-	ck_assert(!list->tail);
+	ck_assert(!DS_PRIV(list)->head);
+	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_null(list));
 
 	dl_free(&list);
@@ -972,16 +975,16 @@ END_TEST
 START_TEST(test_dl_drop_while_empty)
 {
 	bool changed;
-	struct double_list * list;
+	double_list list;
 
-	dl_alloc(&list, sizeof(uint8_t));
+	list = dl_create(&props);
 
 	changed = dl_drop_while(list, (pred_fn) pred_gte1);
 
 	ck_assert(!changed);
 
-	ck_assert(!list->head);
-	ck_assert(!list->tail);
+	ck_assert(!DS_PRIV(list)->head);
+	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_null(list));
 
 	dl_free(&list);
@@ -992,26 +995,26 @@ START_TEST(test_dl_drop_while_single)
 {
 	bool changed;
 	uint8_t in = 0;
-	struct double_list * list;
+	double_list list;
 
 	/* Singleton List: [0] */
-	dl_alloc(&list, sizeof(in));
+	list = dl_create(&props);
 	dl_push_head(list, &in);
 
 	/* dropWhile (> 1) [0] -> [0] */
 	changed = dl_drop_while(list, (pred_fn) pred_gte1);
 
 	ck_assert(!changed);
-	ck_assert(list->head);
-	ck_assert(list->tail);
-	ck_assert_int_eq(list->length, 1);
+	ck_assert(DS_PRIV(list)->head);
+	ck_assert(DS_PRIV(list)->tail);
+	ck_assert_int_eq(DS_PRIV(list)->length, 1);
 
 	/* dropWhile (<= 1) [0] -> [] */
 	changed = dl_drop_while(list, (pred_fn) pred_lte1);
 
 	ck_assert(changed);
-	ck_assert(!list->head);
-	ck_assert(!list->tail);
+	ck_assert(!DS_PRIV(list)->head);
+	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_null(list));
 
 	dl_free(&list);
@@ -1022,10 +1025,10 @@ START_TEST(test_dl_drop_while_multiple)
 {
 	bool changed;
 	uint8_t in[6] = {0, 0, 2, 2, 0, 0};
-	struct double_list * list;
+	double_list list;
 
 	/* Create linked list: [0, 0, 2, 2, 0, 0] */
-	dl_alloc(&list, sizeof(uint8_t));
+	list = dl_create(&props);
 	dl_push_tail(list, &in[0]);
 	dl_push_tail(list, &in[1]);
 	dl_push_tail(list, &in[2]);
@@ -1037,17 +1040,17 @@ START_TEST(test_dl_drop_while_multiple)
 	changed = dl_drop_while(list, (pred_fn) pred_lte1);
 
 	ck_assert(changed);
-	ck_assert(list->head);
-	ck_assert(list->tail);
-	ck_assert_int_eq(list->length, 4);
+	ck_assert(DS_PRIV(list)->head);
+	ck_assert(DS_PRIV(list)->tail);
+	ck_assert_int_eq(DS_PRIV(list)->length, 4);
 
 	/* dropWhile (> 1) [2, 2, 0, 0] -> [0, 0]*/
 	changed = dl_drop_while(list, (pred_fn) pred_gte1);
 
 	ck_assert(changed);
-	ck_assert(list->head);
-	ck_assert(list->tail);
-	ck_assert_int_eq(list->length, 2);
+	ck_assert(DS_PRIV(list)->head);
+	ck_assert(DS_PRIV(list)->tail);
+	ck_assert_int_eq(DS_PRIV(list)->length, 2);
 
 	dl_free(&list);
 }
@@ -1056,16 +1059,16 @@ END_TEST
 START_TEST(test_dl_take_while_empty)
 {
 	bool changed;
-	struct double_list * list;
+	double_list list;
 
-	dl_alloc(&list, sizeof(uint8_t));
+	list = dl_create(&props);
 
 	changed = dl_take_while(list, (pred_fn) pred_gte1);
 
 	ck_assert(!changed);
 
-	ck_assert(!list->head);
-	ck_assert(!list->tail);
+	ck_assert(!DS_PRIV(list)->head);
+	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_null(list));
 
 	dl_free(&list);
@@ -1076,26 +1079,26 @@ START_TEST(test_dl_take_while_single)
 {
 	bool changed;
 	uint8_t in = 0;
-	struct double_list * list;
+	double_list list;
 
 	/* Singleton List: [0] */
-	dl_alloc(&list, sizeof(in));
+	list = dl_create(&props);
 	dl_push_head(list, &in);
 
 	/* takeWhile (<= 1) [0] -> [0] */
 	changed = dl_take_while(list, (pred_fn) pred_lte1);
 
 	ck_assert(!changed);
-	ck_assert(list->head);
-	ck_assert(list->tail);
-	ck_assert_int_eq(list->length, 1);
+	ck_assert(DS_PRIV(list)->head);
+	ck_assert(DS_PRIV(list)->tail);
+	ck_assert_int_eq(DS_PRIV(list)->length, 1);
 
 	/* takeWhile (> 1) [0] -> [] */
 	changed = dl_take_while(list, (pred_fn) pred_gte1);
 
 	ck_assert(changed);
-	ck_assert(!list->head);
-	ck_assert(!list->tail);
+	ck_assert(!DS_PRIV(list)->head);
+	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_null(list));
 
 	dl_free(&list);
@@ -1106,10 +1109,10 @@ START_TEST(test_dl_take_while_multiple)
 {
 	bool changed;
 	uint8_t in[] = {1, 0, 2};
-	struct double_list * list;
+	double_list list;
 
 	/* Create linked list: [1, 0, 2] */
-	dl_alloc(&list, sizeof(uint8_t));
+	list = dl_create(&props);
 	dl_push_tail(list, &in[0]);
 	dl_push_tail(list, &in[1]);
 	dl_push_tail(list, &in[2]);
@@ -1118,17 +1121,17 @@ START_TEST(test_dl_take_while_multiple)
 	changed = dl_take_while(list, (pred_fn) pred_lte1);
 
 	ck_assert(changed);
-	ck_assert(list->head);
-	ck_assert(list->tail);
-	ck_assert_int_eq(list->length, 2);
+	ck_assert(DS_PRIV(list)->head);
+	ck_assert(DS_PRIV(list)->tail);
+	ck_assert_int_eq(DS_PRIV(list)->length, 2);
 
 	/* dropWhile (> 1) [1, 0] -> [1]*/
 	changed = dl_take_while(list, (pred_fn) pred_gte1);
 
 	ck_assert(changed);
-	ck_assert(list->head);
-	ck_assert(list->tail);
-	ck_assert_int_eq(list->length, 1);
+	ck_assert(DS_PRIV(list)->head);
+	ck_assert(DS_PRIV(list)->tail);
+	ck_assert_int_eq(DS_PRIV(list)->length, 1);
 
 	dl_free(&list);
 }
@@ -1153,15 +1156,15 @@ uint8_t * map_fn_newptr(uint8_t * data)
 
 START_TEST(test_dl_map_empty)
 {
-	struct double_list * list;
+	double_list list;
 
-	dl_alloc(&list, 0);
+	list = dl_create(&props);
 
 	dl_map(list, (map_fn) map_fn_inplace);
 	dl_map(list, (map_fn) map_fn_newptr);
 
-	ck_assert(!list->head);
-	ck_assert(!list->tail);
+	ck_assert(!DS_PRIV(list)->head);
+	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_null(list));
 
 	dl_free(&list);
@@ -1172,10 +1175,10 @@ START_TEST(test_dl_map_single)
 {
 	uint8_t in = 1;
 	uint8_t * out;
-	struct double_list * list;
+	double_list list;
 
 	/* Create single element list [1] */
-	dl_alloc(&list, sizeof(in));
+	list = dl_create(&props);
 	dl_push_head(list, &in);
 
 	/* Map two increment functions over the list. */
@@ -1183,9 +1186,9 @@ START_TEST(test_dl_map_single)
 	dl_map(list, (map_fn) map_fn_newptr); /* [2] -> [3] */
 	out = dl_fetch(list, 0);
 
-	ck_assert(list->head);
-	ck_assert(list->tail);
-	ck_assert_int_eq(list->length, 1);
+	ck_assert(DS_PRIV(list)->head);
+	ck_assert(DS_PRIV(list)->tail);
+	ck_assert_int_eq(DS_PRIV(list)->length, 1);
 
 	ck_assert_int_eq(*out, in + 2);
 
@@ -1201,9 +1204,9 @@ START_TEST(test_dl_map_multiple)
 	uint8_t * out1;
 	uint8_t * out2;
 	uint8_t * out3;
-	struct double_list * list;
+	double_list list;
 
-	dl_alloc(&list, sizeof(in1));
+	list = dl_create(&props);
 
 	/* list: [1, 2, 3] */
 	dl_push_tail(list, &in1);
@@ -1219,9 +1222,9 @@ START_TEST(test_dl_map_multiple)
 	out2 = dl_fetch(list, 1);
 	out3 = dl_fetch(list, 2);
 
-	ck_assert(list->head);
-	ck_assert(list->tail);
-	ck_assert_int_eq(list->length, 3);
+	ck_assert(DS_PRIV(list)->head);
+	ck_assert(DS_PRIV(list)->tail);
+	ck_assert_int_eq(DS_PRIV(list)->length, 3);
 
 	ck_assert_int_eq(*out1, in1 + 2);
 	ck_assert_int_eq(*out2, in2 + 2);
@@ -1233,14 +1236,14 @@ END_TEST
 
 START_TEST(test_dl_reverse_empty)
 {
-	struct double_list * list;
+	double_list list;
 
-	dl_alloc(&list, sizeof(uint8_t));
+	list = dl_create(&props);
 
 	dl_reverse(list);
 
-	ck_assert(!list->head);
-	ck_assert(!list->tail);
+	ck_assert(!DS_PRIV(list)->head);
+	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_null(list));
 
 	dl_free(&list);
@@ -1251,9 +1254,9 @@ START_TEST(test_dl_reverse_single)
 {
 	uint8_t in = 1;
 	uint8_t * out;
-	struct double_list * list;
+	double_list list;
 
-	dl_alloc(&list, sizeof(in));
+	list = dl_create(&props);
 	dl_push_head(list, &in);
 
 	dl_reverse(list);
@@ -1262,9 +1265,9 @@ START_TEST(test_dl_reverse_single)
 	ck_assert(out);
 	ck_assert_int_eq(*out, in);
 
-	ck_assert(list->head);
-	ck_assert(list->tail);
-	ck_assert_int_eq(list->length, 1);
+	ck_assert(DS_PRIV(list)->head);
+	ck_assert(DS_PRIV(list)->tail);
+	ck_assert_int_eq(DS_PRIV(list)->length, 1);
 
 	dl_free(&list);
 }
@@ -1274,9 +1277,9 @@ START_TEST(test_dl_reverse_multiple)
 {
 	uint8_t in[3] = {1, 2, 3};
 	uint8_t * out[3];
-	struct double_list * list;
+	double_list list;
 
-	dl_alloc(&list, sizeof(uint8_t));
+	list = dl_create(&props);
 
 	/* Create linked list: [1, 2, 3] */
 	dl_push_tail(list, &in[0]);
@@ -1291,9 +1294,9 @@ START_TEST(test_dl_reverse_multiple)
 	out[1] = dl_fetch(list, 1); /* 2 */
 	out[2] = dl_fetch(list, 2); /* 1 */
 
-	ck_assert(list->head);
-	ck_assert(list->tail);
-	ck_assert_int_eq(list->length, 3);
+	ck_assert(DS_PRIV(list)->head);
+	ck_assert(DS_PRIV(list)->tail);
+	ck_assert_int_eq(DS_PRIV(list)->length, 3);
 
 	ck_assert(out[0]);
 	ck_assert(out[1]);
@@ -1365,9 +1368,9 @@ START_TEST(test_dl_foldr_empty)
 	int8_t init = 0;
 	int8_t * out1;
 	int8_t * out2;
-	struct double_list * list;
+	double_list list;
 
-	dl_alloc(&list, sizeof(uint8_t));
+	list = dl_create(&props);
 
 	out1 = dl_foldr(list, (foldr_fn) foldr_fn_inplace, &init);
 	out2 = dl_foldr(list, (foldr_fn) generic_fold_fn, &init);
@@ -1377,8 +1380,8 @@ START_TEST(test_dl_foldr_empty)
 	ck_assert_int_eq(*out1, init);
 	ck_assert_int_eq(*out2, init);
 
-	ck_assert(!list->head);
-	ck_assert(!list->tail);
+	ck_assert(!DS_PRIV(list)->head);
+	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_null(list));
 
 	free(out1);
@@ -1393,9 +1396,9 @@ START_TEST(test_dl_foldr_single)
 	int8_t init = 0;
 	int8_t * out1;
 	int8_t * out2;
-	struct double_list * list;
+	double_list list;
 
-	dl_alloc(&list, sizeof(in));
+	list = dl_create(&props);
 	dl_push_head(list, &in);
 
 	out1 = dl_foldr(list, (foldr_fn) foldr_fn_inplace, &init);
@@ -1405,9 +1408,9 @@ START_TEST(test_dl_foldr_single)
 	ck_assert_int_eq(*out1, 1);
 	ck_assert_int_eq(*out2, 1);
 
-	ck_assert(list->head);
-	ck_assert(list->tail);
-	ck_assert_int_eq(list->length, 1);
+	ck_assert(DS_PRIV(list)->head);
+	ck_assert(DS_PRIV(list)->tail);
+	ck_assert_int_eq(DS_PRIV(list)->length, 1);
 
 	free(out1);
 	free(out2);
@@ -1423,9 +1426,9 @@ START_TEST(test_dl_foldr_multiple)
 	int8_t init = 0;
 	int8_t * out1;
 	int8_t * out2;
-	struct double_list * list;
+	double_list list;
 
-	dl_alloc(&list, sizeof(int8_t));
+	list = dl_create(&props);
 
 	dl_push_tail(list, &in1);
 	dl_push_tail(list, &in2);
@@ -1440,9 +1443,9 @@ START_TEST(test_dl_foldr_multiple)
 	ck_assert_int_eq(*out1, 2);
 	ck_assert_int_eq(*out2, 2);
 
-	ck_assert(list->head);
-	ck_assert(list->tail);
-	ck_assert_int_eq(list->length, 3);
+	ck_assert(DS_PRIV(list)->head);
+	ck_assert(DS_PRIV(list)->tail);
+	ck_assert_int_eq(DS_PRIV(list)->length, 3);
 
 	free(out1);
 	free(out2);
@@ -1455,9 +1458,9 @@ START_TEST(test_dl_foldl_empty)
 	int8_t init = 0;
 	int8_t * out1;
 	int8_t * out2;
-	struct double_list * list;
+	double_list list;
 
-	dl_alloc(&list, sizeof(int8_t));
+	list = dl_create(&props);
 
 	out1 = dl_foldl(list, (foldl_fn) foldl_fn_inplace, &init);
 	out2 = dl_foldl(list, (foldl_fn) generic_fold_fn, &init);
@@ -1467,8 +1470,8 @@ START_TEST(test_dl_foldl_empty)
 	ck_assert_int_eq(*out1, init);
 	ck_assert_int_eq(*out2, init);
 
-	ck_assert(!list->head);
-	ck_assert(!list->tail);
+	ck_assert(!DS_PRIV(list)->head);
+	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_null(list));
 
 	free(out1);
@@ -1483,9 +1486,9 @@ START_TEST(test_dl_foldl_single)
 	int8_t init = 0;
 	int8_t * out1;
 	int8_t * out2;
-	struct double_list * list;
+	double_list list;
 
-	dl_alloc(&list, sizeof(in));
+	list = dl_create(&props);
 	dl_push_head(list, &in);
 
 	/* foldl (-) 0 [1] -> -1 */
@@ -1497,9 +1500,9 @@ START_TEST(test_dl_foldl_single)
 	ck_assert_int_eq(*out1, -1);
 	ck_assert_int_eq(*out2, -1);
 
-	ck_assert(list->head);
-	ck_assert(list->tail);
-	ck_assert_int_eq(list->length, 1);
+	ck_assert(DS_PRIV(list)->head);
+	ck_assert(DS_PRIV(list)->tail);
+	ck_assert_int_eq(DS_PRIV(list)->length, 1);
 
 	free(out1);
 	free(out2);
@@ -1515,9 +1518,9 @@ START_TEST(test_dl_foldl_multiple)
 	int8_t init = 0;
 	int8_t * out1;
 	int8_t * out2;
-	struct double_list * list;
+	double_list list;
 
-	dl_alloc(&list, sizeof(int8_t));
+	list = dl_create(&props);
 
 	dl_push_tail(list, &in1);
 	dl_push_tail(list, &in2);
@@ -1532,9 +1535,9 @@ START_TEST(test_dl_foldl_multiple)
 	ck_assert_int_eq(*out1, -6);
 	ck_assert_int_eq(*out2, -6);
 
-	ck_assert(list->head);
-	ck_assert(list->tail);
-	ck_assert_int_eq(list->length, 3);
+	ck_assert(DS_PRIV(list)->head);
+	ck_assert(DS_PRIV(list)->tail);
+	ck_assert_int_eq(DS_PRIV(list)->length, 3);
 
 	free(out1);
 	free(out2);
