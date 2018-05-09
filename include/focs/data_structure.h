@@ -25,8 +25,8 @@
 #include <unistd.h>
 
 #ifdef GENERICS
-#include "focs/hof_operations.h"
-#include "focs/mgmt_operations.h"
+#include "focs/generics/hof.h"
+#include "focs/generics/mgmt.h"
 #endif
 
 #ifndef __DATA_STRUCTURE_H

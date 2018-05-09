@@ -1,4 +1,4 @@
-/* hof_operations.h - Higher Order Functions Emulation
+/* hof_generics.h - Generic Higher Order Function Macros
  * Copyright (C) 2018 Quytelda Kahja
  *
  * This file is part of focs.
@@ -18,10 +18,10 @@
  * along with focs.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "focs/hof.h"
+#include "../../hof.h"
 
-#ifndef __HOF_OPERATIONS_H
-#define __HOF_OPERATIONS_H
+#ifndef __GENERICS_HOF_H
+#define __GENERICS_HOF_H
 
 /* ################### *
  * # Transformations # *
@@ -34,9 +34,9 @@ typedef void * (* foldl_hof_fn)(void * ds, foldl_fn fn, const void * init);
  * # Properties # *
  * ############## */
 typedef bool (* empty_hof_fn)(void * ds);
-typedef bool (* elem_hof_fn)(void * ds, void * data);
-typedef bool (* any_hof_fn) (void * ds, pred_fn p);
-typedef bool (* all_hof_fn) (void * ds, pred_fn p);
+typedef bool (* elem_hof_fn) (void * ds, void * data);
+typedef bool (* any_hof_fn)  (void * ds, pred_fn p);
+typedef bool (* all_hof_fn)  (void * ds, pred_fn p);
 
 /* ############# *
  * # Filtering # *
@@ -63,4 +63,15 @@ struct hof_operations {
 	take_while_hof_fn take_while;
 };
 
-#endif /* __HOF_OPERATIONS_H */
+#define map(ds, fn)          (__DS_DOPS(ds)->map(ds, fn))
+#define foldr(ds, fn, init)  (__DS_DOPS(ds)->foldr(ds, fn, init))
+#define foldl(ds, fn, init)  (__DS_DOPS(ds)->foldl(ds, fn, init))
+#define empty(ds)            (__DS_DOPS(ds)->empty(ds))
+#define elem(ds, datum)      (__DS_DOPS(ds)->elem(ds, datum))
+#define any(ds, pred)        (__DS_DOPS(ds)->any(ds, pred))
+#define all(ds, pred)        (__DS_DOPS(ds)->all(ds, pred))
+#define filter(ds, pred)     (__DS_DOPS(ds)->filter(ds, pred))
+#define drop_while(ds, pred) (__DS_DOPS(ds)->drop_while(ds, pred))
+#define take_while(ds, pred) (__DS_DOPS(ds)->take_while(ds, pred))
+
+#endif /* __GENERICS_HOF_H */

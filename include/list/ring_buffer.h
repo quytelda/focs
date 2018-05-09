@@ -202,7 +202,6 @@ static inline void __zero(const ring_buffer buf,
 #ifdef GENERICS
 
 const static struct mgmt_operations mgmt_ops = {
-	.create  = (create_mgmt_fn)  rb_create,
 	.destroy = (destroy_mgmt_fn) rb_destroy,
 	.size    = (size_mgmt_fn)    rb_size,
 };

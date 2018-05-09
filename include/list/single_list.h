@@ -21,8 +21,8 @@
 #define __SINGLE_LIST_H
 
 #include "focs.h"
-#include "focs/hof.h"
 #include "focs/data_structure.h"
+#include "hof.h"
 #include "sync/rwlock.h"
 
 /**
@@ -339,7 +339,6 @@ bool sl_take_while(single_list list, pred_fn p);
 #ifdef GENERICS
 
 static const struct mgmt_operations mgmt_ops = {
-	.create  = (create_mgmt_fn)  sl_create,
 	.destroy = (destroy_mgmt_fn) sl_free,
 };
 

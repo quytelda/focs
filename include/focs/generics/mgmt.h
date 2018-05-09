@@ -18,13 +18,18 @@
  * along with focs.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "focs/generics.h"
+#ifndef __GENERICS_MGMT_H
+#define __GENERICS_MGMT_H
 
-#ifndef __MGMT_GENERICS_H
-#define __MGMT_GENERICS_H
+typedef size_t (* size_mgmt_fn)   (void * ds);
+typedef void   (* destroy_mgmt_fn)(void * ds);
 
-#define create(ds, props) (__DS_MGMT_OPS(ds)->create(ds, props))
-#define destroy(ds)       (__DS_MGMT_OPS(ds)->destroy(ds))
-#define size(ds)          (__DS_MGMT_OPS(ds)->size(ds))
+struct mgmt_operations {
+	size_mgmt_fn    size;
+	destroy_mgmt_fn destroy;
+};
 
-#endif /* __MGMT_GENERICS_H */
+#define size(ds)    (__DS_MGMT_OPS(ds)->size(ds))
+#define destroy(ds) (__DS_MGMT_OPS(ds)->destroy(ds))
+
+#endif /* __GENERICS_MGMT_H */
