@@ -46,7 +46,6 @@ START_DS(single_list) {
 	struct sl_element * head;
 	struct sl_element * tail;
 	size_t length;
-	size_t data_size;
 
 	struct rwlock * rwlock;
 } END_DS(single_list);
