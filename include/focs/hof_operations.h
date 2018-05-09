@@ -53,7 +53,7 @@ struct hof_operations {
 		
 	/* Properties */
 	empty_hof_fn empty;
-	elem_hof_fn  contains;
+	elem_hof_fn  elem;
 	any_hof_fn   any;
 	all_hof_fn   all;
 
