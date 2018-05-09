@@ -201,18 +201,18 @@ static inline void __zero(const ring_buffer buf,
 
 #ifdef GENERICS
 
-const static struct mgmt_operations mgmt_ops = {
+static const struct mgmt_operations mgmt_ops = {
 	.destroy = (destroy_mgmt_fn) rb_destroy,
 	.size    = (size_mgmt_fn)    rb_size,
 };
 
-const static struct hof_operations hof_ops = {
+static const struct hof_operations hof_ops = {
 	.empty = (empty_hof_fn) rb_empty,
 };
 
 #else /* GENERICS */
 
-__PLACEHOLDER_SYM(mgmt_ops);
-__PLACEHOLDER_SYM(hof_ops);
+static const __unused void * mgmt_ops = NULL;
+static const __unused void * hof_ops  = NULL;
 
 #endif /* GENERICS */
