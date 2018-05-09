@@ -50,7 +50,7 @@ struct hof_operations {
 	map_hof_fn   map;
 	foldr_hof_fn foldr;
 	foldl_hof_fn foldl;
-		
+
 	/* Properties */
 	empty_hof_fn empty;
 	elem_hof_fn  elem;
