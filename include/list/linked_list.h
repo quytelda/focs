@@ -35,8 +35,10 @@
  * the behavior of linked_list_foreach() is undefined.  See linked_list_foreach_safe()
  * instead.
  */
-#define linked_list_foreach(list, current)					\
-	for(current = (list)->head; current; current = current->next)
+#define linked_list_foreach(list, current)	\
+	for(current = DS_PRIV(list)->head;	\
+	    current;				\
+	    current = current->next)
 
 /**
  * Advance through a linked list element by element.
@@ -47,10 +49,10 @@
  * However, it is safe to change the `next` pointer in the current element
  * during the loop body.
  */
-#define linked_list_foreach_safe(list, current)			\
-	void * _tmp;						\
-	for(current = (list)->head, _tmp = NEXT_SAFE(current);	\
-	    current;						\
+#define linked_list_foreach_safe(list, current)				\
+	void * _tmp;							\
+	for(current = DS_PRIV(list)->head, _tmp = NEXT_SAFE(current);	\
+	    current;							\
 	    current = _tmp, _tmp = NEXT_SAFE(current))
 
 /**
@@ -71,7 +73,7 @@
  * instead.
  */
 #define linked_list_while(list, current, condition)	\
-	for(current = (list)->head;			\
+	for(current = DS_PRIV(list)->head;		\
 	    current && (condition);			\
 	    current = current->next)
 
@@ -86,9 +88,9 @@
  * during the loop body.
  */
 #define linked_list_while_safe(list, current, condition)		\
-	void * _tmp;						\
-	for(current = (list)->head, _tmp = NEXT_SAFE(current);	\
-	    current && (condition);				\
+	void * _tmp;							\
+	for(current = DS_PRIV(list)->head, _tmp = NEXT_SAFE(current);	\
+	    current && (condition);					\
 	    current = _tmp, _tmp = NEXT_SAFE(current))
 
 /**

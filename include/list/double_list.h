@@ -21,6 +21,7 @@
 #define __LINKED_LIST_H
 
 #include "focs.h"
+#include "focs/data_structure.h"
 #include "hof.h"
 #include "list/linked_list.h"
 #include "sync/rwlock.h"
@@ -44,14 +45,14 @@ struct dl_element {
  *
  * Initialize this structure with dl_alloc(), and destroy it with dl_free().
  */
-struct double_list {
+ START_DS(double_list) {
 	struct dl_element * head;
 	struct dl_element * tail;
 	size_t length;
 	size_t data_size;
 
 	struct rwlock * rwlock;
-};
+} END_DS(double_list);
 
 /**
  * Return a pointer to the previous element, if this element is defined.
@@ -76,7 +77,7 @@ struct double_list {
  * linked_list_foreach_safe() instead.
  */
 #define double_list_foreach_rev(list, current)				\
-	for(current = (list)->tail; current; current = current->prev)
+	for(current = DS_PRIV(list)->tail; current; current = current->prev)
 
 /**
  * Advance through a doubly linked list in reverse.
@@ -87,7 +88,7 @@ struct double_list {
  */
 #define double_list_foreach_rev_safe(list, current)		\
 	struct dl_element * _tmp;				\
-	for(current = (list)->tail, _tmp = PREV_SAFE(current);	\
+	for(current = DS_PRIV(list)->tail, _tmp = PREV_SAFE(current);	\
 	    current;						\
 	    current = _tmp, _tmp = PREV_SAFE(current))
 
@@ -105,7 +106,7 @@ struct double_list {
  * instead.
  */
 #define double_list_while_rev(list, current, condition)	\
-	for(current = (list)->tail;			\
+	for(current = DS_PRIV(list)->tail;			\
 	    current && (condition);			\
 	    current = current->prev)
 
@@ -120,7 +121,7 @@ struct double_list {
  */
 #define double_list_while_rev_safe(list, current, condition)	\
 	struct dl_element * _tmp;				\
-	for(current = (list)->tail, _tmp = PREV_SAFE(current);	\
+	for(current = DS_PRIV(list)->tail, _tmp = PREV_SAFE(current);	\
 	    current && (condition);				\
 	    current = _tmp, _tmp = PREV_SAFE(current))
 
@@ -136,10 +137,11 @@ struct double_list {
  * Allocates a new doubly linked list at the structure pointer pointed to by
  * `list`.
  *
- * @return Upon successful completion, dl_alloc() shall return `0`.  Otherwise,
- * `-1` shall be returned and `errno` set to indicate the error.
+ * @return Upon successful completion, dl_create() shall return a new
+ * double_list.  Otherwise, `NULL` shall be returned and `errno` set to
+ * indicate the error.
  */
-int dl_alloc(struct double_list ** list, size_t data_size);
+double_list dl_create(const struct ds_properties * props);
 
 /**
  * Destroy and deallocate a doubly linked list.
@@ -149,7 +151,7 @@ int dl_alloc(struct double_list ** list, size_t data_size);
  * De-allocates the doubly linked list at the structure pointer pointed to by
  * `list`, as well as de-allocating all data elements contained within `list`.
  */
-void dl_free(struct double_list ** list);
+void dl_free(double_list * list);
 
 /* ############################# *
  * # Data Management Functions # *
@@ -162,7 +164,7 @@ void dl_free(struct double_list ** list);
  *
  * Push a newly allocated copy of `data` onto the head of `list`.
  */
-void dl_push_head(struct double_list * list, void * data);
+void dl_push_head(double_list list, void * data);
 
 /**
  * Push a new data element to the tail of the list.
@@ -171,7 +173,7 @@ void dl_push_head(struct double_list * list, void * data);
  *
  * Push a newly allocated copy of `data` onto the tail of `list`.
  */
-void dl_push_tail(struct double_list * list, void * data);
+void dl_push_tail(double_list list, void * data);
 
 /**
  * Pop a data element from the head of a list.
@@ -179,13 +181,13 @@ void dl_push_tail(struct double_list * list, void * data);
  *
  * Remove and return the data element at the head of `list`.  After this
  * operation the returned data element *will no longer be stored in* `list`.
- * 
+ *
  * @return A pointer to the data element at the head of `list`.  This pointer
  * must be explicitly freed with free() when it is no longer needed.  It is
  * **not** equivalent to the pointer which was used to insert the data into
  * `list`.
  */
-void * dl_pop_head(struct double_list * list);
+void * dl_pop_head(double_list list);
 
 /**
  * Pop a data element from the tail of a list.
@@ -193,45 +195,45 @@ void * dl_pop_head(struct double_list * list);
  *
  * Remove and return the data element at the tail of `list`.  After this
  * operation the returned data element *will no longer be stored in* `list`.
- * 
+ *
  * @return A pointer to the data element at the tail of `list`.  This pointer
  * must be explicitly freed with free() when it is no longer needed.  It is
  * **not** equivalent to the pointer which was used to insert the data into
  * `list`.
  */
-void * dl_pop_tail(struct double_list * list);
+void * dl_pop_tail(double_list list);
 
 /**
  * Insert a new data element to a given position in a list.
  * @param list The list to inesrt into
  * @param data A pointer to the data to insert
  * @param pos  The position to insert the element at
- *             (must be an index in the range `0..list->length`)
+ *             (must be an index in the range `0..DS_PRIV(list)->length`)
  *
  * Insert a newly allocated copy of `data` into `list` at the index indicated
  * by `pos`.
  *
  * @return `true` if the insertion succeeds, otherwise `false`.
  */
-bool dl_insert(struct double_list * list, void * data, size_t pos);
+bool dl_insert(double_list list, void * data, size_t pos);
 
 /**
  * Delete a data element from a given position in a list.
  * @param list The list to delete from
  * @param pos  The position to delete the element at
- *             (must be an index in the range `0..list->length - 1`)
+ *             (must be an index in the range `0..DS_PRIV(list)->length - 1`)
  *
  * Delete the copy of `data` stored in `list` at the index indicated by `pos`.
  *
  * @return `true` if the deletion succeeds, otherwise `false`.
  */
-bool dl_delete(struct double_list * list, size_t pos);
+bool dl_delete(double_list list, size_t pos);
 
 /**
  * Delete and return a data element from a given position in a list.
  * @param list The list to delete from
  * @param pos  The position to delete the element at
- *             (must be an index in the range `0..list->length - 1`)
+ *             (must be an index in the range `0..DS_PRIV(list)->length - 1`)
  *
  * Delete the reference to `data` stored in `list` at the index indicated by
  * `pos`.
@@ -241,13 +243,13 @@ bool dl_delete(struct double_list * list, size_t pos);
  * needed.  It is **not** equivalent to the pointer which was used to insert
  * the data into `list`.
  */
-void * dl_remove(struct double_list * list, size_t pos);
+void * dl_remove(double_list list, size_t pos);
 
 /**
  * Fetch a data element from a given position in a list.
  * @param list The list to fetch from
  * @param pos  The index to fetch the element from
- *             (must be an index in the range `0..list->length - 1`)
+ *             (must be an index in the range `0..DS_PRIV(list)->length - 1`)
  *
  * Fetch the data stored at index `pos` in `list`.
  *
@@ -257,7 +259,7 @@ void * dl_remove(struct double_list * list, size_t pos);
  * the data is needed after the list is destroyed, make a copy of it, or make
  * sure to call dl_remove() on the data's index before destroying the list.
  */
-void * dl_fetch(struct double_list * list, size_t pos);
+void * dl_fetch(double_list list, size_t pos);
 
 /* ############################ *
  * # Transformation Functions # *
@@ -271,11 +273,11 @@ void * dl_fetch(struct double_list * list, size_t pos);
  * the function `fn`, replacing the old value with the result of the
  * transformation.  In pseudo-code:
  * ```
- * for i from 0 to list->length:
+ * for i from 0 to DS_PRIV(list)->length:
  * 	list[i] = fn(list[i])
  * ```
  */
-void dl_map(struct double_list * list, map_fn fn);
+void dl_map(double_list list, map_fn fn);
 
 /**
  * Reverse a list in place.
@@ -284,7 +286,7 @@ void dl_map(struct double_list * list, map_fn fn);
  * Reverses a list in place so that the elements are in reverse order and the
  * head and tail are switched.
  */
-void dl_reverse(struct double_list * list);
+void dl_reverse(double_list list);
 
 /**
  * Right associative fold for doubly linked lists.
@@ -301,7 +303,7 @@ void dl_reverse(struct double_list * list);
  * @return The result of a right associate fold over `list`.  If `list` is
  * empty, the fold will be equal to the value of `init`.
  */
-void * dl_foldr(const struct double_list * list,
+void * dl_foldr(const double_list list,
 		foldr_fn fn,
 		const void * init);
 
@@ -320,7 +322,7 @@ void * dl_foldr(const struct double_list * list,
  * @return The result of a left associate fold over `list`.  If `list` is
  * empty, the fold will be equal to the value of `init`.
  */
-void * dl_foldl(const struct double_list * list,
+void * dl_foldl(const double_list list,
 		foldl_fn fn,
 		const void * init);
 
@@ -333,7 +335,7 @@ void * dl_foldl(const struct double_list * list,
  *
  * @return `true` if `list` is empty, `false` otherwise.
  */
-bool dl_null(struct double_list * list);
+bool dl_null(double_list list);
 
 /**
  * Determine if a list contains a value.
@@ -346,7 +348,7 @@ bool dl_null(struct double_list * list);
  *
  * @return `true` if a matching entry is found, otherwise `false`
  */
-bool dl_contains(struct double_list * list, void * data);
+bool dl_contains(double_list list, void * data);
 
 /**
  * Determine if any value in a list satisifies some condition.
@@ -359,7 +361,7 @@ bool dl_contains(struct double_list * list, void * data);
  * @return `true` if there is at least one value that satisfies the predicate.
  * Otherwise, it returns `false`.
  */
-bool dl_any(struct double_list * list, pred_fn p);
+bool dl_any(double_list list, pred_fn p);
 
 /**
  * Determines if all values in a list satisify some condition
@@ -372,7 +374,7 @@ bool dl_any(struct double_list * list, pred_fn p);
  * @return `false` if there is at least one value that does not satisfy the
  * predicate.  Otherwise, it returns `true`.
  */
-bool dl_all(struct double_list * list, pred_fn p);
+bool dl_all(double_list list, pred_fn p);
 
 /* ############################ *
  * # Filtering # *
@@ -386,7 +388,7 @@ bool dl_all(struct double_list * list, pred_fn p);
  * predicate `p`.  Elements that do satisfy the predicate `p` are not removed
  * from the list.
  */
-bool dl_filter(struct double_list * list, pred_fn p);
+bool dl_filter(double_list list, pred_fn p);
 
 /**
  * Drop elements from the head of the list until the predicate is unsatisfied.
@@ -397,7 +399,7 @@ bool dl_filter(struct double_list * list, pred_fn p);
  *
  * This function is an in-place equivalent of Haskell's dropWhile.
  */
-bool dl_drop_while(struct double_list * list, pred_fn p);
+bool dl_drop_while(double_list list, pred_fn p);
 
 /**
  * Keep elements from the head of the list until the predicate is unsatisfied.
@@ -408,6 +410,6 @@ bool dl_drop_while(struct double_list * list, pred_fn p);
  *
  * This function is an in-place equivalent of Haskell's takeWhile.
  */
-bool dl_take_while(struct double_list * list, pred_fn p);
+bool dl_take_while(double_list list, pred_fn p);
 
 #endif /* __LINKED_LIST_H */

@@ -20,125 +20,120 @@
 
 #include "list/double_list.h"
 
-static struct dl_element * __element_init(struct double_list * list, void * data)
+static struct dl_element * __create_element(void * data,
+					    size_t data_size)
 {
 	struct dl_element * elem;
 
 	elem = malloc(sizeof(*elem));
 	if(!elem)
-		goto exit;
+		return_with_errno(ENOMEM, NULL);
 
-	elem->data = malloc(list->data_size);
+	elem->data = malloc(data_size);
 	if(!elem->data)
-		goto exit;
+		goto_with_errno(ENOMEM, exit);
 
-	memcpy(elem->data, data, list->data_size);
-
+	memcpy(elem->data, data, data_size);
 	return elem;
 
 exit:
-	if(elem)
-		free(elem);
-
-	if(elem->data)
-		free(elem->data);
-
+	free(elem);
 	return NULL;
 }
 
-static struct dl_element * __lookup_element(struct double_list * list, size_t pos)
+static struct dl_element * __lookup_element(double_list list, size_t pos)
 {
 	struct dl_element * current;
 
-	if(pos >= list->length)
+	if(pos >= DS_PRIV(list)->length)
 		return NULL;
 
-	current = list->head;
+	current = DS_PRIV(list)->head;
 	for(size_t i = 0; i < pos; i++)
 		current = current->next;
 	return current;
 }
 
-static void __push_head(struct double_list * list, struct dl_element * current)
+static void __push_head(double_list list, struct dl_element * current)
 {
-	if(list->head)
-		list->head->prev = current;
+	if(DS_PRIV(list)->head)
+		DS_PRIV(list)->head->prev = current;
 
-	current->next = list->head;
+	current->next = DS_PRIV(list)->head;
 	current->prev = NULL;
-	list->head = current;
+	DS_PRIV(list)->head = current;
 
-	if(!list->tail)
-		list->tail = current;
+	if(!DS_PRIV(list)->tail)
+		DS_PRIV(list)->tail = current;
 
-	(list->length)++;
+	(DS_PRIV(list)->length)++;
 }
 
-static struct dl_element * __pop_head(struct double_list * list)
+static struct dl_element * __pop_head(double_list list)
 {
 	struct dl_element * current;
 
-	if(list->length == 0)
+	if(DS_PRIV(list)->length == 0)
 		return NULL;
 
-	current = list->head;
-	list->head = current->next;
+	current = DS_PRIV(list)->head;
+	DS_PRIV(list)->head = current->next;
 
-	if(list->head)
-		list->head->prev = NULL;
+	if(DS_PRIV(list)->head)
+		DS_PRIV(list)->head->prev = NULL;
 	else
-		list->tail = NULL;
+		DS_PRIV(list)->tail = NULL;
 
-	(list->length)--;
+	(DS_PRIV(list)->length)--;
 
 	return current;
 }
 
-static void __push_tail(struct double_list * list, struct dl_element * current)
+static void __push_tail(double_list list, struct dl_element * current)
 {
-	if(list->tail)
-		list->tail->next = current;
+	if(DS_PRIV(list)->tail)
+		DS_PRIV(list)->tail->next = current;
 
-	current->prev = list->tail;
+	current->prev = DS_PRIV(list)->tail;
 	current->next = NULL;
-	list->tail = current;
+	DS_PRIV(list)->tail = current;
 
-	if(!list->head)
-		list->head = current;
+	if(!DS_PRIV(list)->head)
+		DS_PRIV(list)->head = current;
 
-	(list->length)++;
+	(DS_PRIV(list)->length)++;
 }
 
-static struct dl_element * __pop_tail(struct double_list * list)
+static struct dl_element * __pop_tail(double_list list)
 {
 	struct dl_element * current;
 
-	if(list->length == 0)
+	if(DS_PRIV(list)->length == 0)
 		return NULL;
 
-	current = list->tail;
-	list->tail = current->prev;
+	current = DS_PRIV(list)->tail;
+	DS_PRIV(list)->tail = current->prev;
 
-	if(list->tail)
-		list->tail->next = NULL;
+	if(DS_PRIV(list)->tail)
+		DS_PRIV(list)->tail->next = NULL;
 	else
-		list->head = NULL;
+		DS_PRIV(list)->head = NULL;
 
-	(list->length)--;
+	(DS_PRIV(list)->length)--;
 
 	return current;
 }
 
-static bool __insert_element(struct double_list * list, struct dl_element * current, size_t pos)
+static bool __insert_element(double_list list, struct dl_element * current, size_t pos)
 {
 	struct dl_element * prev;
 
-	if(pos > list->length)
+	if(pos > DS_PRIV(list)->length)
 		return false;
 
 	if(pos == 0) {
 		__push_head(list, current);
-	} else if(pos == list->length) {
+	} else if(pos == DS_PRIV(list)->length) {
 		__push_tail(list, current);
 	} else {
 		prev = __lookup_element(list, pos - 1);
@@ -148,41 +143,41 @@ static bool __insert_element(struct double_list * list, struct dl_element * curr
 		prev->next->prev = current;
 		prev->next = current;
 
-		(list->length)++;
+		(DS_PRIV(list)->length)++;
 	}
 
 	return true;
 }
 
-static struct dl_element * __remove_element(struct double_list * list, size_t pos)
+static struct dl_element * __remove_element(double_list list, size_t pos)
 {
 	struct dl_element * current;
 
-	if(pos >= list->length)
+	if(pos >= DS_PRIV(list)->length)
 		return NULL;
 
 	if(pos == 0) {
 		current = __pop_head(list);
-	} else if(pos == list->length - 1) {
+	} else if(pos == DS_PRIV(list)->length - 1) {
 		current = __pop_tail(list);
 	} else {
 		current = __lookup_element(list, pos);
 		current->prev->next = current->next;
 		current->next->prev = current->prev;
 
-		(list->length)--;
+		(DS_PRIV(list)->length)--;
 	}
 
 	return current;
 }
 
-static void __delete_element(struct double_list * list, struct dl_element * elem)
+static void __delete_element(double_list list, struct dl_element * elem)
 {
 	/* Fix head and tail. */
-	if(list->head == elem)
-		list->head = elem->next;
-	if(list->tail == elem)
-		list->tail = elem->prev;
+	if(DS_PRIV(list)->head == elem)
+		DS_PRIV(list)->head = elem->next;
+	if(DS_PRIV(list)->tail == elem)
+		DS_PRIV(list)->tail = elem->prev;
 
 	/* Fix pointers in surrounding elements. */
 	if(elem->prev)
@@ -190,10 +185,10 @@ static void __delete_element(struct double_list * list, struct dl_element * elem
 	if(elem->next)
 		elem->next->prev = elem->prev;
 
-	(list->length)--;
+	(DS_PRIV(list)->length)--;
 }
 
-static void __delete_before(struct double_list * list, struct dl_element * mark)
+static void __delete_before(double_list list, struct dl_element * mark)
 {
 	struct dl_element * current;
 
@@ -201,17 +196,17 @@ static void __delete_before(struct double_list * list, struct dl_element * mark)
 		free(current->data);
 		free(current);
 
-		(list->length)--;
+		(DS_PRIV(list)->length)--;
 	}
 
-	list->head = mark;
+	DS_PRIV(list)->head = mark;
 	if(mark)
 		mark->prev = NULL;
 	else
-		list->tail = NULL;
+		DS_PRIV(list)->tail = NULL;
 }
 
-static void __delete_after(struct double_list * list, struct dl_element * mark)
+static void __delete_after(double_list list, struct dl_element * mark)
 {
 	struct dl_element * current;
 
@@ -219,98 +214,101 @@ static void __delete_after(struct double_list * list, struct dl_element * mark)
 		free(current->data);
 		free(current);
 
-		(list->length)--;
+		(DS_PRIV(list)->length)--;
 	}
 
-	list->tail = mark;
+	DS_PRIV(list)->tail = mark;
 	if(mark)
 		mark->next = NULL;
 	else
-		list->head = NULL;
+		DS_PRIV(list)->head = NULL;
 }
 
-int dl_alloc(struct double_list ** list, size_t data_size)
+double_list dl_create(const struct ds_properties * props)
 {
-	int err;
+	double_list list;
+	struct double_list_priv * priv;
 
-	*list = calloc(1, sizeof(**list));
-	if(!*list) {
-		err = -ENOMEM;
+	list = malloc(sizeof(*list));
+	if(!list)
+		return_with_errno(ENOMEM, NULL);
+
+	DS_INIT(list, props, NULL, NULL);
+
+	priv = DS_PRIV(list);
+	priv->head = NULL;
+	priv->tail = NULL;
+	priv->length = 0;
+
+	if(rwlock_alloc(&priv->rwlock) < 0)
 		goto exit;
-	}
 
-	(*list)->data_size = data_size;
-	err = rwlock_alloc(&(*list)->rwlock);
-	if(err)
-		goto exit;
-
-	return 0;
+	return list;
 
 exit:
-	free(*list);
-	return err;
+	dl_free(&list);
+
+	return NULL;
 }
 
-void dl_free(struct double_list ** list)
+void dl_free(double_list * list)
 {
 	struct dl_element * current;
 
-	rwlock_writer_entry((*list)->rwlock);
-
-	(*list)->length = 0;
+	rwlock_writer_entry(DS_PRIV(*list)->rwlock);
 
 	linked_list_foreach_safe(*list, current) {
 		free(current->data);
 		free(current);
 	}
 
-	rwlock_writer_exit((*list)->rwlock);
-	rwlock_free(&(*list)->rwlock);
+	rwlock_writer_exit(DS_PRIV(*list)->rwlock);
+	rwlock_free(&DS_PRIV(*list)->rwlock);
 
-	free(*list);
+	DS_FREE(list);
 }
 
-bool dl_null(struct double_list * list)
+bool dl_null(double_list list)
 {
 	bool null;
 
-	rwlock_reader_entry(list->rwlock);
-	null = (list->length == 0);
-	rwlock_reader_exit(list->rwlock);
+	rwlock_reader_entry(DS_PRIV(list)->rwlock);
+	null = (DS_PRIV(list)->length == 0);
+	rwlock_reader_exit(DS_PRIV(list)->rwlock);
 
 	return null;
 }
 
-void dl_push_head(struct double_list * list, void * data)
+void dl_push_head(double_list list, void * data)
 {
 	struct dl_element * current;
 
-	current = __element_init(list, data);
+	current = __create_element(data, DS_DATA_SIZE(list));
 
-	rwlock_writer_entry(list->rwlock);
+	rwlock_writer_entry(DS_PRIV(list)->rwlock);
 	__push_head(list, current);
-	rwlock_writer_exit(list->rwlock);
+	rwlock_writer_exit(DS_PRIV(list)->rwlock);
 }
 
-void dl_push_tail(struct double_list * list, void * data)
+void dl_push_tail(double_list list, void * data)
 {
 	struct dl_element * current;
 
-	current = __element_init(list, data);
+	current = __create_element(data, DS_DATA_SIZE(list));
 
-	rwlock_writer_entry(list->rwlock);
+	rwlock_writer_entry(DS_PRIV(list)->rwlock);
 	__push_tail(list, current);
-	rwlock_writer_exit(list->rwlock);
+	rwlock_writer_exit(DS_PRIV(list)->rwlock);
 }
 
-void * dl_pop_head(struct double_list * list)
+void * dl_pop_head(double_list list)
 {
 	void * data = NULL;
 	struct dl_element * current;
 
-	rwlock_writer_entry(list->rwlock);
+	rwlock_writer_entry(DS_PRIV(list)->rwlock);
 	current = __pop_head(list);
-	rwlock_writer_exit(list->rwlock);
+	rwlock_writer_exit(DS_PRIV(list)->rwlock);
 
 	if(current) {
 		data = current->data;
@@ -320,14 +318,14 @@ void * dl_pop_head(struct double_list * list)
 	return data;
 }
 
-void * dl_pop_tail(struct double_list * list)
+void * dl_pop_tail(double_list list)
 {
 	void * data = NULL;
 	struct dl_element * current;
 
-	rwlock_writer_entry(list->rwlock);
+	rwlock_writer_entry(DS_PRIV(list)->rwlock);
 	current = __pop_tail(list);
-	rwlock_writer_exit(list->rwlock);
+	rwlock_writer_exit(DS_PRIV(list)->rwlock);
 
 	if(current) {
 		data = current->data;
@@ -337,27 +335,27 @@ void * dl_pop_tail(struct double_list * list)
 	return data;
 }
 
-bool dl_insert(struct double_list * list, void * data, size_t pos)
+bool dl_insert(double_list list, void * data, size_t pos)
 {
 	bool success;
 	struct dl_element * current;
 
-	current = __element_init(list, data);
+	current = __create_element(data, DS_DATA_SIZE(list));
 
-	rwlock_writer_entry(list->rwlock);
+	rwlock_writer_entry(DS_PRIV(list)->rwlock);
 	success = __insert_element(list, current, pos);
-	rwlock_writer_exit(list->rwlock);
+	rwlock_writer_exit(DS_PRIV(list)->rwlock);
 
 	return success;
 }
 
-bool dl_delete(struct double_list * list, size_t pos)
+bool dl_delete(double_list list, size_t pos)
 {
 	struct dl_element * current;
 
-	rwlock_writer_entry(list->rwlock);
+	rwlock_writer_entry(DS_PRIV(list)->rwlock);
 	current = __remove_element(list, pos);
-	rwlock_writer_exit(list->rwlock);
+	rwlock_writer_exit(DS_PRIV(list)->rwlock);
 
 	if(current) {
 		free(current->data);
@@ -369,14 +367,14 @@ bool dl_delete(struct double_list * list, size_t pos)
 	return false;
 }
 
-void * dl_remove(struct double_list * list, size_t pos)
+void * dl_remove(double_list list, size_t pos)
 {
 	void * data = NULL;
 	struct dl_element * current;
 
-	rwlock_writer_entry(list->rwlock);
+	rwlock_writer_entry(DS_PRIV(list)->rwlock);
 	current = __remove_element(list, pos);
-	rwlock_writer_exit(list->rwlock);
+	rwlock_writer_exit(DS_PRIV(list)->rwlock);
 
 	if(current) {
 		data = current->data;
@@ -386,13 +384,13 @@ void * dl_remove(struct double_list * list, size_t pos)
 	return data;
 }
 
-void * dl_fetch(struct double_list * list, size_t pos)
+void * dl_fetch(double_list list, size_t pos)
 {
 	struct dl_element * current;
 
-	rwlock_reader_entry(list->rwlock);
+	rwlock_reader_entry(DS_PRIV(list)->rwlock);
 	current = __lookup_element(list, pos);
-	rwlock_reader_exit(list->rwlock);
+	rwlock_reader_exit(DS_PRIV(list)->rwlock);
 
 	if(current)
 		return current->data;
@@ -400,26 +398,26 @@ void * dl_fetch(struct double_list * list, size_t pos)
 	return NULL;
 }
 
-bool dl_contains(struct double_list * list, void * data)
+bool dl_contains(double_list list, void * data)
 {
 	bool success = false;
 	struct dl_element * current;
 
-	rwlock_reader_entry(list->rwlock);
+	rwlock_reader_entry(DS_PRIV(list)->rwlock);
 
 	linked_list_foreach(list, current) {
-		if(memcmp(current->data, data, list->data_size) == 0) {
+		if(memcmp(current->data, data, DS_DATA_SIZE(list)) == 0) {
 			success = true;
 			break;
 		}
 	}
 
-	rwlock_reader_exit(list->rwlock);
+	rwlock_reader_exit(DS_PRIV(list)->rwlock);
 
 	return success;
 }
 
-bool dl_any(struct double_list * list, pred_fn p)
+bool dl_any(double_list list, pred_fn p)
 {
 	bool success = false;
 	struct dl_element * current;
@@ -427,7 +425,7 @@ bool dl_any(struct double_list * list, pred_fn p)
 	if(dl_null(list))
 		return false;
 
-	rwlock_reader_entry(list->rwlock);
+	rwlock_reader_entry(DS_PRIV(list)->rwlock);
 
 	linked_list_foreach(list, current) {
 		if(p(current->data)) {
@@ -436,12 +434,12 @@ bool dl_any(struct double_list * list, pred_fn p)
 		}
 	}
 
-	rwlock_reader_exit(list->rwlock);
+	rwlock_reader_exit(DS_PRIV(list)->rwlock);
 
 	return success;
 }
 
-bool dl_all(struct double_list * list, pred_fn p)
+bool dl_all(double_list list, pred_fn p)
 {
 	bool success = true;
 	struct dl_element * current;
@@ -449,7 +447,7 @@ bool dl_all(struct double_list * list, pred_fn p)
 	if(dl_null(list))
 		return false;
 
-	rwlock_reader_entry(list->rwlock);
+	rwlock_reader_entry(DS_PRIV(list)->rwlock);
 
 	linked_list_foreach(list, current) {
 		if(!p(current->data)) {
@@ -458,12 +456,12 @@ bool dl_all(struct double_list * list, pred_fn p)
 		}
 	}
 
-	rwlock_reader_exit(list->rwlock);
+	rwlock_reader_exit(DS_PRIV(list)->rwlock);
 
 	return success;
 }
 
-bool dl_filter(struct double_list * list, pred_fn p)
+bool dl_filter(double_list list, pred_fn p)
 {
 	bool changed = false;
 	struct dl_element * current;
@@ -471,7 +469,7 @@ bool dl_filter(struct double_list * list, pred_fn p)
 	if(dl_null(list))
 		return false;
 
-	rwlock_writer_entry(list->rwlock);
+	rwlock_writer_entry(DS_PRIV(list)->rwlock);
 
 	linked_list_foreach_safe(list, current) {
 		if(!p(current->data)) {
@@ -483,19 +481,19 @@ bool dl_filter(struct double_list * list, pred_fn p)
 		}
 	}
 
-	rwlock_writer_exit(list->rwlock);
+	rwlock_writer_exit(DS_PRIV(list)->rwlock);
 
 	return changed;
 }
 
-bool dl_drop_while(struct double_list * list, pred_fn p)
+bool dl_drop_while(double_list list, pred_fn p)
 {
 	size_t orig_length;
 	struct dl_element * current;
 
-	rwlock_writer_entry(list->rwlock);
+	rwlock_writer_entry(DS_PRIV(list)->rwlock);
 
-	orig_length = list->length;
+	orig_length = DS_PRIV(list)->length;
 
 	/* Iterate over the list until we find the first element that doesn't
 	 * satisfy the predicate; delete everything before that element.
@@ -510,19 +508,19 @@ bool dl_drop_while(struct double_list * list, pred_fn p)
 		__delete_before(list, NULL);
 	}
 
-	rwlock_writer_exit(list->rwlock);
+	rwlock_writer_exit(DS_PRIV(list)->rwlock);
 
-	return (orig_length != list->length);
+	return (orig_length != DS_PRIV(list)->length);
 }
 
-bool dl_take_while(struct double_list * list, pred_fn p)
+bool dl_take_while(double_list list, pred_fn p)
 {
 	size_t orig_length;
 	struct dl_element * current;
 
-	rwlock_writer_entry(list->rwlock);
+	rwlock_writer_entry(DS_PRIV(list)->rwlock);
 
-	orig_length = list->length;
+	orig_length = DS_PRIV(list)->length;
 
 	/* Iterate over the list until we find the first element that doesn't
 	 * satisfy the predicate; delete that element and every one after. */
@@ -533,17 +531,17 @@ bool dl_take_while(struct double_list * list, pred_fn p)
 		}
 	}
 
-	rwlock_writer_exit(list->rwlock);
+	rwlock_writer_exit(DS_PRIV(list)->rwlock);
 
-	return (orig_length != list->length);
+	return (orig_length != DS_PRIV(list)->length);
 }
 
-void dl_map(struct double_list * list, map_fn fn)
+void dl_map(double_list list, map_fn fn)
 {
 	void * result;
 	struct dl_element * current;
 
-	rwlock_writer_entry(list->rwlock);
+	rwlock_writer_entry(DS_PRIV(list)->rwlock);
 	linked_list_foreach(list, current) {
 		result = fn(current->data);
 
@@ -553,14 +551,14 @@ void dl_map(struct double_list * list, map_fn fn)
 		 * reference is lost in the next iteration.
 		 */
 		if(result != current->data) {
-			memcpy(current->data, result, list->data_size);
+			memcpy(current->data, result, DS_DATA_SIZE(list));
 			free(result);
 		}
 	}
-	rwlock_writer_exit(list->rwlock);
+	rwlock_writer_exit(DS_PRIV(list)->rwlock);
 }
 
-void dl_reverse(struct double_list * list)
+void dl_reverse(double_list list)
 {
 	struct dl_element * current;
 	struct dl_element * tmp;
@@ -572,12 +570,12 @@ void dl_reverse(struct double_list * list)
 	}
 
 	/* Swap the list head and tail */
-	tmp = list->head;
-	list->head = list->tail;
-	list->tail = tmp;
+	tmp = DS_PRIV(list)->head;
+	DS_PRIV(list)->head = DS_PRIV(list)->tail;
+	DS_PRIV(list)->tail = tmp;
 }
 
-void * dl_foldr(const struct double_list * list,
+void * dl_foldr(const double_list list,
 		      foldr_fn fn,
 		      const void * init)
 {
@@ -585,10 +583,10 @@ void * dl_foldr(const struct double_list * list,
 	void * accumulator;
 	struct dl_element * current;
 
-	accumulator = malloc(list->data_size);
-	memcpy(accumulator, init, list->data_size);
+	accumulator = malloc(DS_DATA_SIZE(list));
+	memcpy(accumulator, init, DS_DATA_SIZE(list));
 
-	rwlock_reader_entry(list->rwlock);
+	rwlock_reader_entry(DS_PRIV(list)->rwlock);
 	linked_list_foreach(list, current) {
 		result = fn(current->data, accumulator);
 
@@ -598,16 +596,16 @@ void * dl_foldr(const struct double_list * list,
 		 * reference is lost in the next iteration.
 		 */
 		if(result != accumulator) {
-			memcpy(accumulator, result, list->data_size);
+			memcpy(accumulator, result, DS_DATA_SIZE(list));
 			free(result);
 		}
 	}
-	rwlock_reader_exit(list->rwlock);
+	rwlock_reader_exit(DS_PRIV(list)->rwlock);
 
 	return accumulator;
 }
 
-void * dl_foldl(const struct double_list * list,
+void * dl_foldl(const double_list list,
 		      foldl_fn fn,
 		      const void * init)
 {
@@ -615,10 +613,10 @@ void * dl_foldl(const struct double_list * list,
 	void * accumulator;
 	struct dl_element * current;
 
-	accumulator = malloc(list->data_size);
-	memcpy(accumulator, init, list->data_size);
+	accumulator = malloc(DS_DATA_SIZE(list));
+	memcpy(accumulator, init, DS_DATA_SIZE(list));
 
-	rwlock_reader_entry(list->rwlock);
+	rwlock_reader_entry(DS_PRIV(list)->rwlock);
 	linked_list_foreach(list, current) {
 		result = fn(accumulator, current->data);
 
@@ -628,11 +626,11 @@ void * dl_foldl(const struct double_list * list,
 		 * reference is lost in the next iteration.
 		 */
 		if(result != accumulator) {
-			memcpy(accumulator, result, list->data_size);
+			memcpy(accumulator, result, DS_DATA_SIZE(list));
 			free(result);
 		}
 	}
-	rwlock_reader_exit(list->rwlock);
+	rwlock_reader_exit(DS_PRIV(list)->rwlock);
 
 	return accumulator;
 }
