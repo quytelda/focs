@@ -199,7 +199,7 @@ static inline void __zero(const ring_buffer buf,
 #endif /* ZERO */
 
 
-#ifdef GENERIC_OPS
+#ifdef GENERICS
 
 const static struct mgmt_operations mgmt_ops = {
 	.create  = (create_mgmt_fn)  rb_create,
@@ -211,9 +211,9 @@ const static struct hof_operations hof_ops = {
 	.empty = (empty_hof_fn) rb_empty,
 };
 
-#else /* GENERIC_OPS */
+#else /* GENERICS */
 
 __PLACEHOLDER_SYM(mgmt_ops);
 __PLACEHOLDER_SYM(hof_ops);
 
-#endif /* GENERIC_OPS */
+#endif /* GENERICS */

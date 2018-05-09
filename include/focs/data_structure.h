@@ -24,7 +24,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#ifdef GENERIC_OPS
+#ifdef GENERICS
 #include "focs/hof_operations.h"
 #include "focs/mgmt_operations.h"
 #endif
@@ -43,7 +43,7 @@ struct ds_properties {
 #define __DS_PRIV_NAME      __priv
 #define __DS_PROPS_NAME     __props
 
-#ifdef GENERIC_OPS
+#ifdef GENERICS
 #define START_DS(ds_name)						\
 	typedef struct {						\
 		const struct ds_properties   * __DS_PROPS_NAME;		\
@@ -61,7 +61,7 @@ struct ds_properties {
 		__DS_HOF_OPS(ds)  = hof_ops;	\
 	})
 
-#else /* GENERIC_OPS */
+#else /* GENERICS */
 
 #define START_DS(ds_name)				\
 	typedef struct {				\
@@ -70,7 +70,7 @@ struct ds_properties {
 
 #define DS_INIT(ds, props, mgmt_ops, hof_ops) (DS_PROPS(ds) = props)
 
-#endif /* GENERIC_OPS */
+#endif /* GENERICS */
 
 #define END_DS(ds_name) __DS_PRIV_NAME; } * ds_name
 
