@@ -40,6 +40,41 @@ static inline __pure bool __is_full(const ring_buffer buf)
 	return (__length(buf) >= DS_ENTRIES(buf));
 }
 
+static inline __pure __nonulls bool __is_index_valid(const ring_buffer buf,
+	                                             const size_t absolute)
+{
+	return (absolute >= 0) && (absolute < __length(buf));
+}
+
+static inline __pure __nonulls void * __index_to_addr(const ring_buffer buf,
+	                                              const ssize_t relative)
+{
+	size_t absolute;
+	size_t offset;
+	size_t start;
+
+	/* Doing arithmetic with void pointers is tricksy, even in GNU C.
+	 * Cast all our pointers to size_t integers before doing arithmetic. */
+	size_t data = (size_t) DS_PRIV(buf)->data;
+	size_t head = (size_t) DS_PRIV(buf)->head;
+
+	absolute = mod(relative, __length(buf)) * DS_DATA_SIZE(buf);
+	start = head - data;
+	offset = (start + absolute) % __space(buf);
+	return (void *) (data + offset);
+}
+
+static inline __pure __nonulls size_t __addr_to_index(const ring_buffer buf,
+	                                              const void * addr)
+{
+	/* Doing arithmetic with void pointers is tricksy, even in GNU C.
+	 * Cast all our pointers to size_t integers before doing arithmetic. */
+	size_t head = (size_t) DS_PRIV(buf)->head;
+	size_t mark = (size_t) addr;
+
+	return (mark - head) / DS_DATA_SIZE(buf);
+}
+
 ring_buffer rb_create(const struct ds_properties * props)
 {
 	ring_buffer buf;
