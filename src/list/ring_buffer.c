@@ -73,15 +73,9 @@ exit:
 
 void rb_destroy(ring_buffer * buf)
 {
-	struct ring_buffer_priv * priv = DS_PRIV(*buf);
-
 	/* Destroy the private data section. */
-	priv->head = NULL;
-	priv->tail = NULL;
-	priv->length = 0;
-	free_null(priv->data);
-
-	/* TODO: destroy rwlock */
+	free_null(DS_PRIV(*buf)->data);
+	rwlock_free(&DS_PRIV(*buf)->rwlock);
 
 	/* Deallocate the data structure. */
 	DS_FREE(buf);
