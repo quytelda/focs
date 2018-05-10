@@ -41,8 +41,7 @@ START_DS(ring_buffer) {
  * created ring buffer.  Otherwise, `NULL` shall be returned and `errno` set to
  * indicate the error.
  */
-ring_buffer rb_create(const struct ds_properties * props)
-	__attribute__((nonnull));
+ring_buffer __nonulls rb_create(const struct ds_properties * props);
 
 /**
  * Destroy and deallocate a ring buffer.
@@ -50,8 +49,7 @@ ring_buffer rb_create(const struct ds_properties * props)
  *
  * Destroys and deallocates the ring buffer pointed to by `buf`.
  */
-void rb_destroy(ring_buffer * buf)
-	__attribute__((nonnull));
+void __nonulls rb_destroy(ring_buffer * buf);
 
 /**
  * Determine the number of data blocks stored in a ring buffer.
@@ -61,8 +59,7 @@ void rb_destroy(ring_buffer * buf)
  * ring buffer `buf`.  This is distinct from the capacity of the ring buffer,
  * which is the number of entries it may contain when full.
  */
-size_t rb_size(ring_buffer buf)
-	__attribute__((nonnull));
+size_t __nonulls rb_size(ring_buffer buf);
 
 /**
  * Determine if a ring buffer is empty.
@@ -71,8 +68,7 @@ size_t rb_size(ring_buffer buf)
  * @return This function shall return `true` if `buf` is empty,
  * or `false` otherwise.
  */
-bool rb_empty(ring_buffer buf)
-	__attribute__((nonnull));
+bool __nonulls rb_empty(ring_buffer buf);
 
 /**
  * Push a new data block onto the head of a ring buffer.
@@ -81,8 +77,8 @@ bool rb_empty(ring_buffer buf)
  *
  * Push a newly allocated copy of `data` onto the head of `buf`.
  */
-bool rb_push_head(ring_buffer buf, const void * data)
-	__attribute__((nonnull (1)));
+bool __nonulls rb_push_head(ring_buffer buf,
+	                    const void * data);
 
 /**
  * Push a new data block onto the tail of a ring buffer.
@@ -91,8 +87,8 @@ bool rb_push_head(ring_buffer buf, const void * data)
  *
  * Push a newly allocated copy of `data` onto the tail of `buf`.
  */
-bool rb_push_tail(ring_buffer buf, const void * data)
-	__attribute__((nonnull (1)));
+bool __nonulls rb_push_tail(ring_buffer buf,
+	                    const void * data);
 
 /**
  * Pop a data element from the head of a ring buffer.
@@ -109,8 +105,7 @@ bool rb_push_tail(ring_buffer buf, const void * data)
  * needed.  It is **not** equivalent to the pointer which was used to insert the
  * data into `buf`.
  */
-void * rb_pop_head(ring_buffer buf)
-	__attribute__((nonnull));
+void * __nonulls rb_pop_head(ring_buffer buf);
 
 /**
  * Pop a data element from the tail of a ring buffer.
@@ -127,8 +122,7 @@ void * rb_pop_head(ring_buffer buf)
  * needed.  It is **not** equivalent to the pointer which was used to insert the
  * data into `buf`.
  */
-void * rb_pop_tail(ring_buffer buf)
-	__attribute__((nonnull));
+void * __nonulls rb_pop_tail(ring_buffer buf);
 
 /**
  * Insert a data block into a ring buffer at a certain position.
@@ -143,10 +137,9 @@ void * rb_pop_tail(ring_buffer buf)
  * @return Upon successful completion, this function shall return `true`;
  * otherwise, `false` shall be returned and `errno` set appropriately.
  */
-bool rb_insert(ring_buffer buf,
-	       const void * data,
-	       const ssize_t pos)
-	__attribute__((nonnull (1)));
+bool __nonulls rb_insert(ring_buffer buf,
+	                 const void * data,
+	                 const ssize_t pos);
 
 /**
  * Fetch a data block from a given index of a ring buffer.
@@ -162,10 +155,8 @@ bool rb_insert(ring_buffer buf,
  * the data is needed after the list is destroyed, make a copy of it, or make
  * sure to call dl_remove() on the data's index before destroying the list.
  */
-void * rb_fetch(ring_buffer buf,
-		const ssize_t pos)
-	__attribute__((nonnull));
-
+void * __nonulls rb_fetch(ring_buffer buf,
+		          const ssize_t pos);
 
 #ifdef DEBUG
 #include <stdio.h>
@@ -178,26 +169,8 @@ void * rb_fetch(ring_buffer buf,
  * information on addresses, indices, and the locations of the head and tail
  * pointers.
  */
-void rb_dump(ring_buffer buf);
+void __nonulls rb_dump(ring_buffer buf);
 #endif /* DEBUG */
-
-#ifdef ZERO
-
-static inline void __zero(const ring_buffer buf,
-			  const ssize_t pos)
-{
-	addr = __rbpos_to_addr(buf, pos);
-	bzero(addr, DS_PROPS(buf)->data_size);
-}
-
-#else /* ZERO */
-
-static inline void __zero(const ring_buffer buf,
-			  const ssize_t pos)
-{}
-
-#endif /* ZERO */
-
 
 #ifdef GENERICS
 
