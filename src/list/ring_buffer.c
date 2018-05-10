@@ -75,6 +75,39 @@ static inline __pure __nonulls size_t __addr_to_index(const ring_buffer buf,
 	return (mark - head) / DS_DATA_SIZE(buf);
 }
 
+static inline __pure __nonulls void * __prev(const ring_buffer buf,
+	                                     const void * addr)
+{
+	size_t start;
+	size_t offset;
+
+	/* Doing arithmetic with void pointers is tricksy, even in GNU C.
+	 * Cast all our pointers to size_t integers before doing arithmetic. */
+	size_t data = (size_t) DS_PRIV(buf)->data;
+	size_t mark = (size_t) addr;
+
+	start = mark - data;
+	offset = mod((ssize_t) (start - DS_DATA_SIZE(buf)),
+		     (ssize_t) DS_ENTRIES(buf));
+	return (void *) (data + offset);
+}
+
+static inline __pure __nonulls void * __next(const ring_buffer buf,
+	                                     const void * addr)
+{
+	size_t start;
+	size_t offset;
+
+	/* Doing arithmetic with void pointers is tricksy, even in GNU C.
+	 * Cast all our pointers to size_t integers before doing arithmetic. */
+	size_t data = (size_t) DS_PRIV(buf)->data;
+	size_t mark = (size_t) addr;
+
+	start = mark - data;
+	offset = (start + DS_DATA_SIZE(buf)) % DS_ENTRIES(buf);
+	return (void *) (data + offset);
+}
+
 ring_buffer rb_create(const struct ds_properties * props)
 {
 	ring_buffer buf;
