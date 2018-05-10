@@ -202,12 +202,12 @@ static inline void __zero(const ring_buffer buf,
 #ifdef GENERICS
 
 static const struct mgmt_operations mgmt_ops = {
-	.destroy = (destroy_mgmt_fn) rb_destroy,
+	.empty   = (empty_mgmt_fn)    rb_empty,
 	.size    = (size_mgmt_fn)    rb_size,
+	.destroy = (destroy_mgmt_fn) rb_destroy,
 };
 
 static const struct hof_operations hof_ops = {
-	.empty = (empty_hof_fn) rb_empty,
 };
 
 #else /* GENERICS */

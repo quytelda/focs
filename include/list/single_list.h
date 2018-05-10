@@ -340,6 +340,8 @@ bool sl_take_while(single_list list, pred_fn p);
 #ifdef GENERICS
 
 static const struct mgmt_operations mgmt_ops = {
+	.empty   = (empty_mgmt_fn)    sl_null,
+	.elem    = (elem_mgmt_fn)     sl_contains,
 	.destroy = (destroy_mgmt_fn) sl_free,
 };
 
@@ -347,8 +349,6 @@ static const struct hof_operations hof_ops = {
 	.map        = (map_hof_fn)        sl_map,
 	.foldr      = (foldr_hof_fn)      sl_foldr,
 	.foldl      = (foldl_hof_fn)      sl_foldl,
-	.empty      = (empty_hof_fn)      sl_null,
-	.elem       = (elem_hof_fn)       sl_contains,
 	.any        = (any_hof_fn)        sl_any,
 	.all        = (all_hof_fn)        sl_all,
 	.filter     = (filter_hof_fn)     sl_filter,

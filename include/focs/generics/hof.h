@@ -33,8 +33,6 @@ typedef void * (* foldl_hof_fn)(void * ds, foldl_fn fn, const void * init);
 /* ############## *
  * # Properties # *
  * ############## */
-typedef bool (* empty_hof_fn)(void * ds);
-typedef bool (* elem_hof_fn) (void * ds, void * data);
 typedef bool (* any_hof_fn)  (void * ds, pred_fn p);
 typedef bool (* all_hof_fn)  (void * ds, pred_fn p);
 
@@ -52,8 +50,6 @@ struct hof_operations {
 	foldl_hof_fn foldl;
 
 	/* Properties */
-	empty_hof_fn empty;
-	elem_hof_fn  elem;
 	any_hof_fn   any;
 	all_hof_fn   all;
 
@@ -66,8 +62,6 @@ struct hof_operations {
 #define map(ds, fn)          (__DS_DOPS(ds)->map(ds, fn))
 #define foldr(ds, fn, init)  (__DS_DOPS(ds)->foldr(ds, fn, init))
 #define foldl(ds, fn, init)  (__DS_DOPS(ds)->foldl(ds, fn, init))
-#define empty(ds)            (__DS_DOPS(ds)->empty(ds))
-#define elem(ds, datum)      (__DS_DOPS(ds)->elem(ds, datum))
 #define any(ds, pred)        (__DS_DOPS(ds)->any(ds, pred))
 #define all(ds, pred)        (__DS_DOPS(ds)->all(ds, pred))
 #define filter(ds, pred)     (__DS_DOPS(ds)->filter(ds, pred))
