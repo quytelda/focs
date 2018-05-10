@@ -71,6 +71,15 @@ size_t __nonulls rb_size(ring_buffer buf);
 bool __nonulls rb_empty(ring_buffer buf);
 
 /**
+ * Determine if a ring buffer is full.
+ * @param buf The ring buffer to check (non-NULL)
+ *
+ * @return This function shall return `true` if `buf` is full,
+ * or `false` otherwise.
+ */
+bool __nonulls rb_full(ring_buffer buf);
+
+/**
  * Push a new data block onto the head of a ring buffer.
  * @param buf The ring buffer to push onto
  * @param data A pointer to the data to push

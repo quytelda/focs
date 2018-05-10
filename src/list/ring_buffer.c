@@ -138,6 +138,17 @@ bool rb_empty(const ring_buffer buf)
 	return success;
 }
 
+bool rb_full(const ring_buffer buf)
+{
+	bool success;
+
+	rwlock_reader_entry(DS_PRIV(buf)->rwlock);
+	success = __is_full(buf);
+	rwlock_reader_exit(DS_PRIV(buf)->rwlock);
+
+	return success;
+}
+
 #ifdef DEBUG
 
 void rb_dump(ring_buffer buf)
