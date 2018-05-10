@@ -161,8 +161,8 @@ void rb_dump(ring_buffer buf)
 	}
 
 	priv = DS_PRIV(buf);
-	printf("Buffer length: %ld", priv->length);
 
+	printf("Buffer length: %ld", priv->length);
 	if(__is_empty(buf))
 		puts(" (empty)\n");
 	else if(__is_full(buf))
