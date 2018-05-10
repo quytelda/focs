@@ -26,6 +26,7 @@
 #ifndef __FOCS_H
 #define __FOCS_H
 
+#define __nonulls __attribute__((nonnull))
 #define __pure    __attribute__((pure))
 #define __unused  __attribute__((unused))
 
