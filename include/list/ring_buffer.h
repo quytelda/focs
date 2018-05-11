@@ -156,13 +156,13 @@ bool __nonulls rb_insert(ring_buffer buf,
  * @param pos The index to fetch the block from
  *             (must be an index in the range `0..length - 1`)
  *
- * Fetch the data stored at index `pos` in `list`.
+ * Fetch the data stored at index `pos` in `buf`.
  *
  * @return A pointer to the data at index `pos`, or `NULL` on failure.
- * This pointer should **not** be free()d explicitly, or the list will become
+ * This pointer should **not** be free()d explicitly, or the `buf` will become
  * corrupted.  This pointer will be free()d when dl_free() is called, so if
- * the data is needed after the list is destroyed, make a copy of it, or make
- * sure to call dl_remove() on the data's index before destroying the list.
+ * the data is needed after `buf` is destroyed, make a copy of it, or make
+ * sure to call rb_remove() on the data's index before destroying `buf`.
  */
 void * __nonulls rb_fetch(ring_buffer buf,
 		          const ssize_t pos);
