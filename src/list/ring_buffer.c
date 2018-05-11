@@ -118,7 +118,7 @@ static __nonulls bool __push_head(ring_buffer buf, const void * data)
 
 	DS_PRIV(buf)->head = __prev(buf, DS_PRIV(buf)->head);
 	memcpy(DS_PRIV(buf)->head, data, DS_DATA_SIZE(buf));
-	DS_PRIV(buf)->length = MIN(DS_PRIV(buf)->length, DS_ENTRIES(buf));
+	DS_PRIV(buf)->length = MIN(DS_PRIV(buf)->length + 1, DS_ENTRIES(buf));
 
 	return true;
 }
@@ -130,7 +130,7 @@ static __nonulls bool __push_tail(ring_buffer buf, const void * data)
 
 	memcpy(DS_PRIV(buf)->tail, data, DS_DATA_SIZE(buf));
 	DS_PRIV(buf)->tail = __next(buf, DS_PRIV(buf)->tail);
-	DS_PRIV(buf)->length = MIN(DS_PRIV(buf)->length, DS_ENTRIES(buf));
+	DS_PRIV(buf)->length = MIN(DS_PRIV(buf)->length + 1, DS_ENTRIES(buf));
 
 	return true;
 }
