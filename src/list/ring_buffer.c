@@ -67,12 +67,15 @@ static inline __pure __nonulls void * __index_to_addr(const ring_buffer buf,
 static inline __pure __nonulls size_t __addr_to_index(const ring_buffer buf,
 	                                              const void * addr)
 {
+	size_t offset;
+
 	/* Doing arithmetic with void pointers is tricksy, even in GNU C.
 	 * Cast all our pointers to size_t integers before doing arithmetic. */
 	size_t head = (size_t) DS_PRIV(buf)->head;
 	size_t mark = (size_t) addr;
 
-	return (mark - head) / DS_DATA_SIZE(buf);
+	offset = mod((ssize_t) (mark - head), (ssize_t) __space(buf));
+	return offset / DS_DATA_SIZE(buf);
 }
 
 static inline __pure __nonulls void * __prev(const ring_buffer buf,
