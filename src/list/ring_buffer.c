@@ -20,6 +20,8 @@
 #include "list/ring_buffer.h"
 #include "sync/rwlock.h"
 
+#define INDEX_ABS(relative) mod(relative, (ssize_t) DS_PRIV(buf)->length)
+
 static inline __pure size_t __length(const ring_buffer buf)
 {
 	return DS_PRIV(buf)->length;
