@@ -40,10 +40,10 @@ static inline __pure bool __is_full(const ring_buffer buf)
 	return (__length(buf) >= DS_ENTRIES(buf));
 }
 
-static inline __pure __nonulls bool __is_index_valid(const ring_buffer buf,
-	                                             const size_t absolute)
+static inline __pure __nonulls bool __is_index_OOB(const ring_buffer buf,
+	                                           const size_t absolute)
 {
-	return (absolute >= 0) && (absolute < __length(buf));
+	return (absolute < 0) || (absolute >= __length(buf));
 }
 
 static inline __pure __nonulls void * __index_to_addr(const ring_buffer buf,
