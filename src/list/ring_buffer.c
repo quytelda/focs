@@ -166,6 +166,42 @@ static __nonulls void * __pop_tail(ring_buffer buf)
 	return data;
 }
 
+static void * __shift_forward(const ring_buffer buf,
+			      const size_t start,
+			      const size_t end)
+{
+	void * dest;
+	void * front;
+	void * src;
+
+	front = dest = __prev(buf, __index_to_addr(buf, start));
+	for(ssize_t i = start; i <= end; i++) {
+		src = __index_to_addr(buf, i);
+		memcpy(dest, src, DS_DATA_SIZE(buf));
+		dest = src;
+	}
+
+	return front;
+}
+
+static void * __shift_backward(const ring_buffer buf,
+			       const size_t start,
+			       const size_t end)
+{
+	void * back;
+	void * dest;
+	void * src;
+
+	back = dest = __next(buf, __index_to_addr(buf, end));
+	for(ssize_t i = end; i >= start; i--) {
+		src = __index_to_addr(buf, i);
+		memcpy(dest, src, DS_DATA_SIZE(buf));
+		dest = src;
+	}
+
+	return back;
+}
+
 ring_buffer rb_create(const struct ds_properties * props)
 {
 	ring_buffer buf;
