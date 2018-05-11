@@ -47,9 +47,8 @@ static inline __pure __nonulls bool __is_index_OOB(const ring_buffer buf,
 }
 
 static inline __pure __nonulls void * __index_to_addr(const ring_buffer buf,
-	                                              const ssize_t relative)
+	                                              const size_t index)
 {
-	size_t absolute;
 	size_t offset;
 	size_t start;
 
@@ -58,9 +57,9 @@ static inline __pure __nonulls void * __index_to_addr(const ring_buffer buf,
 	size_t data = (size_t) DS_PRIV(buf)->data;
 	size_t head = (size_t) DS_PRIV(buf)->head;
 
-	absolute = mod(relative, __length(buf)) * DS_DATA_SIZE(buf);
 	start = head - data;
-	offset = (start + absolute) % __space(buf);
+	offset = index * DS_DATA_SIZE(buf);
+	offset = (start + offset) % __space(buf);
 	return (void *) (data + offset);
 }
 
