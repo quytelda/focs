@@ -220,6 +220,26 @@ static void __open_gap(ring_buffer buf,
 	(DS_PRIV(buf)->length)++;
 }
 
+static __nonulls bool __insert(ring_buffer buf,
+			       const void * data,
+			       const ssize_t relative)
+{
+	size_t absolute;
+	void * addr;
+
+	if(!DS_OVERWRITE(buf) && __is_full(buf))
+		return_with_errno(ENOBUFS, false);
+
+	absolute = INDEX_ABS(relative);
+	if(!DS_OVERWRITE(buf))
+		__open_gap(buf, absolute);
+
+	addr = __index_to_addr(buf, absolute);
+	memcpy(addr, data, DS_DATA_SIZE(buf));
+
+	return true;
+}
+
 ring_buffer rb_create(const struct ds_properties * props)
 {
 	ring_buffer buf;
@@ -336,6 +356,17 @@ void * rb_pop_tail(ring_buffer buf)
 	rwlock_writer_exit(DS_PRIV(buf)->rwlock);
 
 	return data;
+}
+
+bool rb_insert(ring_buffer buf, const void * data, const ssize_t pos)
+{
+	bool success;
+
+	rwlock_writer_entry(DS_PRIV(buf)->rwlock);
+	success = __insert(buf, data, pos);
+	rwlock_writer_exit(DS_PRIV(buf)->rwlock);
+
+	return success;
 }
 
 #ifdef DEBUG

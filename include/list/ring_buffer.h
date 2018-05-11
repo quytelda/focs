@@ -135,10 +135,10 @@ void * __nonulls rb_pop_tail(ring_buffer buf);
 
 /**
  * Insert a data block into a ring buffer at a certain position.
- * @param buf  The ring buffer to insert into
+ * @param buf  The ring buffer to insert into (non-NULL, cannot be empty)
  * @param data A pointer to the data to insert
  * @param pos  The position to insert the data block at
- *             (must be an index in the range `-1..length`)
+ *             (must be an index in the range `0..length-1`)
  *
  * Insert a newly allocated copy of `data` into `buf` at the index indicated
  * by `pos`.
