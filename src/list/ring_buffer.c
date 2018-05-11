@@ -202,6 +202,24 @@ static void * __shift_backward(const ring_buffer buf,
 	return back;
 }
 
+static void __open_gap(ring_buffer buf,
+	               const size_t index)
+{
+	size_t end;
+	void * mark;
+
+	end = DS_PRIV(buf)->length - 1;
+	if(index <= (end - index)) {
+		mark = __shift_forward(buf, 0, index);
+		DS_PRIV(buf)->head = mark;
+	} else {
+		mark = __shift_backward(buf, index, end);
+		DS_PRIV(buf)->tail = __next(buf, mark);
+	}
+
+	(DS_PRIV(buf)->length)++;
+}
+
 ring_buffer rb_create(const struct ds_properties * props)
 {
 	ring_buffer buf;
