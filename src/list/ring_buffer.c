@@ -312,15 +312,15 @@ void rb_dump(ring_buffer buf)
 
 	for(size_t i = 0; i < DS_ENTRIES(buf); i++) {
 		uint8_t * addr;
-		ssize_t pos;
+		size_t pos;
 
 		addr = ((uint8_t *) priv->data) + i;
-		pos  = __addr_to_phy(buf, addr);
+		pos  = __addr_to_index(buf, addr);
 
-		printf("%p (%ld): %#04x", addr, pos, *addr);
+		printf("%p [%lu]: %#04x", addr, pos, *addr);
 
 		if(addr == priv->data)
-			printf(" (start)");
+			printf(" <data>");
 		if(addr == priv->head)
 			printf(" (head)");
 		if(addr == priv->tail)

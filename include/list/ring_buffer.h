@@ -178,7 +178,7 @@ void * __nonulls rb_fetch(ring_buffer buf,
  * information on addresses, indices, and the locations of the head and tail
  * pointers.
  */
-void __nonulls rb_dump(ring_buffer buf);
+void rb_dump(ring_buffer buf);
 #endif /* DEBUG */
 
 #ifdef GENERICS
