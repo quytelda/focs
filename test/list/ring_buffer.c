@@ -87,7 +87,7 @@ START_TEST(test_rb_push_head_multiple)
 
 	free(out[0]);
 	free(out[1]);
-	free(out[2]);	
+	free(out[2]);
 	rb_destroy(&buf);
 }
 END_TEST
