@@ -132,6 +132,42 @@ static __nonulls bool __push_tail(ring_buffer buf, const void * data)
 	return true;
 }
 
+static __nonulls void * __pop_head(ring_buffer buf)
+{
+	void * data;
+
+	if(__is_empty(buf))
+		return_with_errno(EFAULT, NULL);
+
+	data = malloc(DS_DATA_SIZE(buf));
+	if(!data)
+		return_with_errno(ENOMEM, NULL);
+
+	memcpy(data, DS_PRIV(buf)->head, DS_DATA_SIZE(buf));
+	DS_PRIV(buf)->head = __next(buf, DS_PRIV(buf)->head);
+	DS_PRIV(buf)->length--;
+
+	return data;
+}
+
+static __nonulls void * __pop_tail(ring_buffer buf)
+{
+	void * data;
+
+	if(__is_empty(buf))
+		return_with_errno(EFAULT, NULL);
+
+	data = malloc(DS_DATA_SIZE(buf));
+	if(!data)
+		return_with_errno(ENOMEM, NULL);
+
+	DS_PRIV(buf)->tail = __prev(buf, DS_PRIV(buf)->tail);
+	memcpy(data, DS_PRIV(buf)->tail, DS_DATA_SIZE(buf));
+	DS_PRIV(buf)->length--;
+
+	return data;
+}
+
 ring_buffer rb_create(const struct ds_properties * props)
 {
 	ring_buffer buf;
@@ -226,6 +262,28 @@ bool rb_push_tail(ring_buffer buf, const void * data)
 	rwlock_writer_exit(DS_PRIV(buf)->rwlock);
 
 	return success;
+}
+
+void * rb_pop_head(ring_buffer buf)
+{
+	void * data;
+
+	rwlock_writer_entry(DS_PRIV(buf)->rwlock);
+	data = __pop_head(buf);
+	rwlock_writer_exit(DS_PRIV(buf)->rwlock);
+
+	return data;
+}
+
+void * rb_pop_tail(ring_buffer buf)
+{
+	void * data;
+
+	rwlock_writer_entry(DS_PRIV(buf)->rwlock);
+	data = __pop_tail(buf);
+	rwlock_writer_exit(DS_PRIV(buf)->rwlock);
+
+	return data;
 }
 
 #ifdef DEBUG
