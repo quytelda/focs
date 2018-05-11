@@ -286,24 +286,29 @@ END_TEST
 START_TEST(test_rb_insert_single)
 {
 	bool success;
-	uint8_t in = 1;
-	uint8_t * out;
+	uint8_t in[] = {1, 2};
+	uint8_t * out[2];
 	ring_buffer buf = NULL;
 
 	/* Create list: [1] */
 	buf = rb_create(&props);
+	rb_push_head(buf, &in[0]);
 
-	success = rb_insert(buf, &in, 0);
+	success = rb_insert(buf, &in[1], 0);
 
 	ck_assert(success);
 
-	out = rb_pop_head(buf);
+	out[0] = rb_pop_head(buf);
+	out[1] = rb_pop_head(buf);
 
-	ck_assert(out);
-	ck_assert_int_eq(*out, in);
+	ck_assert(out[0]);
+	ck_assert(out[1]);
+	ck_assert_int_eq(*out[0], in[1]);
+	ck_assert_int_eq(*out[1], in[0]);
 	ck_assert(rb_empty(buf));
 
-	free(out);
+	free(out[0]);
+	free(out[1]);
 	rb_destroy(&buf);
 }
 END_TEST
@@ -311,17 +316,17 @@ END_TEST
 START_TEST(test_rb_insert_multiple)
 {
 	uint8_t in[] = {1, 2, 3, 4};
-	bool success[sizeof(in)];
-	uint8_t * out[sizeof(in)];
+	bool success[3];
+	uint8_t * out[4];
 	ring_buffer buf = NULL;
 
 	buf = rb_create(&props);
 
-	/* [1, 4, 3, 2] */
-	success[0] = rb_insert(buf, &in[0], 0);
-	success[1] = rb_insert(buf, &in[1], 1);
-	success[2] = rb_insert(buf, &in[2], 1);
-	success[3] = rb_insert(buf, &in[3], 1);
+	/* [4, 2, 3, 1] */
+	rb_push_head(buf, &in[0]);
+	success[0] = rb_insert(buf, &in[1], 0);
+	success[1] = rb_insert(buf, &in[2], 1);
+	success[2] = rb_insert(buf, &in[3], 3);
 
 	ck_assert(success[0]);
 	ck_assert(success[1]);
@@ -338,82 +343,15 @@ START_TEST(test_rb_insert_multiple)
 	ck_assert(out[2]);
 	ck_assert(out[3]);
 
-	ck_assert_int_eq(*out[0], in[1]);
+	ck_assert_int_eq(*out[0], in[0]);
 	ck_assert_int_eq(*out[1], in[2]);
-	ck_assert_int_eq(*out[2], in[3]);
-	ck_assert_int_eq(*out[3], in[0]);
+	ck_assert_int_eq(*out[2], in[1]);
+	ck_assert_int_eq(*out[3], in[3]);
 
 	free(out[0]);
 	free(out[1]);
 	free(out[2]);
 	free(out[3]);
-	rb_destroy(&buf);
-}
-END_TEST
-
-START_TEST(test_rb_fetch_empty)
-{
-	uint8_t * out[2];
-	ring_buffer buf;
-
-	buf = rb_create(&props);
-
-	out[0] = rb_fetch(buf, 0);
-	out[1] = rb_fetch(buf, 1);
-
-	ck_assert(!out[0]);
-	ck_assert(!out[1]);
-	ck_assert(rb_empty(buf));
-
-	rb_destroy(&buf);
-}
-END_TEST
-
-START_TEST(test_rb_fetch_single)
-{
-	uint8_t in = 1;
-	uint8_t * out[2];
-	ring_buffer buf = NULL;
-
-	/* Create list: [1] */
-	buf = rb_create(&props);
-	rb_push_head(buf, &in);
-
-	out[0] = rb_fetch(buf, 0);
-	out[1] = rb_fetch(buf, 1);
-
-	ck_assert(out[0]);
-	ck_assert(!out[1]);
-	ck_assert_int_eq(*out[0], in);
-
-	rb_destroy(&buf);
-}
-END_TEST
-
-START_TEST(test_rb_fetch_multiple)
-{
-	uint8_t in[] = {0, 1, 2};
-	uint8_t * out[3];
-	ring_buffer buf = NULL;
-
-	/* Create list: [1, 2, 3] */
-	buf = rb_create(&props);
-	rb_push_tail(buf, &in[0]);
-	rb_push_tail(buf, &in[1]);
-	rb_push_tail(buf, &in[2]);
-
-	out[0] = rb_fetch(buf, 1);
-	out[1] = rb_fetch(buf, 0);
-	out[2] = rb_fetch(buf, 2);
-
-	ck_assert(out[0]);
-	ck_assert(out[1]);
-	ck_assert(out[2]);
-
-	ck_assert_int_eq(*out[0], in[1]);
-	ck_assert_int_eq(*out[1], in[0]);
-	ck_assert_int_eq(*out[2], in[2]);
-
 	rb_destroy(&buf);
 }
 END_TEST
@@ -452,9 +390,6 @@ Suite * rb_suite(void)
 	tcase_add_test(case_rb_pop_tail, test_rb_pop_tail_multiple);
 	tcase_add_test(case_rb_insert, test_rb_insert_single);
 	tcase_add_test(case_rb_insert, test_rb_insert_multiple);
-	tcase_add_test(case_rb_fetch, test_rb_fetch_empty);
-	tcase_add_test(case_rb_fetch, test_rb_fetch_single);
-	tcase_add_test(case_rb_fetch, test_rb_fetch_multiple);
 
 	suite_add_tcase(suite, case_rb_create);
 	suite_add_tcase(suite, case_rb_push_head);
