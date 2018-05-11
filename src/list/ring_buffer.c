@@ -209,7 +209,7 @@ void rb_destroy(ring_buffer * buf)
 	DS_FREE(buf);
 }
 
-size_t rb_size(ring_buffer buf)
+size_t rb_size(const ring_buffer buf)
 {
 	size_t size;
 

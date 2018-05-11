@@ -59,7 +59,7 @@ void __nonulls rb_destroy(ring_buffer * buf);
  * ring buffer `buf`.  This is distinct from the capacity of the ring buffer,
  * which is the number of entries it may contain when full.
  */
-size_t __nonulls rb_size(ring_buffer buf);
+size_t __nonulls rb_size(const ring_buffer buf);
 
 /**
  * Determine if a ring buffer is empty.
@@ -68,7 +68,7 @@ size_t __nonulls rb_size(ring_buffer buf);
  * @return This function shall return `true` if `buf` is empty,
  * or `false` otherwise.
  */
-bool __nonulls rb_empty(ring_buffer buf);
+bool __nonulls rb_empty(const ring_buffer buf);
 
 /**
  * Determine if a ring buffer is full.
@@ -77,7 +77,7 @@ bool __nonulls rb_empty(ring_buffer buf);
  * @return This function shall return `true` if `buf` is full,
  * or `false` otherwise.
  */
-bool __nonulls rb_full(ring_buffer buf);
+bool __nonulls rb_full(const ring_buffer buf);
 
 /**
  * Push a new data block onto the head of a ring buffer.
