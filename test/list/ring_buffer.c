@@ -377,19 +377,17 @@ END_TEST
 START_TEST(test_rb_fetch_single)
 {
 	uint8_t in = 1;
-	uint8_t * out[2];
+	uint8_t * out;
 	ring_buffer buf = NULL;
 
 	/* Create list: [1] */
 	buf = rb_create(&props);
 	rb_push_head(buf, &in);
 
-	out[0] = rb_fetch(buf, 0);
-	out[1] = rb_fetch(buf, 1);
+	out = rb_fetch(buf, 0);
 
-	ck_assert(out[0]);
-	ck_assert(!out[1]);
-	ck_assert_int_eq(*out[0], in);
+	ck_assert(out);
+	ck_assert_int_eq(*out, in);
 
 	rb_destroy(&buf);
 }

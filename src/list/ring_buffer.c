@@ -241,6 +241,24 @@ static __nonulls bool __insert(ring_buffer buf,
 	return true;
 }
 
+static void * __pure __nonulls __fetch(const ring_buffer buf,
+	                               const ssize_t relative)
+{
+	void * addr;
+	void * data;
+
+	if(__is_empty(buf))
+		return_with_errno(EFAULT, NULL);
+
+	data = malloc(DS_DATA_SIZE(buf));
+	if(!data)
+		return_with_errno(ENOMEM, NULL);
+
+	addr = __index_to_addr(buf, INDEX_ABS(buf, relative));
+	memcpy(data, addr, DS_DATA_SIZE(buf));
+	return data;
+}
+
 ring_buffer rb_create(const struct ds_properties * props)
 {
 	ring_buffer buf;
@@ -368,6 +386,17 @@ bool rb_insert(ring_buffer buf, const void * data, const ssize_t pos)
 	rwlock_writer_exit(DS_PRIV(buf)->rwlock);
 
 	return success;
+}
+
+void * __nonulls rb_fetch(const ring_buffer buf, const ssize_t pos)
+{
+	void * data;
+
+	rwlock_writer_entry(DS_PRIV(buf)->rwlock);
+	data = __fetch(buf, pos);
+	rwlock_writer_exit(DS_PRIV(buf)->rwlock);
+
+	return data;
 }
 
 #ifdef DEBUG

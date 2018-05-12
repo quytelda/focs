@@ -164,8 +164,7 @@ bool __nonulls rb_insert(ring_buffer buf,
  * the data is needed after `buf` is destroyed, make a copy of it, or make
  * sure to call rb_remove() on the data's index before destroying `buf`.
  */
-void * __nonulls rb_fetch(ring_buffer buf,
-		          const ssize_t pos);
+void * __nonulls rb_fetch(const ring_buffer buf, const ssize_t pos);
 
 #ifdef DEBUG
 #include <stdio.h>
