@@ -20,8 +20,6 @@
 #include "list/ring_buffer.h"
 #include "sync/rwlock.h"
 
-#define INDEX_ABS(relative) mod(relative, (ssize_t) DS_PRIV(buf)->length)
-
 static inline __pure size_t __length(const ring_buffer buf)
 {
 	return DS_PRIV(buf)->length;
@@ -105,6 +103,9 @@ static inline __pure __nonulls void * __next(const ring_buffer buf,
 	offset = (start + DS_DATA_SIZE(buf)) % DS_ENTRIES(buf);
 	return (void *) (data + offset);
 }
+
+#define INDEX_ABS(buf, relative) \
+	(__is_empty(buf)) ? 0 : mod(relative, (ssize_t) __length(buf))
 
 static __nonulls bool __push_head(ring_buffer buf, const void * data)
 {
@@ -230,7 +231,7 @@ static __nonulls bool __insert(ring_buffer buf,
 	if(!DS_OVERWRITE(buf) && __is_full(buf))
 		return_with_errno(ENOBUFS, false);
 
-	absolute = INDEX_ABS(relative);
+	absolute = INDEX_ABS(buf, relative);
 	if(!DS_OVERWRITE(buf))
 		__open_gap(buf, absolute);
 

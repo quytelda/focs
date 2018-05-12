@@ -323,10 +323,10 @@ START_TEST(test_rb_insert_multiple)
 	buf = rb_create(&props);
 
 	/* [4, 2, 3, 1] */
-	rb_push_head(buf, &in[0]);
-	success[0] = rb_insert(buf, &in[1], 0);
-	success[1] = rb_insert(buf, &in[2], 1);
-	success[2] = rb_insert(buf, &in[3], 3);
+	success[0] = rb_insert(buf, &in[0], 0);
+	success[1] = rb_insert(buf, &in[1], 0);
+	success[2] = rb_insert(buf, &in[2], 1);
+	success[3] = rb_insert(buf, &in[3], 3);
 
 	ck_assert(success[0]);
 	ck_assert(success[1]);
