@@ -32,7 +32,7 @@ START_DS(ring_buffer) {
 } END_DS(ring_buffer);
 
 /**
- * Create a new doubly ring buffer with the given properties.
+ * Create a new ring buffer with the given properties.
  * @param props A pointer to a data structure properties structure (non-NULL)
  *
  * Allocates and initializes a new ring buffer with the given properties.
@@ -57,7 +57,7 @@ void __nonulls rb_destroy(ring_buffer * buf);
  *
  * @return This function shall return the number of data blocks stored in the
  * ring buffer `buf`.  This is distinct from the capacity of the ring buffer,
- * which is the number of entries it may contain when full.
+ * which is the number of entries it will contain when full.
  */
 size_t __nonulls rb_size(const ring_buffer buf);
 
@@ -65,8 +65,8 @@ size_t __nonulls rb_size(const ring_buffer buf);
  * Determine if a ring buffer is empty.
  * @param buf The ring buffer to check (non-NULL)
  *
- * @return This function shall return `true` if `buf` is empty,
- * or `false` otherwise.
+ * @return This function shall return `true` if `buf` is empty, or `false`
+ * otherwise.
  */
 bool __nonulls rb_empty(const ring_buffer buf);
 
@@ -74,8 +74,8 @@ bool __nonulls rb_empty(const ring_buffer buf);
  * Determine if a ring buffer is full.
  * @param buf The ring buffer to check (non-NULL)
  *
- * @return This function shall return `true` if `buf` is full,
- * or `false` otherwise.
+ * @return This function shall return `true` if `buf` is full, or `false`
+ * otherwise.
  */
 bool __nonulls rb_full(const ring_buffer buf);
 
@@ -86,8 +86,7 @@ bool __nonulls rb_full(const ring_buffer buf);
  *
  * Push a newly allocated copy of `data` onto the head of `buf`.
  */
-bool __nonulls rb_push_head(ring_buffer buf,
-	                    const void * data);
+bool __nonulls rb_push_head(ring_buffer buf, const void * data);
 
 /**
  * Push a new data block onto the tail of a ring buffer.
@@ -96,8 +95,7 @@ bool __nonulls rb_push_head(ring_buffer buf,
  *
  * Push a newly allocated copy of `data` onto the tail of `buf`.
  */
-bool __nonulls rb_push_tail(ring_buffer buf,
-	                    const void * data);
+bool __nonulls rb_push_tail(ring_buffer buf, const void * data);
 
 /**
  * Pop a data element from the head of a ring buffer.
@@ -106,7 +104,7 @@ bool __nonulls rb_push_tail(ring_buffer buf,
  * Remove and return the data element at the head of `buf`.  After this
  * operation the returned data element *will no longer be stored in* `buf`.
  *
- * @return Upon successful completion, this function shall returns a pointer to
+ * @return Upon successful completion, this function shall return a pointer to
  * the data block stored at the head of `buf`; otherwise, `NULL` shall be
  * returned and `errno` set appropriately.
  *
@@ -123,7 +121,7 @@ void * __nonulls rb_pop_head(ring_buffer buf);
  * Remove and return the data block at the tail of `buf`.  After this
  * operation the returned data block *will no longer be stored in* `buf`.
  *
- * @return Upon successful completion, this function shall returns a pointer to
+ * @return Upon successful completion, this function shall return a pointer to
  * the data block stored at the tail of `buf`; otherwise, `NULL` shall be
  * returned and `errno` set appropriately.
  *
@@ -138,7 +136,6 @@ void * __nonulls rb_pop_tail(ring_buffer buf);
  * @param buf  The ring buffer to insert into (non-NULL)
  * @param data A pointer to the data to insert
  * @param pos  The position to insert the data block at
- *             (must be an index in the range `0..length-1`)
  *
  * Insert a newly allocated copy of `data` into `buf` at the index indicated
  * by `pos`.
@@ -146,22 +143,19 @@ void * __nonulls rb_pop_tail(ring_buffer buf);
  * @return Upon successful completion, this function shall return `true`;
  * otherwise, `false` shall be returned and `errno` set appropriately.
  */
-bool __nonulls rb_insert(ring_buffer buf,
-	                 const void * data,
-	                 const ssize_t pos);
+bool __nonulls rb_insert(ring_buffer buf, const void * data, const ssize_t pos);
 
 /**
  * Fetch a data block from a given index of a ring buffer.
  * @param buf The ring buffer to fetch from
  * @param pos The index to fetch the block from
- *             (must be an index in the range `0..length - 1`)
  *
  * Fetch the data stored at index `pos` in `buf`.
  *
  * @return A pointer to the data at index `pos`, or `NULL` on failure.
  * This pointer should **not** be free()d explicitly, or the `buf` will become
- * corrupted.  This pointer will be free()d when dl_free() is called, so if
- * the data is needed after `buf` is destroyed, make a copy of it, or make
+ * corrupted.  This pointer will be free()d when rb_free() is called, so if
+ * the data is needed after `buf` is destroyed, make a copy of it or make
  * sure to call rb_remove() on the data's index before destroying `buf`.
  */
 void * __nonulls rb_fetch(const ring_buffer buf, const ssize_t pos);
