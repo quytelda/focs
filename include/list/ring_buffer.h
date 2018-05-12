@@ -135,7 +135,7 @@ void * __nonulls rb_pop_tail(ring_buffer buf);
 
 /**
  * Insert a data block into a ring buffer at a certain position.
- * @param buf  The ring buffer to insert into (non-NULL, cannot be empty)
+ * @param buf  The ring buffer to insert into (non-NULL)
  * @param data A pointer to the data to insert
  * @param pos  The position to insert the data block at
  *             (must be an index in the range `0..length-1`)
@@ -164,8 +164,7 @@ bool __nonulls rb_insert(ring_buffer buf,
  * the data is needed after `buf` is destroyed, make a copy of it, or make
  * sure to call rb_remove() on the data's index before destroying `buf`.
  */
-void * __nonulls rb_fetch(ring_buffer buf,
-		          const ssize_t pos);
+void * __nonulls rb_fetch(const ring_buffer buf, const ssize_t pos);
 
 #ifdef DEBUG
 #include <stdio.h>
