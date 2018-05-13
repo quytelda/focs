@@ -91,6 +91,23 @@
 	})
 
 /**
+ * Malloc: Return on Failure
+ * @param ptr A pointer to the newly allocated memory, if any
+ * @param size The amount of memory to allocate in bytes
+ * @param eval The value to return if `malloc()` fails
+ *
+ * Calls malloc to try and allocate `size` bytes, and assigns a pointer to the
+ * newly allocated memory to `ptr`.  If `malloc()` fails, and returns `NULL`,
+ * this macro will return from the function with the error value `eval`.
+ */
+#define malloc_rof(ptr, size, eval)                      \
+	({                                               \
+		ptr = malloc(size);                      \
+		if(!ptr)                                 \
+			return_with_errno(ENOMEM, eval); \
+	})
+
+/**
  * Free a pointer, then set it's value to NULL.
  * @param ptr A pointer to allocated memory to free
  *
