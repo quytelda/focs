@@ -373,6 +373,19 @@ void * __nonulls rb_fetch(const ring_buffer buf, const ssize_t pos)
 	return data;
 }
 
+void rb_map(const ring_buffer buf, const map_fn fn)
+{
+	void * current;
+	void * result;
+
+	for(size_t i = 0; i < __LENGTH(buf); i++) {
+		current = __index_to_addr(buf, i);
+		result = fn(current);
+		if(result != current)
+			memcpy(current, result, DS_DATA_SIZE(buf));
+	}
+}
+
 #ifdef DEBUG
 
 void rb_dump(ring_buffer buf)

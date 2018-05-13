@@ -18,6 +18,7 @@
  */
 
 #include "focs.h"
+#include "hof.h"
 #include "focs/data_structure.h"
 #include "sync/rwlock.h"
 
@@ -258,6 +259,25 @@ bool __nonulls rb_delete(ring_buffer buf, const size_t pos);
  * the data into `buf`.
  */
 void * __nonulls rb_remove(ring_buffer buf, const size_t pos);
+
+/* ############################ *
+ * # Transformation Functions # *
+ * ############################ */
+
+/**
+ * Map a function over the contents of a ring buffer in-place.
+ * @param buf A ring buffer to map over
+ * @param fn A function that will transform each data block in the buffer
+ *
+ * A map operation iterates over `buf` and transforms each data block using
+ * the function `fn`, replacing the old value with the result of the
+ * transformation.  In pseudo-code:
+ * ```
+ * for i from 0 to (length - 1):
+ * 	buffer[i] = fn(buffer[i])
+ * ```
+ */
+void __nonulls rb_map(const ring_buffer buf, const map_fn fn);
 
 #ifdef DEBUG
 #include <stdio.h>
