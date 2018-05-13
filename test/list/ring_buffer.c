@@ -1,4 +1,4 @@
-/* double_list.c - Unit Tests for Doubly Linked List
+/* ring_buffer.c - Unit Tests for the Ring Buffer API
  * Copyright (C) 2018 Quytelda Kahja
  *
  * This file is part of focs.
