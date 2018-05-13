@@ -106,6 +106,40 @@ static inline __pure __nonulls void * __next(const ring_buffer buf,
 }
 
 /**
+ * Advance through a ring buffer block by block.
+ * @param list    The ring buffer to iterate over
+ * @param current A pointer that will point to the current data block
+ *
+ * ring_buffer_foreach() should be used like a for loop; for example:
+ * ```
+ * struct data_type * current;
+ * ring_buffer_foreach(buf, current) {
+ *         do_something(current);
+ * }
+ * ```
+ * The loop will work whether `current` is a void pointer or a pointer to a type
+ * with the same size as (or theoretically less than) the buffer's data blocks.
+ */
+#define ring_buffer_foreach(buf, current)         \
+	size_t _i;                                \
+	for(_i = 0, current = __HEAD(buf);        \
+	    _i < __LENGTH(buf);                   \
+	    _i++, current = __next(buf, current))
+
+/**
+ * Advance through a ring buffer block by block in reverse.
+ * @param list    The ring buffer to iterate over
+ * @param current A pointer that will point to the current data block
+ *
+ * The syntax of ring_buffer_foreach_rev() is the same as ring_buffer_foreach().
+ */
+#define ring_buffer_foreach_rev(buf, current)     \
+	size_t _i;                                \
+	for(_i = 0, current = __TAIL(buf);        \
+	    _i < __LENGTH(buf);                   \
+	    _i++, current = __prev(buf, current))
+
+/**
  * Create a new ring buffer with the given properties.
  * @param props A pointer to a data structure properties structure (non-NULL)
  *

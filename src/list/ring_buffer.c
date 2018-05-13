@@ -378,8 +378,7 @@ void rb_map(const ring_buffer buf, const map_fn fn)
 	void * current;
 	void * result;
 
-	for(size_t i = 0; i < __LENGTH(buf); i++) {
-		current = __index_to_addr(buf, i);
+	ring_buffer_foreach(buf, current) {
 		result = fn(current);
 		if(result != current)
 			memcpy(current, result, DS_DATA_SIZE(buf));
