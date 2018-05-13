@@ -20,96 +20,9 @@
 #include "list/ring_buffer.h"
 #include "sync/rwlock.h"
 
-static inline __pure size_t __length(const ring_buffer buf)
-{
-	return DS_PRIV(buf)->length;
-}
-
-static inline __pure size_t __space(const ring_buffer buf)
-{
-	return DS_DATA_SIZE(buf) * DS_ENTRIES(buf);
-}
-
-static inline __pure bool __is_empty(const ring_buffer buf)
-{
-	return (__length(buf) <= 0);
-}
-
-static inline __pure bool __is_full(const ring_buffer buf)
-{
-	return (__length(buf) >= DS_ENTRIES(buf));
-}
-
-static inline __pure __nonulls void * __index_to_addr(const ring_buffer buf,
-	                                              const size_t index)
-{
-	size_t offset;
-	size_t start;
-
-	/* Doing arithmetic with void pointers is tricksy, even in GNU C.
-	 * Cast all our pointers to size_t integers before doing arithmetic. */
-	size_t data = (size_t) DS_PRIV(buf)->data;
-	size_t head = (size_t) DS_PRIV(buf)->head;
-
-	start = head - data;
-	offset = index * DS_DATA_SIZE(buf);
-	offset = (start + offset) % __space(buf);
-	return (void *) (data + offset);
-}
-
-static inline __pure __nonulls size_t __addr_to_index(const ring_buffer buf,
-	                                              const void * addr)
-{
-	size_t offset;
-
-	/* Doing arithmetic with void pointers is tricksy, even in GNU C.
-	 * Cast all our pointers to size_t integers before doing arithmetic. */
-	size_t head = (size_t) DS_PRIV(buf)->head;
-	size_t mark = (size_t) addr;
-
-	offset = mod((ssize_t) (mark - head), (ssize_t) __space(buf));
-	return offset / DS_DATA_SIZE(buf);
-}
-
-static inline __pure __nonulls void * __prev(const ring_buffer buf,
-	                                     const void * addr)
-{
-	size_t start;
-	size_t offset;
-
-	/* Doing arithmetic with void pointers is tricksy, even in GNU C.
-	 * Cast all our pointers to size_t integers before doing arithmetic. */
-	size_t data = (size_t) DS_PRIV(buf)->data;
-	size_t mark = (size_t) addr;
-
-	start = mark - data;
-	offset = mod((ssize_t) (start - DS_DATA_SIZE(buf)),
-		     (ssize_t) DS_ENTRIES(buf));
-	return (void *) (data + offset);
-}
-
-static inline __pure __nonulls void * __next(const ring_buffer buf,
-	                                     const void * addr)
-{
-	size_t start;
-	size_t offset;
-
-	/* Doing arithmetic with void pointers is tricksy, even in GNU C.
-	 * Cast all our pointers to size_t integers before doing arithmetic. */
-	size_t data = (size_t) DS_PRIV(buf)->data;
-	size_t mark = (size_t) addr;
-
-	start = mark - data;
-	offset = (start + DS_DATA_SIZE(buf)) % DS_ENTRIES(buf);
-	return (void *) (data + offset);
-}
-
-#define INDEX_ABS(buf, relative) \
-	(__is_empty(buf)) ? 0 : mod(relative, (ssize_t) __length(buf))
-
 static __nonulls bool __push_head(ring_buffer buf, const void * data)
 {
-	if(!DS_OVERWRITE(buf) && __is_full(buf))
+	if(!DS_OVERWRITE(buf) && __IS_FULL(buf))
 		return_with_errno(ENOBUFS, false);
 
 	DS_PRIV(buf)->head = __prev(buf, DS_PRIV(buf)->head);
@@ -121,7 +34,7 @@ static __nonulls bool __push_head(ring_buffer buf, const void * data)
 
 static __nonulls bool __push_tail(ring_buffer buf, const void * data)
 {
-	if(!DS_OVERWRITE(buf) && __is_full(buf))
+	if(!DS_OVERWRITE(buf) && __IS_FULL(buf))
 		return_with_errno(ENOBUFS, false);
 
 	memcpy(DS_PRIV(buf)->tail, data, DS_DATA_SIZE(buf));
@@ -135,7 +48,7 @@ static __nonulls void * __pop_head(ring_buffer buf)
 {
 	void * data;
 
-	if(__is_empty(buf))
+	if(__IS_EMPTY(buf))
 		return_with_errno(EFAULT, NULL);
 
 	data = malloc(DS_DATA_SIZE(buf));
@@ -153,7 +66,7 @@ static __nonulls void * __pop_tail(ring_buffer buf)
 {
 	void * data;
 
-	if(__is_empty(buf))
+	if(__IS_EMPTY(buf))
 		return_with_errno(EFAULT, NULL);
 
 	data = malloc(DS_DATA_SIZE(buf));
@@ -243,10 +156,10 @@ static __nonulls bool __insert(ring_buffer buf,
 	size_t absolute;
 	void * addr;
 
-	if(!DS_OVERWRITE(buf) && __is_full(buf))
+	if(!DS_OVERWRITE(buf) && __IS_FULL(buf))
 		return_with_errno(ENOBUFS, false);
 
-	absolute = INDEX_ABS(buf, relative);
+	absolute = __INDEX_ABS(buf, relative);
 	if(!DS_OVERWRITE(buf))
 		__open_gap(buf, absolute);
 
@@ -263,7 +176,7 @@ static __nonulls void * __remove(ring_buffer buf,
 	void * addr;
 	void * data;
 
-	if(__is_empty(buf))
+	if(__IS_EMPTY(buf))
 		return_with_errno(EFAULT, NULL);
 
 	addr = __index_to_addr(buf, index);
@@ -286,14 +199,14 @@ static void * __pure __nonulls __fetch(const ring_buffer buf,
 	void * addr;
 	void * data;
 
-	if(__is_empty(buf))
+	if(__IS_EMPTY(buf))
 		return_with_errno(EFAULT, NULL);
 
 	data = malloc(DS_DATA_SIZE(buf));
 	if(!data)
 		return_with_errno(ENOMEM, NULL);
 
-	addr = __index_to_addr(buf, INDEX_ABS(buf, relative));
+	addr = __index_to_addr(buf, __INDEX_ABS(buf, relative));
 	memcpy(data, addr, DS_DATA_SIZE(buf));
 	return data;
 }
@@ -311,7 +224,7 @@ ring_buffer rb_create(const struct ds_properties * props)
 
 	/* Set up private data section. */
 	priv = DS_PRIV(buf);
-	priv->data = malloc(__space(buf));
+	priv->data = malloc(__SPACE(buf));
 	if(!priv->data)
 		goto_with_errno(ENOMEM, exit);
 
@@ -344,7 +257,7 @@ size_t rb_size(const ring_buffer buf)
 	size_t size;
 
 	rwlock_reader_entry(DS_PRIV(buf)->rwlock);
-	size = __length(buf);
+	size = __LENGTH(buf);
 	rwlock_reader_exit(DS_PRIV(buf)->rwlock);
 
 	return size;
@@ -355,7 +268,7 @@ bool rb_empty(const ring_buffer buf)
 	bool success;
 
 	rwlock_reader_entry(DS_PRIV(buf)->rwlock);
-	success = __is_empty(buf);
+	success = __IS_EMPTY(buf);
 	rwlock_reader_exit(DS_PRIV(buf)->rwlock);
 
 	return success;
@@ -366,7 +279,7 @@ bool rb_full(const ring_buffer buf)
 	bool success;
 
 	rwlock_reader_entry(DS_PRIV(buf)->rwlock);
-	success = __is_full(buf);
+	success = __IS_FULL(buf);
 	rwlock_reader_exit(DS_PRIV(buf)->rwlock);
 
 	return success;
@@ -474,9 +387,9 @@ void rb_dump(ring_buffer buf)
 	priv = DS_PRIV(buf);
 
 	printf("Buffer length: %ld", priv->length);
-	if(__is_empty(buf))
+	if(__IS_EMPTY(buf))
 		puts(" (empty)\n");
-	else if(__is_full(buf))
+	else if(__IS_FULL(buf))
 		puts(" (full)\n");
 	else
 		puts("\n");

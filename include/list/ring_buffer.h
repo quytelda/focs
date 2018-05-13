@@ -31,6 +31,79 @@ START_DS(ring_buffer) {
 	struct rwlock * rwlock;
 } END_DS(ring_buffer);
 
+#define __SPACE(buf)  (DS_DATA_SIZE(buf) * DS_ENTRIES(buf))
+#define __LENGTH(buf) (DS_PRIV(buf)->length)
+#define __HEAD(buf)   (DS_PRIV(buf)->head)
+#define __TAIL(buf)   (DS_PRIV(buf)->tail)
+
+#define __IS_EMPTY(buf)       (__LENGTH(buf) <= 0)
+#define __IS_FULL(buf)        (__LENGTH(buf) >= DS_ENTRIES(buf))
+#define __INDEX_ABS(buf, rel) (__IS_EMPTY(buf) ? 0 : mod(rel, __LENGTH(buf)))
+
+static inline __pure __nonulls void * __index_to_addr(const ring_buffer buf,
+	                                              const size_t index)
+{
+	size_t offset;
+	size_t start;
+
+	/* Doing arithmetic with void pointers is tricksy, even in GNU C.
+	 * Cast all our pointers to size_t integers before doing arithmetic. */
+	size_t data = (size_t) DS_PRIV(buf)->data;
+	size_t head = (size_t) DS_PRIV(buf)->head;
+
+	start = head - data;
+	offset = index * DS_DATA_SIZE(buf);
+	offset = (start + offset) % __SPACE(buf);
+	return (void *) (data + offset);
+}
+
+static inline __pure __nonulls size_t __addr_to_index(const ring_buffer buf,
+	                                              const void * addr)
+{
+	size_t offset;
+
+	/* Doing arithmetic with void pointers is tricksy, even in GNU C.
+	 * Cast all our pointers to size_t integers before doing arithmetic. */
+	size_t head = (size_t) DS_PRIV(buf)->head;
+	size_t mark = (size_t) addr;
+
+	offset = mod((ssize_t) (mark - head), (ssize_t) __SPACE(buf));
+	return offset / DS_DATA_SIZE(buf);
+}
+
+static inline __pure __nonulls void * __prev(const ring_buffer buf,
+	                                     const void * addr)
+{
+	size_t start;
+	size_t offset;
+
+	/* Doing arithmetic with void pointers is tricksy, even in GNU C.
+	 * Cast all our pointers to size_t integers before doing arithmetic. */
+	size_t data = (size_t) DS_PRIV(buf)->data;
+	size_t mark = (size_t) addr;
+
+	start = mark - data;
+	offset = mod((ssize_t) (start - DS_DATA_SIZE(buf)),
+		     (ssize_t) DS_ENTRIES(buf));
+	return (void *) (data + offset);
+}
+
+static inline __pure __nonulls void * __next(const ring_buffer buf,
+	                                     const void * addr)
+{
+	size_t start;
+	size_t offset;
+
+	/* Doing arithmetic with void pointers is tricksy, even in GNU C.
+	 * Cast all our pointers to size_t integers before doing arithmetic. */
+	size_t data = (size_t) DS_PRIV(buf)->data;
+	size_t mark = (size_t) addr;
+
+	start = mark - data;
+	offset = (start + DS_DATA_SIZE(buf)) % DS_ENTRIES(buf);
+	return (void *) (data + offset);
+}
+
 /**
  * Create a new ring buffer with the given properties.
  * @param props A pointer to a data structure properties structure (non-NULL)
