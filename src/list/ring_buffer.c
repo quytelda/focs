@@ -203,8 +203,7 @@ static void * __shift_backward(const ring_buffer buf,
 	return back;
 }
 
-static void __open_gap(ring_buffer buf,
-	               const size_t index)
+static void __open_gap(ring_buffer buf, const size_t index)
 {
 	size_t end;
 	void * mark;
@@ -219,6 +218,22 @@ static void __open_gap(ring_buffer buf,
 	}
 
 	(DS_PRIV(buf)->length)++;
+}
+
+static void __close_gap(ring_buffer buf, const size_t index)
+{
+	size_t end;
+
+	end = DS_PRIV(buf)->length - 1;
+	if(index <= (end - index)) {
+		__shift_backward(buf, 0, index);
+		DS_PRIV(buf)->head = __next(buf, DS_PRIV(buf)->head);
+	} else {
+		__shift_forward(buf, index, end);
+		DS_PRIV(buf)->tail = __prev(buf, DS_PRIV(buf)->tail);
+	}
+
+	(DS_PRIV(buf)->length)--;
 }
 
 static __nonulls bool __insert(ring_buffer buf,
@@ -239,6 +254,30 @@ static __nonulls bool __insert(ring_buffer buf,
 	memcpy(addr, data, DS_DATA_SIZE(buf));
 
 	return true;
+}
+
+static __nonulls void * __remove(ring_buffer buf,
+	                         const size_t index,
+				 const bool keep)
+{
+	void * addr;
+	void * data;
+
+	if(__is_empty(buf))
+		return_with_errno(EFAULT, NULL);
+
+	addr = __index_to_addr(buf, index);
+	if(keep) {
+		data = malloc(DS_DATA_SIZE(buf));
+		if(!data)
+			return_with_errno(ENOMEM, NULL);
+
+		memcpy(data, addr, DS_DATA_SIZE(buf));
+	}
+
+	__close_gap(buf, index);
+
+	return keep ? data : addr;
 }
 
 static void * __pure __nonulls __fetch(const ring_buffer buf,
@@ -386,6 +425,28 @@ bool rb_insert(ring_buffer buf, const void * data, const ssize_t pos)
 	rwlock_writer_exit(DS_PRIV(buf)->rwlock);
 
 	return success;
+}
+
+bool __nonulls rb_delete(ring_buffer buf, const size_t pos)
+{
+	void * addr;
+
+	rwlock_writer_entry(DS_PRIV(buf)->rwlock);
+	addr = __remove(buf, pos, false);
+	rwlock_writer_exit(DS_PRIV(buf)->rwlock);
+
+	return (addr != NULL);
+}
+
+void * __nonulls rb_remove(ring_buffer buf, const size_t pos)
+{
+	void * data;
+
+	rwlock_writer_entry(DS_PRIV(buf)->rwlock);
+	data = __remove(buf, pos, true);
+	rwlock_writer_exit(DS_PRIV(buf)->rwlock);
+
+	return data;
 }
 
 void * __nonulls rb_fetch(const ring_buffer buf, const ssize_t pos)
