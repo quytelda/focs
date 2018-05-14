@@ -226,6 +226,52 @@ void __nonulls __map(const ring_buffer buf, const map_fn fn)
 	}
 }
 
+void * __nonulls __foldr(const ring_buffer buf,
+	                 const foldr_fn fn,
+	                 const void * init)
+{
+	void * accumulator;
+	void * current;
+	void * result;
+
+	malloc_rof(accumulator, DS_DATA_SIZE(buf), NULL);
+	memcpy(accumulator, init, DS_DATA_SIZE(buf));
+
+	ring_buffer_foreach(buf, current) {
+		result = fn(current, accumulator);
+
+		if(result != accumulator) {
+			memcpy(accumulator, result, DS_DATA_SIZE(buf));
+			free(result);
+		}
+	}
+
+	return accumulator;
+}
+
+void * __nonulls __foldl(const ring_buffer buf,
+	                 const foldl_fn fn,
+	                 const void * init)
+{
+	void * accumulator;
+	void * current;
+	void * result;
+
+	malloc_rof(accumulator, DS_DATA_SIZE(buf), NULL);
+	memcpy(accumulator, init, DS_DATA_SIZE(buf));
+
+	ring_buffer_foreach(buf, current) {
+		result = fn(accumulator, current);
+
+		if(result != accumulator) {
+			memcpy(accumulator, result, DS_DATA_SIZE(buf));
+			free(result);
+		}
+	}
+
+	return accumulator;
+}
+
 ring_buffer rb_create(const struct ds_properties * props)
 {
 	ring_buffer buf;
@@ -395,6 +441,26 @@ void __nonulls rb_map(const ring_buffer buf, const map_fn fn)
 	rwlock_writer_exit(DS_PRIV(buf)->rwlock);
 }
 
+void * rb_foldr(const ring_buffer buf, const foldr_fn fn, const void * init)
+{
+	void * data;
+
+	rwlock_reader_entry(DS_PRIV(buf)->rwlock);
+	data = __foldr(buf, fn, init);
+	rwlock_reader_exit(DS_PRIV(buf)->rwlock);
+
+	return data;
+}
+
+void * rb_foldl(const ring_buffer buf, const foldl_fn fn, const void * init)
+{
+	void * data;
+
+	rwlock_reader_entry(DS_PRIV(buf)->rwlock);
+	data = __foldl(buf, fn, init);
+	rwlock_reader_exit(DS_PRIV(buf)->rwlock);
+
+	return data;
 }
 
 #ifdef DEBUG

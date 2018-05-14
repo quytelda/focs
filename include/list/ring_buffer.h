@@ -313,6 +313,48 @@ void * __nonulls rb_remove(ring_buffer buf, const size_t pos);
  */
 void __nonulls rb_map(const ring_buffer buf, const map_fn fn);
 
+/**
+ * Right associative fold for ring buffers.
+ * @param buf  A ring buffer to reduce
+ * @param fn   A binary function that will sequentially reduce values
+ * @param init An initial value for the fold
+ *
+ * A right associative fold uses the binary function `fn` to sequentially reduce
+ * a list of values to a single value, starting from some initial value `init`:
+ * ```
+ * fn(init, fn(buf[0], fn(buf[1], ...)))
+ * ```
+ *
+ * @return Upon successful completetion, this function shall return the result
+ * of a right associate fold over `buf`.  If `buf` is empty, the fold will be
+ * equal to the value of `buf`.  Otherwise, `NULL` shall be returned and errno
+ * set to indicate the error.
+ */
+void * __nonulls rb_foldr(const ring_buffer buf,
+	                  const foldr_fn fn,
+	                  const void * init);
+
+/**
+ * Left associative fold for ring buffers.
+ * @param buf  A ring buffer to reduce
+ * @param fn   A binary function that will sequentially reduce values
+ * @param init An initial value for the fold
+ *
+ * A left associative fold uses the binary function `fn` to sequentially reduce
+ * a list of values to a single value, starting from some initial value `init`:
+ * ```
+ * fn(fn(fn(..., init), buf[0]), buf[1])
+ * ```
+ *
+ * @return Upon successful completetion, this function shall return the result
+ * of a left associate fold over `buf`.  If `buf` is empty, the fold will be
+ * equal to the value of `buf`.  Otherwise, `NULL` shall be returned and errno
+ * set to indicate the error.
+ */
+void * __nonulls rb_foldl(const ring_buffer buf,
+	                  const foldl_fn fn,
+	                  const void * init);
+
 #ifdef DEBUG
 #include <stdio.h>
 
