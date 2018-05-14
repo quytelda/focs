@@ -78,8 +78,8 @@
 
 /**
  * Set errno then jump to the specified label.
- * @param err The error number to set errno to
- * @param lable The label to jump to
+ * @param err   The error number to set errno to
+ * @param label The label to jump to
  *
  * Set errno to `err`, then execute `goto label` inside the function,
  * effectively jumping to `label`.
