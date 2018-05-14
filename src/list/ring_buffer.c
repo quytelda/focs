@@ -211,6 +211,21 @@ static void * __pure __nonulls __fetch(const ring_buffer buf,
 	return data;
 }
 
+void __nonulls __map(const ring_buffer buf, const map_fn fn)
+{
+	void * current;
+	void * result;
+
+	ring_buffer_foreach(buf, current) {
+		result = fn(current);
+
+		if(result != current) {
+			memcpy(current, result, DS_DATA_SIZE(buf));
+			free(result);
+		}
+	}
+}
+
 ring_buffer rb_create(const struct ds_properties * props)
 {
 	ring_buffer buf;
@@ -373,16 +388,13 @@ void * __nonulls rb_fetch(const ring_buffer buf, const ssize_t pos)
 	return data;
 }
 
-void rb_map(const ring_buffer buf, const map_fn fn)
+void __nonulls rb_map(const ring_buffer buf, const map_fn fn)
 {
-	void * current;
-	void * result;
+	rwlock_writer_entry(DS_PRIV(buf)->rwlock);
+	__map(buf, fn);
+	rwlock_writer_exit(DS_PRIV(buf)->rwlock);
+}
 
-	ring_buffer_foreach(buf, current) {
-		result = fn(current);
-		if(result != current)
-			memcpy(current, result, DS_DATA_SIZE(buf));
-	}
 }
 
 #ifdef DEBUG
