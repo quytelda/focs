@@ -120,11 +120,14 @@ static inline __pure __nonulls void * __next(const ring_buffer buf,
  * The loop will work whether `current` is a void pointer or a pointer to a type
  * with the same size as (or theoretically less than) the buffer's data blocks.
  */
-#define ring_buffer_foreach(buf, current)         \
-	size_t _i;                                \
-	for(_i = 0, current = __HEAD(buf);        \
-	    _i < __LENGTH(buf);                   \
-	    _i++, current = __next(buf, current))
+#define ring_buffer_foreach_i(buf, index, current)   \
+	for(index = 0, current = __HEAD(buf);        \
+	    index < __LENGTH(buf);                   \
+	    index++, current = __next(buf, current))
+
+#define ring_buffer_foreach(buf, current)       \
+	size_t _i;                              \
+	ring_buffer_foreach_i(buf, _i, current)
 
 /**
  * Advance through a ring buffer block by block in reverse.
@@ -133,11 +136,14 @@ static inline __pure __nonulls void * __next(const ring_buffer buf,
  *
  * The syntax of ring_buffer_foreach_rev() is the same as ring_buffer_foreach().
  */
-#define ring_buffer_foreach_rev(buf, current)     \
-	size_t _i;                                \
-	for(_i = 0, current = __TAIL(buf);        \
-	    _i < __LENGTH(buf);                   \
-	    _i++, current = __prev(buf, current))
+#define ring_buffer_foreach_i_rev(buf, index, current) \
+	for(index = 0, current = __TAIL(buf);          \
+	    index < __LENGTH(buf);                     \
+	    index++, current = __prev(buf, current))
+
+#define ring_buffer_foreach_rev(buf, current)       \
+	size_t _i;                                  \
+	ring_buffer_foreach_i_rev(buf, _i, current)
 
 /**
  * Create a new ring buffer with the given properties.
