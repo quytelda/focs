@@ -272,6 +272,66 @@ void * __nonulls __foldl(const ring_buffer buf,
 	return accumulator;
 }
 
+bool __nonulls __any(const ring_buffer buf, const pred_fn pred)
+{
+	void * current;
+
+	ring_buffer_foreach(buf, current)
+		if(pred(current))
+			return true;
+
+	return false;
+}
+
+bool __nonulls __all(const ring_buffer buf, const pred_fn pred)
+{
+	void * current;
+
+	ring_buffer_foreach(buf, current)
+		if(!pred(current))
+			return false;
+
+	return true;
+}
+
+void __filter(ring_buffer buf, const pred_fn pred)
+{
+	void * current;
+	size_t index;
+
+	ring_buffer_foreach_i(buf, index, current)
+		if(!pred(current))
+			__remove(buf, index, false);
+}
+
+void __drop_while(ring_buffer buf, const pred_fn pred)
+{
+	void * current;
+	size_t index;
+
+	ring_buffer_foreach_i(buf, index, current) {
+		if(!pred(current))
+			break;
+
+		__remove(buf, index, false);
+	}
+}
+
+void __take_while(ring_buffer buf, const pred_fn pred)
+{
+	void * current;
+	size_t index;
+	bool passover = true;
+
+	ring_buffer_foreach_i(buf, index, current) {
+		if(!pred(current))
+			passover = false;
+
+		if(!passover)
+			__remove(buf, index, false);
+	}
+}
+
 ring_buffer rb_create(const struct ds_properties * props)
 {
 	ring_buffer buf;
@@ -461,6 +521,49 @@ void * rb_foldl(const ring_buffer buf, const foldl_fn fn, const void * init)
 	rwlock_reader_exit(DS_PRIV(buf)->rwlock);
 
 	return data;
+}
+
+bool rb_any(const ring_buffer buf, const pred_fn pred)
+{
+	bool success;
+
+	rwlock_reader_entry(DS_PRIV(buf)->rwlock);
+	success = __any(buf, pred);
+	rwlock_reader_exit(DS_PRIV(buf)->rwlock);
+
+	return success;
+}
+
+bool rb_all(const ring_buffer buf, const pred_fn pred)
+{
+	bool success;
+
+	rwlock_reader_entry(DS_PRIV(buf)->rwlock);
+	success = __all(buf, pred);
+	rwlock_reader_exit(DS_PRIV(buf)->rwlock);
+
+	return success;
+}
+
+void rb_filter(ring_buffer buf, const pred_fn pred)
+{
+	rwlock_writer_entry(DS_PRIV(buf)->rwlock);
+	__filter(buf, pred);
+	rwlock_writer_exit(DS_PRIV(buf)->rwlock);
+}
+
+void rb_drop_while(ring_buffer buf, const pred_fn pred)
+{
+	rwlock_writer_entry(DS_PRIV(buf)->rwlock);
+	__drop_while(buf, pred);
+	rwlock_writer_exit(DS_PRIV(buf)->rwlock);
+}
+
+void rb_take_while(ring_buffer buf, const pred_fn pred)
+{
+	rwlock_writer_entry(DS_PRIV(buf)->rwlock);
+	__take_while(buf, pred);
+	rwlock_writer_exit(DS_PRIV(buf)->rwlock);
 }
 
 #ifdef DEBUG

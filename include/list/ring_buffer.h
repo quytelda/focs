@@ -300,9 +300,9 @@ bool __nonulls rb_delete(ring_buffer buf, const size_t pos);
  */
 void * __nonulls rb_remove(ring_buffer buf, const size_t pos);
 
-/* ############################ *
- * # Transformation Functions # *
- * ############################ */
+/* ########################## *
+ * # Higher Order Functions # *
+ * ########################## */
 
 /**
  * Map a function over the contents of a ring buffer in-place.
@@ -360,6 +360,64 @@ void * __nonulls rb_foldr(const ring_buffer buf,
 void * __nonulls rb_foldl(const ring_buffer buf,
 	                  const foldl_fn fn,
 	                  const void * init);
+
+/**
+ * Determine if any value in a list satisifies some condition.
+ * @param list A list of values
+ * @param p The predicate function (representing a condition to be satisfied).
+ *
+ * Iterate over each value stored in `list`, and determine if any of them
+ * satisfies `p` (e.g. `p` returns `true` when passed that value).
+ *
+ * @return `true` if there is at least one value that satisfies the predicate.
+ * Otherwise, it returns `false`.
+ */
+bool rb_any(const ring_buffer buf, const pred_fn pred);
+
+/**
+ * Determines if all values in a list satisify some condition
+ * @param list A list of values
+ * @param p The predicate function (representing a condition to be satisfied).
+ *
+ * Iterate over each value stored in `list`, and determine if all of them
+ * satisfy `p` (e.g. `p` returns true when passed that value).
+ *
+ * @return `false` if there is at least one value that does not satisfy the
+ * predicate.  Otherwise, it returns `true`.
+ */
+bool rb_all(const ring_buffer buf, const pred_fn pred);
+
+/**
+ * Filter a buffer to contain only values that satisfy some predicate.
+ * @param buf  The buffer to filter
+ * @param pred The predicate
+ *
+ * Filter `buf` in-place by removing elements that do not satisfy the predicate
+ * `pred`.  Elements that do satisfy the predicate `pred` remain in the buffer.
+ */
+void rb_filter(ring_buffer buf, const pred_fn pred);
+
+/**
+ * Drop elements from the head of the buffer until the predicate is unsatisfied.
+ *
+ * Drop each element that satisfies the predicate `pred`, starting at the
+ * beginning of `buf` and continuing until reaching the first element that does
+ * not satisfy the predicate `pred`.
+ *
+ * This function is an in-place equivalent to Haskell's dropWhile.
+ */
+void rb_drop_while(ring_buffer buf, const pred_fn pred);
+
+/**
+ * Keep elements from the head of the buffer until the predicate is unsatisfied.
+ *
+ * Iterate over each element of `buf`, starting at the beginning, that satisfies
+ * the predicate `pred`.  Once an element that does not satisfy the predicate
+ * `pred` is reached, drop the rest of the list including that element.
+ *
+ * This function is an in-place equivalent to Haskell's takeWhile.
+ */
+void rb_take_while(ring_buffer buf, const pred_fn pred);
 
 #ifdef DEBUG
 #include <stdio.h>
