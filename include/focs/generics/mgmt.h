@@ -22,6 +22,7 @@
 #define __GENERICS_MGMT_H
 
 typedef bool   (* empty_mgmt_fn)  (void * ds);
+typedef bool   (* full_mgmt_fn)   (void * ds);
 typedef bool   (* elem_mgmt_fn)   (void * ds, void * data);
 typedef size_t (* size_mgmt_fn)   (void * ds);
 typedef void   (* destroy_mgmt_fn)(void * ds);
@@ -35,6 +36,7 @@ struct mgmt_operations {
 
 #define size(ds)        (__DS_MGMT_OPS(ds)->size(ds))
 #define empty(ds)       (__DS_MGMT_OPS(ds)->empty(ds))
+#define full(ds)        (__DS_MGMT_OPS(ds)->full(ds))
 #define elem(ds, datum) (__DS_MGMT_OPS(ds)->elem(ds, datum))
 #define destroy(ds)     (__DS_MGMT_OPS(ds)->destroy(ds))
 
