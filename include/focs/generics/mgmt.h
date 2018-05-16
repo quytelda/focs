@@ -21,23 +21,21 @@
 #ifndef __GENERICS_MGMT_H
 #define __GENERICS_MGMT_H
 
-typedef bool   (* empty_mgmt_fn)  (void * ds);
-typedef bool   (* full_mgmt_fn)   (void * ds);
-typedef bool   (* elem_mgmt_fn)   (void * ds, void * data);
-typedef size_t (* size_mgmt_fn)   (void * ds);
-typedef void   (* destroy_mgmt_fn)(void * ds);
+typedef bool   (* elem_mgmt_fn)  (void * ds, void * data);
+typedef bool   (* empty_mgmt_fn) (void * ds);
+typedef bool   (* full_mgmt_fn)  (void * ds);
+typedef size_t (* size_mgmt_fn)  (void * ds);
 
 struct mgmt_operations {
-	empty_mgmt_fn   empty;
-	elem_mgmt_fn    elem;
-	size_mgmt_fn    size;
-	destroy_mgmt_fn destroy;
+	elem_mgmt_fn  elem;
+	empty_mgmt_fn empty;
+	full_mgmt_fn  full;
+	size_mgmt_fn  size;
 };
 
-#define size(ds)        (__DS_MGMT_OPS(ds)->size(ds))
+#define elem(ds, datum) (__DS_MGMT_OPS(ds)->elem(ds, datum))
 #define empty(ds)       (__DS_MGMT_OPS(ds)->empty(ds))
 #define full(ds)        (__DS_MGMT_OPS(ds)->full(ds))
-#define elem(ds, datum) (__DS_MGMT_OPS(ds)->elem(ds, datum))
-#define destroy(ds)     (__DS_MGMT_OPS(ds)->destroy(ds))
+#define size(ds)        (__DS_MGMT_OPS(ds)->size(ds))
 
 #endif /* __GENERICS_MGMT_H */
