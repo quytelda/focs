@@ -14,7 +14,7 @@ ifeq ($(libsubunit_test), lib$(subunit).so)
 LIBS := $(LIBS) -l$(subunit)
 endif
 
-CFLAGS = -I ../$(INC_DIR) -g -DDEBUG
+CFLAGS := -I ../$(INC_DIR) -g -DDEBUG $(CFLAGS)
 
 TESTS = $(TEST_SL_BIN) $(TEST_DL_BIN) $(TEST_RB_BIN)
 
