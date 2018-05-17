@@ -19,6 +19,7 @@
 
 #include <check.h>
 
+#include "list/array.h"
 #include "list/ring_buffer.h"
 
 static const struct ds_properties props = {
@@ -26,123 +27,122 @@ static const struct ds_properties props = {
 	.entries   = 10,              /* 10 Data Blocks. */
 };
 
+static ring_buffer buffer;
+
+void setup0(void)
+{
+	buffer = rb_create(&props);
+}
+
+void setup3(void)
+{
+	uint8_t in[] = {1, 2, 3};
+	setup0();
+
+	for(size_t i = 0; i < array_size(in); i++)
+		rb_push_tail(buffer, &in[i]);
+}
+
+void takedown(void)
+{
+	rb_destroy(&buffer);
+}
+
+/**
+ * Test that `buf` has the properties of a newly created ring buffer.
+ * `buf` was created during test setup0, and should be in a pristine state.
+ */
 START_TEST(test_rb_create)
 {
-	ring_buffer buf;
-
-	buf = rb_create(&props);
-
-	ck_assert(buf);
-
-	rb_destroy(&buf);
+	ck_assert(buffer);
+	ck_assert(rb_empty(buffer));
+	ck_assert(!rb_full(buffer));
 }
 END_TEST
 
+/**
+ * Test that a single element can be pushed to (and subsequently popped from) to
+ * the head of `buf`.
+ */
 START_TEST(test_rb_push_head_single)
 {
-	bool success;
 	uint8_t in = 1;
 	uint8_t * out;
-	ring_buffer buf;
+	bool ret;
 
-	buf = rb_create(&props);
+	ret = rb_push_head(buffer, &in);
+	out = rb_pop_head(buffer);
 
-	success = rb_push_head(buf, &in);
-	out = rb_pop_head(buf);
-
-	ck_assert(success);
+	ck_assert(ret);
 	ck_assert(out);
 	ck_assert_int_eq(*out, in);
 
 	free(out);
-	rb_destroy(&buf);
 }
 END_TEST
 
 START_TEST(test_rb_push_head_multiple)
 {
-	bool success[3];
 	uint8_t in[] = {1, 2, 3};
-	uint8_t * out[3];
-	ring_buffer buf = NULL;
+	uint8_t * out[array_size(in)];
+	bool ret[array_size(in)];
 
-	buf = rb_create(&props);
+	for(size_t i = 0; i < array_size(in); i++)
+		ret[i] = rb_push_head(buffer, &in[i]);
 
-	/* Create list: [3, 2, 1] */
-	success[0] = rb_push_head(buf, &in[0]);
-	success[1] = rb_push_head(buf, &in[1]);
-	success[2] = rb_push_head(buf, &in[2]);
+	ck_assert_int_eq(rb_size(buffer), array_size(in));
 
-	ck_assert(success[0]);
-	ck_assert(success[1]);
-	ck_assert(success[2]);
+	for(size_t i = 0; i < array_size(in); i++)
+		out[i] = rb_pop_tail(buffer);
 
-	out[0] = rb_pop_head(buf);
-	out[1] = rb_pop_head(buf);
-	out[2] = rb_pop_head(buf);
+	for(size_t i = 0; i < array_size(in); i++) {
+		ck_assert(ret[i]);
+		ck_assert(out[i]);
+		ck_assert_int_eq(*out[i], in[i]);
 
-	ck_assert_int_eq(*out[0], in[2]);
-	ck_assert_int_eq(*out[1], in[1]);
-	ck_assert_int_eq(*out[2], in[0]);
-
-	free(out[0]);
-	free(out[1]);
-	free(out[2]);
-	rb_destroy(&buf);
+		free(out[i]);
+	}
 }
 END_TEST
 
 START_TEST(test_rb_push_tail_single)
 {
-	bool success;
 	uint8_t in = 1;
 	uint8_t * out;
-	ring_buffer buf;
+	bool ret;
 
-	buf = rb_create(&props);
+	ret = rb_push_tail(buffer, &in);
+	out = rb_pop_tail(buffer);
 
-	success = rb_push_tail(buf, &in);
-	out = rb_pop_tail(buf);
-
-	ck_assert(success);
+	ck_assert(ret);
 	ck_assert(out);
 	ck_assert_int_eq(*out, in);
 
 	free(out);
-	rb_destroy(&buf);
 }
 END_TEST
 
 START_TEST(test_rb_push_tail_multiple)
 {
-	bool success[3];
 	uint8_t in[] = {1, 2, 3};
-	uint8_t * out[3];
-	ring_buffer buf = NULL;
+	uint8_t * out[array_size(in)];
+	bool ret[array_size(in)];
 
-	buf = rb_create(&props);
+	for(size_t i = 0; i < array_size(in); i++)
+		ret[i] = rb_push_tail(buffer, &in[i]);
 
-	/* Create list: [3, 2, 1] */
-	success[0] = rb_push_tail(buf, &in[0]);
-	success[1] = rb_push_tail(buf, &in[1]);
-	success[2] = rb_push_tail(buf, &in[2]);
+	ck_assert_int_eq(rb_size(buffer), array_size(in));
 
-	ck_assert(success[0]);
-	ck_assert(success[1]);
-	ck_assert(success[2]);
+	for(size_t i = 0; i < array_size(in); i++)
+		out[i] = rb_pop_head(buffer);
 
-	out[0] = rb_pop_tail(buf);
-	out[1] = rb_pop_tail(buf);
-	out[2] = rb_pop_tail(buf);
+	for(size_t i = 0; i < array_size(in); i++) {
+		ck_assert(ret[i]);
+		ck_assert(out[i]);
+		ck_assert_int_eq(*out[i], in[i]);
 
-	ck_assert_int_eq(*out[0], in[2]);
-	ck_assert_int_eq(*out[1], in[1]);
-	ck_assert_int_eq(*out[2], in[0]);
-
-	free(out[0]);
-	free(out[1]);
-	free(out[2]);
-	rb_destroy(&buf);
+		free(out[i]);
+	}
 }
 END_TEST
 
@@ -421,6 +421,103 @@ START_TEST(test_rb_fetch_multiple)
 }
 END_TEST
 
+uint8_t increment(uint8_t n)
+{
+	return n + 1;
+}
+WRAP_MAPPABLE(increment, uint8_t, transform);
+
+START_TEST(test_rb_map)
+{
+	uint8_t in[] = {1, 2, 3};
+	uint8_t * out;
+
+	for(size_t i = 0; i < array_size(in); i++)
+		rb_push_head(buffer, &in[i]);
+
+	rb_map(buffer, transform);
+
+	ck_assert_int_eq(rb_size(buffer), array_size(in));
+
+	for(size_t i = 0; i < array_size(in); i++) {
+		out = rb_pop_tail(buffer);
+
+		ck_assert(out);
+		ck_assert_int_eq(*out, in[i] + 1);
+	}
+}
+END_TEST
+
+int8_t subtract(const int8_t a, const int8_t b)
+{
+	return a - b;
+}
+WRAP_RFOLDABLE(subtract, int8_t, reduce_right);
+WRAP_LFOLDABLE(subtract, int8_t, reduce_left);
+
+START_TEST(test_rb_foldr)
+{
+	int8_t in[] = {1, 2, 3};
+	int8_t init = 0;
+	int8_t * out;
+
+	for(size_t i = 0; i < array_size(in); i++)
+		rb_push_head(buffer, &in[i]);
+
+	out = rb_foldr(buffer, reduce_right, &init);
+
+	ck_assert(out);
+	ck_assert_int_eq(*out, 2);
+	ck_assert_int_eq(rb_size(buffer), array_size(in));
+}
+END_TEST
+
+START_TEST(test_rb_foldl)
+{
+	int8_t in[] = {1, 2, 3};
+	int8_t init = 0;
+	int8_t * out;
+
+	for(size_t i = 0; i < array_size(in); i++)
+		rb_push_head(buffer, &in[i]);
+
+	out = rb_foldl(buffer, reduce_left, &init);
+
+	ck_assert(out);
+	ck_assert_int_eq(*out, -6);
+	ck_assert_int_eq(rb_size(buffer), array_size(in));
+}
+END_TEST
+
+bool gte0(int8_t data)
+{
+	return data >= 0;
+}
+WRAP_PREDICATE(gte0, int8_t, pred_gte0);
+
+bool lt0(int8_t data)
+{
+	return data < 0;
+}
+WRAP_PREDICATE(lt0, int8_t, pred_lt0);
+
+START_TEST(test_rb_any)
+{
+	bool any[2];
+	int8_t in[] = {1, 2, 3};
+
+	for(size_t i = 0; i < array_size(in); i++)
+		rb_push_head(buffer, &in[i]);
+
+	any[0] = rb_any(buffer, pred_gte0);
+	any[1] = rb_any(buffer, pred_lt0);
+
+	ck_assert(any[0]);
+	ck_assert(!any[1]);
+	ck_assert_int_eq(rb_size(buffer), array_size(in));
+}
+END_TEST
+
 Suite * rb_suite(void)
 {
 	Suite * suite;
@@ -431,33 +528,56 @@ Suite * rb_suite(void)
 	TCase * case_rb_pop_tail;
 	TCase * case_rb_insert;
 	TCase * case_rb_fetch;
+	TCase * case_rb_map;
+	TCase * case_rb_foldr;
+	TCase * case_rb_foldl;
+	TCase * case_rb_any;
+	TCase * case_rb_all;
 
 	suite = suite_create("Ring Buffer");
 
-	case_rb_create = tcase_create("rb_create");
+	case_rb_create    = tcase_create("rb_create");
 	case_rb_push_head = tcase_create("rb_push_head");
 	case_rb_push_tail = tcase_create("rb_push_tail");
-	case_rb_pop_head = tcase_create("rb_pop_head");
-	case_rb_pop_tail = tcase_create("rb_pop_tail");
-	case_rb_insert = tcase_create("rb_insert");
-	case_rb_fetch = tcase_create("rb_fetch");
+	case_rb_pop_head  = tcase_create("rb_pop_head");
+	case_rb_pop_tail  = tcase_create("rb_pop_tail");
+	case_rb_insert    = tcase_create("rb_insert");
+	case_rb_fetch     = tcase_create("rb_fetch");
+	case_rb_map       = tcase_create("rb_map");
+	case_rb_foldr     = tcase_create("rb_foldr");
+	case_rb_foldl     = tcase_create("rb_foldl");
+	case_rb_any       = tcase_create("rb_any");
+	case_rb_all       = tcase_create("rb_all");
 
-	tcase_add_test(case_rb_create, test_rb_create);
+	tcase_add_checked_fixture(case_rb_create,    setup0, takedown);
+	tcase_add_checked_fixture(case_rb_push_head, setup0, takedown);
+	tcase_add_checked_fixture(case_rb_push_tail, setup0, takedown);
+	tcase_add_checked_fixture(case_rb_map,       setup0, takedown);
+	tcase_add_checked_fixture(case_rb_foldr,     setup0, takedown);
+	tcase_add_checked_fixture(case_rb_foldl,     setup0, takedown);
+	tcase_add_checked_fixture(case_rb_any,       setup0, takedown);
+	tcase_add_checked_fixture(case_rb_all,       setup0, takedown);
+
+	tcase_add_test(case_rb_create,    test_rb_create);
 	tcase_add_test(case_rb_push_head, test_rb_push_head_single);
 	tcase_add_test(case_rb_push_head, test_rb_push_head_multiple);
 	tcase_add_test(case_rb_push_tail, test_rb_push_tail_single);
 	tcase_add_test(case_rb_push_tail, test_rb_push_tail_multiple);
-	tcase_add_test(case_rb_pop_head, test_rb_pop_head_empty);
-	tcase_add_test(case_rb_pop_head, test_rb_pop_head_single);
-	tcase_add_test(case_rb_pop_head, test_rb_pop_head_multiple);
-	tcase_add_test(case_rb_pop_tail, test_rb_pop_tail_empty);
-	tcase_add_test(case_rb_pop_tail, test_rb_pop_tail_single);
-	tcase_add_test(case_rb_pop_tail, test_rb_pop_tail_multiple);
-	tcase_add_test(case_rb_insert, test_rb_insert_single);
-	tcase_add_test(case_rb_insert, test_rb_insert_multiple);
-	tcase_add_test(case_rb_insert, test_rb_fetch_empty);
-	tcase_add_test(case_rb_insert, test_rb_fetch_single);
-	tcase_add_test(case_rb_insert, test_rb_fetch_multiple);
+	tcase_add_test(case_rb_pop_head,  test_rb_pop_head_empty);
+	tcase_add_test(case_rb_pop_head,  test_rb_pop_head_single);
+	tcase_add_test(case_rb_pop_head,  test_rb_pop_head_multiple);
+	tcase_add_test(case_rb_pop_tail,  test_rb_pop_tail_empty);
+	tcase_add_test(case_rb_pop_tail,  test_rb_pop_tail_single);
+	tcase_add_test(case_rb_pop_tail,  test_rb_pop_tail_multiple);
+	tcase_add_test(case_rb_insert,    test_rb_insert_single);
+	tcase_add_test(case_rb_insert,    test_rb_insert_multiple);
+	tcase_add_test(case_rb_fetch,     test_rb_fetch_empty);
+	tcase_add_test(case_rb_fetch,     test_rb_fetch_single);
+	tcase_add_test(case_rb_fetch,     test_rb_fetch_multiple);
+	tcase_add_test(case_rb_map,       test_rb_map);
+	tcase_add_test(case_rb_foldr,     test_rb_foldr);
+	tcase_add_test(case_rb_foldl,     test_rb_foldl);
+	tcase_add_test(case_rb_any,       test_rb_any);
 
 	suite_add_tcase(suite, case_rb_create);
 	suite_add_tcase(suite, case_rb_push_head);
@@ -466,6 +586,9 @@ Suite * rb_suite(void)
 	suite_add_tcase(suite, case_rb_pop_tail);
 	suite_add_tcase(suite, case_rb_insert);
 	suite_add_tcase(suite, case_rb_fetch);
+	suite_add_tcase(suite, case_rb_map);
+	suite_add_tcase(suite, case_rb_foldr);
+	suite_add_tcase(suite, case_rb_foldl);
 
 	return suite;
 }
