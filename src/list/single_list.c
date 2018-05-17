@@ -121,7 +121,9 @@ static struct sl_element * __pop_tail(single_list list)
 	return current;
 }
 
-static bool __insert_element(single_list list, struct sl_element * current, size_t pos)
+static bool __insert(single_list list,
+	             struct sl_element * current,
+	             const size_t pos)
 {
 	struct sl_element * prev;
 
@@ -378,7 +380,7 @@ bool sl_insert(single_list list, const void * data, const size_t pos)
 	current = __create_element(data, DS_DATA_SIZE(list));
 
 	rwlock_writer_entry(DS_PRIV(list)->rwlock);
-	success = __insert_element(list, current, pos);
+	success = __insert(list, current, pos);
 	rwlock_writer_exit(DS_PRIV(list)->rwlock);
 
 	return success;
