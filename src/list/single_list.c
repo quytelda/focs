@@ -41,7 +41,7 @@ exit:
 	return NULL;
 }
 
-static struct sl_element * __lookup_element(single_list list, size_t pos)
+static struct sl_element * __lookup(const single_list list, const size_t pos)
 {
 	struct sl_element * current;
 
@@ -133,7 +133,7 @@ static bool __insert_element(single_list list, struct sl_element * current, size
 	} else if(pos == DS_PRIV(list)->length) {
 		__push_tail(list, current);
 	} else {
-		prev = __lookup_element(list, pos - 1);
+		prev = __lookup(list, pos - 1);
 		current->next = prev->next;
 		prev->next = current;
 
@@ -156,7 +156,7 @@ static struct sl_element * __remove_element(single_list list, size_t pos)
 	} else if(pos == DS_PRIV(list)->length - 1) {
 		current = __pop_tail(list);
 	} else {
-		prev = __lookup_element(list, pos - 1);
+		prev = __lookup(list, pos - 1);
 		current = prev->next;
 		prev->next = current->next;
 
@@ -424,7 +424,7 @@ void * sl_fetch(single_list list, const size_t pos)
 	struct sl_element * current;
 
 	rwlock_reader_entry(DS_PRIV(list)->rwlock);
-	current = __lookup_element(list, pos);
+	current = __lookup(list, pos);
 	rwlock_reader_exit(DS_PRIV(list)->rwlock);
 
 	if(current)
