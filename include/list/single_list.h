@@ -62,7 +62,7 @@ START_DS(single_list) {
  * @return Upon successful completion, sl_alloc() shall return `0`.  Otherwise,
  * `-1` shall be returned and `errno` set to indicate the error.
  */
-single_list sl_create(const struct ds_properties * props);
+single_list __nonulls sl_create(const struct ds_properties * props);
 
 /**
  * Destroy and deallocate a singly linked list.
@@ -72,7 +72,7 @@ single_list sl_create(const struct ds_properties * props);
  * De-allocates the singly linked list at the structure pointer pointed to by
  * `list`, as well as de-allocating all data elements contained within `list`.
  */
-void sl_destroy(single_list * list);
+void __nonulls sl_destroy(single_list * list);
 
 /**
  * Determine if a list is empty.
@@ -80,7 +80,7 @@ void sl_destroy(single_list * list);
  *
  * @return `true` if `list` is empty, `false` otherwise.
  */
-bool sl_empty(single_list list);
+bool __nonulls sl_empty(const single_list list);
 
 /**
  * Determine if a list contains a value.
@@ -93,7 +93,7 @@ bool sl_empty(single_list list);
  *
  * @return `true` if a matching entry is found, otherwise `false`
  */
-bool sl_elem(single_list list, void * data);
+bool __nonulls sl_elem(const single_list list, const void * data);
 
 /**
  * Push a new data element to the head of the list.
@@ -102,7 +102,7 @@ bool sl_elem(single_list list, void * data);
  *
  * Push a newly allocated copy of `data` onto the head of `list`.
  */
-void sl_push_head(single_list list, void * data);
+void __nonulls sl_push_head(single_list list, const void * data);
 
 /**
  * Push a new data element to the tail of the list.
@@ -111,7 +111,7 @@ void sl_push_head(single_list list, void * data);
  *
  * Push a newly allocated copy of `data` onto the tail of `list`.
  */
-void sl_push_tail(single_list list, void * data);
+void __nonulls sl_push_tail(single_list list, const void * data);
 
 /**
  * Pop a data element from the head of a list.
@@ -125,7 +125,7 @@ void sl_push_tail(single_list list, void * data);
  * **not** equivalent to the pointer which was used to insert the data into
  * `list`.
  */
-void * sl_pop_head(single_list list);
+void * __nonulls sl_pop_head(single_list list);
 
 /**
  * Pop a data element from the tail of a list.
@@ -139,7 +139,7 @@ void * sl_pop_head(single_list list);
  * **not** equivalent to the pointer which was used to insert the data into
  * `list`.
  */
-void * sl_pop_tail(single_list list);
+void * __nonulls sl_pop_tail(single_list list);
 
 /**
  * Insert a new data element to a given position in a list.
@@ -153,7 +153,7 @@ void * sl_pop_tail(single_list list);
  *
  * @return `true` if the insertion succeeds, otherwise `false`.
  */
-bool sl_insert(single_list list, void * data, size_t pos);
+bool __nonulls sl_insert(single_list list, const void * data, const size_t pos);
 
 /**
  * Delete a data element from a given position in a list.
@@ -165,7 +165,7 @@ bool sl_insert(single_list list, void * data, size_t pos);
  *
  * @return `true` if the deletion succeeds, otherwise `false`.
  */
-bool sl_delete(single_list list, size_t pos);
+bool __nonulls sl_delete(single_list list, const size_t pos);
 
 /**
  * Delete and return a data element from a given position in a list.
@@ -181,7 +181,7 @@ bool sl_delete(single_list list, size_t pos);
  * needed.  It is **not** equivalent to the pointer which was used to insert
  * the data into `list`.
  */
-void * sl_remove(single_list list, size_t pos);
+void * __nonulls sl_remove(single_list list, const size_t pos);
 
 /**
  * Fetch a data element from a given position in a list.
@@ -197,7 +197,7 @@ void * sl_remove(single_list list, size_t pos);
  * the data is needed after the list is destroyed, make a copy of it, or make
  * sure to call sl_remove() on the data's index before destroying the list.
  */
-void * sl_fetch(single_list list, size_t pos);
+void * __nonulls sl_fetch(single_list list, const size_t pos);
 
 /**
  * Reverse a list in place.
@@ -206,7 +206,7 @@ void * sl_fetch(single_list list, size_t pos);
  * Reverses a list in place so that the elements are in reverse order and the
  * head and tail are switched.
  */
-void sl_reverse(single_list list);
+void __nonulls sl_reverse(single_list list);
 
 /* ########################## *
  * # Higher Order Functions # *
@@ -225,7 +225,7 @@ void sl_reverse(single_list list);
  * 	list[i] = fn(list[i])
  * ```
  */
-void sl_map(single_list list, map_fn fn);
+void __nonulls sl_map(single_list list, const map_fn fn);
 
 /**
  * Right associative fold for singly linked lists.
@@ -242,9 +242,9 @@ void sl_map(single_list list, map_fn fn);
  * @return The result of a right associate fold over `list`.  If `list` is
  * empty, the fold will be equal to the value of `init`.
  */
-void * sl_foldr(const single_list list,
-		foldr_fn fn,
-		const void * init);
+void * __nonulls sl_foldr(const single_list list,
+	                  const foldr_fn fn,
+	                  const void * init);
 
 /**
  * Left associative fold for singly linked lists.
@@ -261,68 +261,74 @@ void * sl_foldr(const single_list list,
  * @return The result of a left associate fold over `list`.  If `list` is
  * empty, the fold will be equal to the value of `init`.
  */
-void * sl_foldl(const single_list list,
-		foldl_fn fn,
-		const void * init);
+void * __nonulls sl_foldl(const single_list list,
+	                  const foldl_fn fn,
+	                  const void * init);
 
 /**
  * Determine if any value in a list satisifies some condition.
  * @param list A list of values
- * @param p The predicate function (representing a condition to be satisfied).
+ * @param pred The predicate function
  *
  * Iterate over each value stored in `list`, and determine if any of them
- * satisfies `p` (e.g. `p` returns `true` when passed that value).
+ * satisfies `pred`.
  *
- * @return `true` if there is at least one value that satisfies the predicate.
- * Otherwise, it returns `false`.
+ * @return This function shall return `true` if the predicate `pred` is
+ * satisfied by any data element in `list`; otherwise `false` shall be returned.
  */
-bool sl_any(single_list list, pred_fn p);
+bool __nonulls sl_any(single_list list, const pred_fn pred);
 
 /**
  * Determines if all values in a list satisify some condition
  * @param list A list of values
- * @param p The predicate function (representing a condition to be satisfied).
+ * @param pred The predicate function (representing a condition to be satisfied).
  *
  * Iterate over each value stored in `list`, and determine if all of them
- * satisfy `p` (e.g. `p` returns true when passed that value).
+ * satisfy `pred`.
  *
- * @return `false` if there is at least one value that does not satisfy the
- * predicate.  Otherwise, it returns `true`.
+ * @return This function shall return `true` if the predicate `pred` is
+ * satisfied by all data elements in `list`; otherwise `false` shall be
+ * returned.
  */
-bool sl_all(single_list list, pred_fn p);
+bool __nonulls sl_all(single_list list, const pred_fn pred);
 
 /**
  * Filter a list to contain only values that satisfy some predicate.
  * @param list The list to filter
- * @param p The predicate
+ * @param pred The predicate
  *
  * Filter `list` in-place by removing elements that do not satisfy the
- * predicate `p`.  Elements that do satisfy the predicate `p` are not removed
- * from the list.
+ * predicate `pred`.  Elements that do satisfy the predicate `pred` are not
+ * removed from the list.
  */
-bool sl_filter(single_list list, pred_fn p);
+bool __nonulls sl_filter(single_list list, const pred_fn pred);
 
 /**
  * Drop elements from the head of the list until the predicate is unsatisfied.
+ * @param list The list to drop from
+ * @param pred The predicate
  *
- * Drop each element that satisfies the predicate `p`, starting at the beginning
- * of `list` and continuing until reaching the first element that does not
- * satisfy the predicate `p`.
+ * Drop each element that satisfies the predicate `pred`, starting at the
+ * beginning of `list` and continuing until reaching the first element that does
+ * not satisfy the predicate `pred`.
  *
  * This function is an in-place equivalent of Haskell's dropWhile.
  */
-bool sl_drop_while(single_list list, pred_fn p);
+bool __nonulls sl_drop_while(single_list list, const pred_fn pred);
 
 /**
  * Keep elements from the head of the list until the predicate is unsatisfied.
+ * @param list The list to take from
+ * @param pred The predicate
  *
  * Iterate over each element of `list`, starting at the beginning, that
- * satisfies the predicate `p`.  Once an element that does not satisfy the
- * predicate `p` is reached, drop the rest of the list, including that element.
+ * satisfies the predicate `pred`.  Once an element that does not satisfy the
+ * predicate `pred` is reached, drop the rest of the list, including that
+ * element.
  *
  * This function is an in-place equivalent of Haskell's takeWhile.
  */
-bool sl_take_while(single_list list, pred_fn p);
+bool __nonulls sl_take_while(single_list list, const pred_fn pred);
 
 #ifdef GENERICS
 
@@ -353,7 +359,7 @@ static const __unused void * hof_ops  = NULL;
 
 #include <stdio.h>
 
-void sl_dump(single_list list);
+void __nonulls sl_dump(const single_list list);
 
 #endif /* DEBUG */
 
