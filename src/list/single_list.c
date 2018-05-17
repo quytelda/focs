@@ -224,6 +224,22 @@ static void __delete_after(single_list list, struct sl_element * mark)
 		DS_PRIV(list)->head = NULL;
 }
 
+void __reverse(single_list list)
+{
+	struct sl_element * current;
+	struct sl_element * tmp = NULL;
+
+	linked_list_foreach_safe(list, current) {
+		current->next = tmp;
+		tmp = current;
+	}
+
+	/* Swap the list head and tail */
+	tmp = DS_PRIV(list)->head;
+	DS_PRIV(list)->head = DS_PRIV(list)->tail;
+	DS_PRIV(list)->tail = tmp;
+}
+
 single_list sl_create(const struct ds_properties * props)
 {
 	single_list list;
@@ -419,18 +435,9 @@ void * sl_fetch(single_list list, const size_t pos)
 
 void sl_reverse(single_list list)
 {
-	struct sl_element * current;
-	struct sl_element * tmp = NULL;
-
-	linked_list_foreach_safe(list, current) {
-		current->next = tmp;
-		tmp = current;
-	}
-
-	/* Swap the list head and tail */
-	tmp = DS_PRIV(list)->head;
-	DS_PRIV(list)->head = DS_PRIV(list)->tail;
-	DS_PRIV(list)->tail = tmp;
+	rwlock_writer_entry(DS_PRIV(list)->rwlock);
+	__reverse(list);
+	rwlock_writer_exit(DS_PRIV(list)->rwlock);
 }
 
 void sl_map(single_list list, const map_fn fn)
