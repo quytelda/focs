@@ -20,8 +20,8 @@
 
 #include "list/single_list.h"
 
-static struct sl_element * __create_element(void * data,
-					    size_t data_size)
+static struct sl_element * __create_element(const void * data,
+	                                    const size_t data_size)
 {
 	struct sl_element * elem;
 
@@ -246,12 +246,12 @@ single_list sl_create(const struct ds_properties * props)
 	return list;
 
 exit:
-	sl_free(&list);
+	sl_destroy(&list);
 
 	return NULL;
 }
 
-void sl_free(single_list * list)
+void sl_destroy(single_list * list)
 {
 	struct sl_element * current;
 
@@ -268,7 +268,7 @@ void sl_free(single_list * list)
 	DS_FREE(list);
 }
 
-bool sl_null(single_list list)
+bool sl_empty(single_list list)
 {
 	bool null;
 
@@ -279,7 +279,26 @@ bool sl_null(single_list list)
 	return null;
 }
 
-void sl_push_head(single_list list, void * data)
+bool sl_elem(single_list list, const void * data)
+{
+	bool success = false;
+	struct sl_element * current;
+
+	rwlock_reader_entry(DS_PRIV(list)->rwlock);
+
+	linked_list_foreach(list, current) {
+		if(memcmp(current->data, data, DS_DATA_SIZE(list)) == 0) {
+			success = true;
+			break;
+		}
+	}
+
+	rwlock_reader_exit(DS_PRIV(list)->rwlock);
+
+	return success;
+}
+
+void sl_push_head(single_list list, const void * data)
 {
 	struct sl_element * current;
 
@@ -290,7 +309,7 @@ void sl_push_head(single_list list, void * data)
 	rwlock_writer_exit(DS_PRIV(list)->rwlock);
 }
 
-void sl_push_tail(single_list list, void * data)
+void sl_push_tail(single_list list, const void * data)
 {
 	struct sl_element * current;
 
@@ -335,7 +354,7 @@ void * sl_pop_tail(single_list list)
 	return data;
 }
 
-bool sl_insert(single_list list, void * data, size_t pos)
+bool sl_insert(single_list list, const void * data, const size_t pos)
 {
 	bool success;
 	struct sl_element * current;
@@ -349,7 +368,7 @@ bool sl_insert(single_list list, void * data, size_t pos)
 	return success;
 }
 
-bool sl_delete(single_list list, size_t pos)
+bool sl_delete(single_list list, const size_t pos)
 {
 	struct sl_element * current;
 
@@ -367,7 +386,7 @@ bool sl_delete(single_list list, size_t pos)
 	return false;
 }
 
-void * sl_remove(single_list list, size_t pos)
+void * sl_remove(single_list list, const size_t pos)
 {
 	void * data = NULL;
 	struct sl_element * current;
@@ -384,7 +403,7 @@ void * sl_remove(single_list list, size_t pos)
 	return data;
 }
 
-void * sl_fetch(single_list list, size_t pos)
+void * sl_fetch(single_list list, const size_t pos)
 {
 	struct sl_element * current;
 
@@ -398,204 +417,23 @@ void * sl_fetch(single_list list, size_t pos)
 	return NULL;
 }
 
-/**
- * sl_contains() - Determines if a list contains a value
- * @list: The list to search
- * @data: The data to search for in the list
- *
- * Determines if @list contains an entry matching @data.
- * The operation compares the contents of the memory pointed to by @data, and
- * not the memory addresses of the data pointers.
- *
- * Return: ``true`` if a matching entry is found, otherwise ``false``
- */
-bool sl_contains(single_list list, void * data)
+void sl_reverse(single_list list)
 {
-	bool success = false;
 	struct sl_element * current;
-
-	rwlock_reader_entry(DS_PRIV(list)->rwlock);
-
-	linked_list_foreach(list, current) {
-		if(memcmp(current->data, data, DS_DATA_SIZE(list)) == 0) {
-			success = true;
-			break;
-		}
-	}
-
-	rwlock_reader_exit(DS_PRIV(list)->rwlock);
-
-	return success;
-}
-
-/**
- * sl_any() - Determines if any value in a list satisifies some condition
- * @list: A list of values
- * @p: The predicate function (representing a condition to be satisfied).
- *
- * Runtime:
- * * worst: O(n)
- * * average: O(n/2)
- * * best: O(1)
- *
- * Iterate over each value stored in @list, and determine if any of them
- * satisfies @p (e.g. @p returns true when passed that value).  This function
- *
- * Return: ``true`` if there is at least one value that satisfies the predicate.
- * Otherwise, it returns ``false``.
- */
-bool sl_any(single_list list, pred_fn p)
-{
-	bool success = false;
-	struct sl_element * current;
-
-	if(sl_null(list))
-		return false;
-
-	rwlock_reader_entry(DS_PRIV(list)->rwlock);
-
-	linked_list_foreach(list, current) {
-		if(p(current->data)) {
-			success = true;
-			break;
-		}
-	}
-
-	rwlock_reader_exit(DS_PRIV(list)->rwlock);
-
-	return success;
-}
-
-/**
- * sl_all() - Determines if all values in a list satisify some condition
- * @list: A list of values
- * @p: The predicate function (representing a condition to be satisfied).
- *
- * Runtime:
- * * worst: O(n)
- * * average: O(n/2)
- * * best: O(1)
- *
- * Iterate over each value stored in @list, and determine if all of them
- * satisfy @p (e.g. @p returns true when passed that value).
- *
- * Return: ``false`` if there is at least one value that does not satisfy the
- * predicate.  Otherwise, it returns ``true``.
- */
-bool sl_all(single_list list, pred_fn p)
-{
-	bool success = true;
-	struct sl_element * current;
-
-	if(sl_null(list))
-		return false;
-
-	rwlock_reader_entry(DS_PRIV(list)->rwlock);
-
-	linked_list_foreach(list, current) {
-		if(!p(current->data)) {
-			success = false;
-			break;
-		}
-	}
-
-	rwlock_reader_exit(DS_PRIV(list)->rwlock);
-
-	return success;
-}
-
-bool sl_filter(single_list list, pred_fn p)
-{
-	bool changed = false;
-	struct sl_element * current;
-
-	if(sl_null(list))
-		return false;
-
-	rwlock_writer_entry(DS_PRIV(list)->rwlock);
+	struct sl_element * tmp = NULL;
 
 	linked_list_foreach_safe(list, current) {
-		if(!p(current->data)) {
-			changed = true;
-
-			__delete_element(list, current);
-			free(current->data);
-			free(current);
-		}
+		current->next = tmp;
+		tmp = current;
 	}
 
-	rwlock_writer_exit(DS_PRIV(list)->rwlock);
-
-	return changed;
+	/* Swap the list head and tail */
+	tmp = DS_PRIV(list)->head;
+	DS_PRIV(list)->head = DS_PRIV(list)->tail;
+	DS_PRIV(list)->tail = tmp;
 }
 
-bool sl_drop_while(single_list list, pred_fn p)
-{
-	size_t orig_length;
-	struct sl_element * current;
-
-	rwlock_writer_entry(DS_PRIV(list)->rwlock);
-
-	orig_length = DS_PRIV(list)->length;
-
-	/* Iterate over the list until we find the first element that doesn't
-	 * satisfy the predicate; delete everything before that element.
-	 * Otherwise, if an element that fails to satisfy the predicate is never
-	 * found, then the entire list should be dropped. */
-	linked_list_foreach(list, current) {
-		if(!p(current->data)) {
-			__delete_before(list, current);
-			break;
-		}
-	} otherwise(current) {
-		__delete_before(list, NULL);
-	}
-
-	rwlock_writer_exit(DS_PRIV(list)->rwlock);
-
-	return (orig_length != DS_PRIV(list)->length);
-}
-
-bool sl_take_while(single_list list, pred_fn p)
-{
-	size_t orig_length;
-	struct sl_element * current;
-	struct sl_element * prev = NULL;
-
-	rwlock_writer_entry(DS_PRIV(list)->rwlock);
-
-	orig_length = DS_PRIV(list)->length;
-
-	/* Iterate over the list until we find the first element that doesn't
-	 * satisfy the predicate; delete that element and every one after. */
-	linked_list_foreach(list, current) {
-		if(!p(current->data)) {
-			__delete_after(list, prev);
-			break;
-		}
-
-		prev = current;
-	}
-
-	rwlock_writer_exit(DS_PRIV(list)->rwlock);
-
-	return (orig_length != DS_PRIV(list)->length);
-}
-
-/**
- * sl_map() - Map a function over a linked list in-place.
- * @list: A list of values
- * @fn: A function that will transform each value in the list
- *
- * Runtime: O(n)
- *
- * A map operation iterates over the provided list (@list) and transforms each
- * data element using the function @fn, replacing the old value with the result
- * of the transformation:
- * for i from 0 to &DS_PRIV(list)->length:
- * 	@list[i] = @fn(@list[i])
- */
-void sl_map(single_list list, map_fn fn)
+void sl_map(single_list list, const map_fn fn)
 {
 	void * result;
 	struct sl_element * current;
@@ -617,46 +455,7 @@ void sl_map(single_list list, map_fn fn)
 	rwlock_writer_exit(DS_PRIV(list)->rwlock);
 }
 
-/**
- * sl_reverse() - Reverse a list in place.
- * @list: The list to reverse
- *
- * Reverses a list in place so that the elements are in reverse order and the
- * head and tail are switched.
- */
-void sl_reverse(single_list list)
-{
-	struct sl_element * current;
-	struct sl_element * tmp = NULL;
-
-	linked_list_foreach_safe(list, current) {
-		current->next = tmp;
-		tmp = current;
-	}
-
-	/* Swap the list head and tail */
-	tmp = DS_PRIV(list)->head;
-	DS_PRIV(list)->head = DS_PRIV(list)->tail;
-	DS_PRIV(list)->tail = tmp;
-}
-
-/**
- * sl_foldr() - Right associative fold for linked lists.
- * @list: A list of values to reduce
- * @fn: A binary function that will sequentially reduce values
- * @init: An initial value for the fold
- *
- * Runtime: O(n)
- *
- * A right associative fold uses the binary function @fn to sequentially reduce
- * a list of values to a single value, starting from some initial value @init:
- * @fn(@init, @fn(@list[0], fn(@list[1], ...)))
- *
- * If @list is empty, the fold will be equal to the value of @init.
- */
-void * sl_foldr(const single_list list,
-		foldr_fn fn,
-		const void * init)
+void * sl_foldr(const single_list list, const foldr_fn fn, const void * init)
 {
 	void * result;
 	void * accumulator;
@@ -684,23 +483,7 @@ void * sl_foldr(const single_list list,
 	return accumulator;
 }
 
-/**
- * sl_foldl() - Left associative fold for linked lists.
- * @list: A list of values to reduce
- * @fn: A binary function that will sequentially reduce values
- * @init: An initial value for the fold
- *
- * Runtime: O(n)
- *
- * A left associative fold uses the binary function @fn to sequentially reduce
- * a list of values to a single value, starting from some initial value @init:
- * @fn(@fn(@fn(..., @init), @list[0]), @list[1])
- *
- * If @list is empty, the fold will be equal to the value of @init.
- */
-void * sl_foldl(const single_list list,
-		foldl_fn fn,
-		const void * init)
+void * sl_foldl(const single_list list, const foldl_fn fn, const void * init)
 {
 	void * result;
 	void * accumulator;
@@ -728,8 +511,170 @@ void * sl_foldl(const single_list list,
 	return accumulator;
 }
 
-#ifdef DEBUG
-void sl_dump(single_list list)
+bool sl_any(single_list list, const pred_fn pred)
 {
+	bool success = false;
+	struct sl_element * current;
+
+	if(sl_empty(list))
+		return false;
+
+	rwlock_reader_entry(DS_PRIV(list)->rwlock);
+
+	linked_list_foreach(list, current) {
+		if(pred(current->data)) {
+			success = true;
+			break;
+		}
+	}
+
+	rwlock_reader_exit(DS_PRIV(list)->rwlock);
+
+	return success;
 }
+
+bool sl_all(single_list list, const pred_fn pred)
+{
+	bool success = true;
+	struct sl_element * current;
+
+	if(sl_empty(list))
+		return false;
+
+	rwlock_reader_entry(DS_PRIV(list)->rwlock);
+
+	linked_list_foreach(list, current) {
+		if(!pred(current->data)) {
+			success = false;
+			break;
+		}
+	}
+
+	rwlock_reader_exit(DS_PRIV(list)->rwlock);
+
+	return success;
+}
+
+bool sl_filter(single_list list, const pred_fn pred)
+{
+	bool changed = false;
+	struct sl_element * current;
+
+	if(sl_empty(list))
+		return false;
+
+	rwlock_writer_entry(DS_PRIV(list)->rwlock);
+
+	linked_list_foreach_safe(list, current) {
+		if(!pred(current->data)) {
+			changed = true;
+
+			__delete_element(list, current);
+			free(current->data);
+			free(current);
+		}
+	}
+
+	rwlock_writer_exit(DS_PRIV(list)->rwlock);
+
+	return changed;
+}
+
+bool sl_drop_while(single_list list, const pred_fn pred)
+{
+	size_t orig_length;
+	struct sl_element * current;
+
+	rwlock_writer_entry(DS_PRIV(list)->rwlock);
+
+	orig_length = DS_PRIV(list)->length;
+
+	/* Iterate over the list until we find the first element that doesn't
+	 * satisfy the predicate; delete everything before that element.
+	 * Otherwise, if an element that fails to satisfy the predicate is never
+	 * found, then the entire list should be dropped. */
+	linked_list_foreach(list, current) {
+		if(!pred(current->data)) {
+			__delete_before(list, current);
+			break;
+		}
+	} otherwise(current) {
+		__delete_before(list, NULL);
+	}
+
+	rwlock_writer_exit(DS_PRIV(list)->rwlock);
+
+	return (orig_length != DS_PRIV(list)->length);
+}
+
+bool sl_take_while(single_list list, const pred_fn pred)
+{
+	size_t orig_length;
+	struct sl_element * current;
+	struct sl_element * prev = NULL;
+
+	rwlock_writer_entry(DS_PRIV(list)->rwlock);
+
+	orig_length = DS_PRIV(list)->length;
+
+	/* Iterate over the list until we find the first element that doesn't
+	 * satisfy the predicate; delete that element and every one after. */
+	linked_list_foreach(list, current) {
+		if(!pred(current->data)) {
+			__delete_after(list, prev);
+			break;
+		}
+
+		prev = current;
+	}
+
+	rwlock_writer_exit(DS_PRIV(list)->rwlock);
+
+	return (orig_length != DS_PRIV(list)->length);
+}
+
+#ifdef DEBUG
+
+#define PUT_HR(char, len)                                      \
+		for(size_t i = 0; i < len; i++)                \
+			putchar(char);                         \
+		putchar('\n')
+
+void sl_element_dump(const single_list list, const struct sl_element * current)
+{
+	uint8_t * bytes = current->data;
+	size_t i;
+
+	printf("Address: %p", (void *) current);
+	if(current == DS_PRIV(list)->head)
+		printf(" (head)");
+	if(current == DS_PRIV(list)->tail)
+		printf(" (tail)");
+
+	printf("\nNext:    %p\n", (void *) current->next);
+	PUT_HR('-', 64);
+
+	for(i = 0; i < DS_DATA_SIZE(list); i++) {
+		printf("%#04x ", bytes[i]);
+
+		/* Print 8 bytes per line. */
+		if((i > 0) && aligned(i, 8, 0))
+			putchar('\n');
+	}
+
+	if(!aligned(i, 8, 0))
+		putchar('\n');
+}
+
+void sl_dump(const single_list list)
+{
+	struct sl_element * current;
+
+	PUT_HR('#', 64);
+	linked_list_foreach(list, current) {
+		sl_element_dump(list, current);
+		PUT_HR('#', 64);
+	}
+}
+
 #endif /* DEBUG */
