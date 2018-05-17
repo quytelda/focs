@@ -27,7 +27,6 @@ static const struct ds_properties props = {
 
 START_TEST(test_dl_alloc)
 {
-	int err;
 	double_list list = NULL;
 
 	list = dl_create(&props);

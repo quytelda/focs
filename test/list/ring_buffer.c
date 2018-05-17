@@ -436,7 +436,7 @@ Suite * rb_suite(void)
 
 	case_rb_create = tcase_create("rb_create");
 	case_rb_push_head = tcase_create("rb_push_head");
-	case_rb_push_head = tcase_create("rb_push_tail");
+	case_rb_push_tail = tcase_create("rb_push_tail");
 	case_rb_pop_head = tcase_create("rb_pop_head");
 	case_rb_pop_tail = tcase_create("rb_pop_tail");
 	case_rb_insert = tcase_create("rb_insert");
@@ -455,6 +455,9 @@ Suite * rb_suite(void)
 	tcase_add_test(case_rb_pop_tail, test_rb_pop_tail_multiple);
 	tcase_add_test(case_rb_insert, test_rb_insert_single);
 	tcase_add_test(case_rb_insert, test_rb_insert_multiple);
+	tcase_add_test(case_rb_insert, test_rb_fetch_empty);
+	tcase_add_test(case_rb_insert, test_rb_fetch_single);
+	tcase_add_test(case_rb_insert, test_rb_fetch_multiple);
 
 	suite_add_tcase(suite, case_rb_create);
 	suite_add_tcase(suite, case_rb_push_head);

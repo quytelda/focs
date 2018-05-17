@@ -27,7 +27,6 @@ static const struct ds_properties props = {
 
 START_TEST(test_sl_create)
 {
-	int err;
 	single_list list = NULL;
 
 	list = sl_create(&props);
