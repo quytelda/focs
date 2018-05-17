@@ -11,7 +11,7 @@ To use the doubly linked list implementation, create a pointer to a ``struct sin
 Creation and Destruction
 ------------------------
 .. doxygenfunction:: sl_alloc
-.. doxygenfunction:: sl_free
+.. doxygenfunction:: sl_destroy
 
 Data Management
 ---------------

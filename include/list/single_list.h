@@ -41,7 +41,7 @@ struct sl_element {
  * @struct single_list
  * Represents a singly linked list.
  *
- * Initialize this structure with sl_alloc(), and destroy it with sl_free().
+ * Initialize this structure with sl_alloc(), and destroy it with sl_destroy().
  */
 START_DS(single_list) {
 	struct sl_element * head;
@@ -72,7 +72,7 @@ single_list sl_create(const struct ds_properties * props);
  * De-allocates the singly linked list at the structure pointer pointed to by
  * `list`, as well as de-allocating all data elements contained within `list`.
  */
-void sl_free(single_list * list);
+void sl_destroy(single_list * list);
 
 /**
  * Determine if a list is empty.
@@ -193,7 +193,7 @@ void * sl_remove(single_list list, size_t pos);
  *
  * @return A pointer to the data at index `pos`, or `NULL` on failure.
  * This pointer should **not** be free()d explicitly, or the list will become
- * corrupted.  This pointer will be free()d when sl_free() is called, so if
+ * corrupted.  This pointer will be free()d when sl_destroy() is called, so if
  * the data is needed after the list is destroyed, make a copy of it, or make
  * sure to call sl_remove() on the data's index before destroying the list.
  */

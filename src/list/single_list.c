@@ -246,12 +246,12 @@ single_list sl_create(const struct ds_properties * props)
 	return list;
 
 exit:
-	sl_free(&list);
+	sl_destroy(&list);
 
 	return NULL;
 }
 
-void sl_free(single_list * list)
+void sl_destroy(single_list * list)
 {
 	struct sl_element * current;
 
