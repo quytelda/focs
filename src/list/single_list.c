@@ -635,8 +635,46 @@ bool sl_take_while(single_list list, const pred_fn pred)
 
 #ifdef DEBUG
 
+#define PUT_HR(char, len)                                      \
+		for(size_t i = 0; i < len; i++)                \
+			putchar(char);                         \
+		putchar('\n')
+
+void sl_element_dump(const single_list list, const struct sl_element * current)
+{
+	uint8_t * bytes = current->data;
+	size_t i;
+
+	printf("Address: %p", (void *) current);
+	if(current == DS_PRIV(list)->head)
+		printf(" (head)");
+	if(current == DS_PRIV(list)->tail)
+		printf(" (tail)");
+
+	printf("\nNext:    %p\n", (void *) current->next);
+	PUT_HR('-', 64);
+
+	for(i = 0; i < DS_DATA_SIZE(list); i++) {
+		printf("%#04x ", bytes[i]);
+
+		/* Print 8 bytes per line. */
+		if((i > 0) && aligned(i, 8, 0))
+			putchar('\n');
+	}
+
+	if(!aligned(i, 8, 0))
+		putchar('\n');
+}
+
 void sl_dump(const single_list list)
 {
+	struct sl_element * current;
+
+	PUT_HR('#', 64);
+	linked_list_foreach(list, current) {
+		sl_element_dump(list, current);
+		PUT_HR('#', 64);
+	}
 }
 
 #endif /* DEBUG */

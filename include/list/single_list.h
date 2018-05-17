@@ -359,6 +359,9 @@ static const __unused void * hof_ops  = NULL;
 
 #include <stdio.h>
 
+void __nonulls sl_element_dump(const single_list list,
+	const struct sl_element * current);
+
 void __nonulls sl_dump(const single_list list);
 
 #endif /* DEBUG */
