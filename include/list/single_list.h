@@ -51,10 +51,6 @@ START_DS(single_list) {
 	struct rwlock * rwlock;
 } END_DS(single_list);
 
-/* ########################## *
- * # Creation & Destruction # *
- * ########################## */
-
 /**
  * Allocate and initialize a new singly linked list.
  * @param list A pointer to a `struct single_list` pointer.
@@ -78,9 +74,26 @@ single_list sl_create(const struct ds_properties * props);
  */
 void sl_free(single_list * list);
 
-/* ############################# *
- * # Data Management Functions # *
- * ############################# */
+/**
+ * Determine if a list is empty.
+ * @param list The list to check
+ *
+ * @return `true` if `list` is empty, `false` otherwise.
+ */
+bool sl_empty(single_list list);
+
+/**
+ * Determine if a list contains a value.
+ * @param list The list to search
+ * @param data The data to search for in the list
+ *
+ * Determines if `list` contains an entry matching `data`.
+ * The operation compares the contents of the memory pointed to by `data`, and
+ * not the memory addresses of the data pointers.
+ *
+ * @return `true` if a matching entry is found, otherwise `false`
+ */
+bool sl_elem(single_list list, void * data);
 
 /**
  * Push a new data element to the head of the list.
@@ -186,9 +199,19 @@ void * sl_remove(single_list list, size_t pos);
  */
 void * sl_fetch(single_list list, size_t pos);
 
-/* ############################ *
- * # Transformation Functions # *
- * ############################ */
+/**
+ * Reverse a list in place.
+ * @param list The list to reverse
+ *
+ * Reverses a list in place so that the elements are in reverse order and the
+ * head and tail are switched.
+ */
+void sl_reverse(single_list list);
+
+/* ########################## *
+ * # Higher Order Functions # *
+ * ########################## */
+
 /**
  * Map a function over a linked list in-place.
  * @param list A list of values
@@ -203,15 +226,6 @@ void * sl_fetch(single_list list, size_t pos);
  * ```
  */
 void sl_map(single_list list, map_fn fn);
-
-/**
- * Reverse a list in place.
- * @param list The list to reverse
- *
- * Reverses a list in place so that the elements are in reverse order and the
- * head and tail are switched.
- */
-void sl_reverse(single_list list);
 
 /**
  * Right associative fold for singly linked lists.
@@ -251,30 +265,6 @@ void * sl_foldl(const single_list list,
 		foldl_fn fn,
 		const void * init);
 
-/* ############################ *
- * # Data Properties # *
- * ############################ */
-/**
- * Determine if a list is empty.
- * @param list The list to check
- *
- * @return `true` if `list` is empty, `false` otherwise.
- */
-bool sl_empty(single_list list);
-
-/**
- * Determine if a list contains a value.
- * @param list The list to search
- * @param data The data to search for in the list
- *
- * Determines if `list` contains an entry matching `data`.
- * The operation compares the contents of the memory pointed to by `data`, and
- * not the memory addresses of the data pointers.
- *
- * @return `true` if a matching entry is found, otherwise `false`
- */
-bool sl_elem(single_list list, void * data);
-
 /**
  * Determine if any value in a list satisifies some condition.
  * @param list A list of values
@@ -301,9 +291,6 @@ bool sl_any(single_list list, pred_fn p);
  */
 bool sl_all(single_list list, pred_fn p);
 
-/* ############################ *
- * # Filtering # *
- * ############################ */
 /**
  * Filter a list to contain only values that satisfy some predicate.
  * @param list The list to filter
@@ -363,9 +350,11 @@ static const __unused void * hof_ops  = NULL;
 #endif /* GENERICS */
 
 #ifdef DEBUG
+
 #include <stdio.h>
 
 void sl_dump(single_list list);
+
 #endif /* DEBUG */
 
 #endif /* __SINGLE_LIST_H */
