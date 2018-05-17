@@ -48,4 +48,4 @@ check: $(TESTS)
 	@for test in $(TESTS); do LD_LIBRARY_PATH=.. ./$$test; done
 
 clean:
-	-$(RM) $(TESTS) $(TEST_DL_OBJS) $(TEST_RB_OBJS)
+	-$(RM) $(TESTS) $(TEST_SL_OBJS) $(TEST_DL_OBJS) $(TEST_RB_OBJS)
