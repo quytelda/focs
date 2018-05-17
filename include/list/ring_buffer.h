@@ -442,14 +442,14 @@ static const struct mgmt_operations mgmt_ops = {
 };
 
 static const struct hof_operations hof_ops = {
-	.map        = (map_hof_fn)        rb_map;
-	.foldr      = (foldr_hof_fn)      rb_foldr;
-	.foldl      = (foldl_hof_fn)      rb_foldl;
-	.any        = (any_hof_fn)        rb_any;
-	.all        = (all_hof_fn)        rb_all;
-	.filter     = (filter_hof_fn)     rb_filter;
-	.drop_while = (drop_while_hof_fn) rb_drop_while;
-	.take_while = (take_while_hof_fn) rb_take_while;
+	.map        = (map_hof_fn)        rb_map,
+	.foldr      = (foldr_hof_fn)      rb_foldr,
+	.foldl      = (foldl_hof_fn)      rb_foldl,
+	.any        = (any_hof_fn)        rb_any,
+	.all        = (all_hof_fn)        rb_all,
+	.filter     = (filter_hof_fn)     rb_filter,
+	.drop_while = (drop_while_hof_fn) rb_drop_while,
+	.take_while = (take_while_hof_fn) rb_take_while,
 };
 
 #else /* GENERICS */
