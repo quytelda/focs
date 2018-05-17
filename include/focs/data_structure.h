@@ -38,35 +38,37 @@ struct ds_properties {
 	bool   overwrite;
 };
 
-#define __DS_HOF_OPS_NAME   __hof_ops
-#define __DS_MGMT_OPS_NAME  __mgmt_ops
-#define __DS_PRIV_NAME      __priv
-#define __DS_PROPS_NAME     __props
+#define __DS_PRIV_NAME  __priv
+#define __DS_PROPS_NAME __props
 
 #ifdef GENERICS
-#define START_DS(ds_name)						\
-	typedef struct {						\
-		const struct ds_properties   * __DS_PROPS_NAME;		\
-		const struct hof_operations  * __DS_HOF_OPS_NAME;	\
-		const struct mgmt_operations * __DS_MGMT_OPS_NAME;	\
+
+#define __DS_HOF_OPS_NAME   __hof_ops
+#define __DS_MGMT_OPS_NAME  __mgmt_ops
+
+#define START_DS(ds_name)                                          \
+	typedef struct {                                           \
+		const struct ds_properties   * __DS_PROPS_NAME;    \
+		const struct hof_operations  * __DS_HOF_OPS_NAME;  \
+		const struct mgmt_operations * __DS_MGMT_OPS_NAME; \
 		struct ds_name##_priv
 
 #define __DS_HOF_OPS(ds)  ((ds)->__DS_HOF_OPS_NAME)
 #define __DS_MGMT_OPS(ds) ((ds)->__DS_MGMT_OPS_NAME)
 
-#define DS_INIT(ds, props, mgmt_ops, hof_ops)	\
-	({					\
-		DS_PROPS(ds)      = props;	\
-		__DS_MGMT_OPS(ds) = mgmt_ops;	\
-		__DS_HOF_OPS(ds)  = hof_ops;	\
+#define DS_INIT(ds, props, mgmt_ops, hof_ops) \
+	({                                    \
+		DS_PROPS(ds)      = props;    \
+		__DS_MGMT_OPS(ds) = mgmt_ops; \
+		__DS_HOF_OPS(ds)  = hof_ops;  \
 	})
 
 #else /* GENERICS */
 
-#define START_DS(ds_name)				\
-	typedef struct {				\
-	const struct ds_properties * __DS_PROPS_NAME;	\
-	struct ds_name##_priv
+#define START_DS(ds_name)                                     \
+	typedef struct {                                      \
+		const struct ds_properties * __DS_PROPS_NAME; \
+		struct ds_name##_priv
 
 #define DS_INIT(ds, props, mgmt_ops, hof_ops) (DS_PROPS(ds) = props)
 
@@ -75,7 +77,7 @@ struct ds_properties {
 #define END_DS(ds_name) __DS_PRIV_NAME; } * ds_name
 
 #define DS_PROPS(ds) ((ds)->__DS_PROPS_NAME)
-#define DS_PRIV(ds) (&((ds)->__DS_PRIV_NAME))
+#define DS_PRIV(ds)  (&((ds)->__DS_PRIV_NAME))
 
 #define DS_DATA_SIZE(ds) (DS_PROPS(ds)->data_size)
 #define DS_ENTRIES(ds)   (DS_PROPS(ds)->entries)
