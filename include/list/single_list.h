@@ -260,7 +260,7 @@ void * sl_foldl(const single_list list,
  *
  * @return `true` if `list` is empty, `false` otherwise.
  */
-bool sl_null(single_list list);
+bool sl_empty(single_list list);
 
 /**
  * Determine if a list contains a value.
@@ -340,7 +340,7 @@ bool sl_take_while(single_list list, pred_fn p);
 #ifdef GENERICS
 
 static const struct mgmt_operations mgmt_ops = {
-	.empty = (empty_mgmt_fn) sl_null,
+	.empty = (empty_mgmt_fn) sl_empty,
 	.elem  = (elem_mgmt_fn)  sl_elem,
 };
 

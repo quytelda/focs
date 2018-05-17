@@ -268,7 +268,7 @@ void sl_free(single_list * list)
 	DS_FREE(list);
 }
 
-bool sl_null(single_list list)
+bool sl_empty(single_list list)
 {
 	bool null;
 
@@ -449,7 +449,7 @@ bool sl_any(single_list list, pred_fn p)
 	bool success = false;
 	struct sl_element * current;
 
-	if(sl_null(list))
+	if(sl_empty(list))
 		return false;
 
 	rwlock_reader_entry(DS_PRIV(list)->rwlock);
@@ -487,7 +487,7 @@ bool sl_all(single_list list, pred_fn p)
 	bool success = true;
 	struct sl_element * current;
 
-	if(sl_null(list))
+	if(sl_empty(list))
 		return false;
 
 	rwlock_reader_entry(DS_PRIV(list)->rwlock);
@@ -509,7 +509,7 @@ bool sl_filter(single_list list, pred_fn p)
 	bool changed = false;
 	struct sl_element * current;
 
-	if(sl_null(list))
+	if(sl_empty(list))
 		return false;
 
 	rwlock_writer_entry(DS_PRIV(list)->rwlock);
