@@ -661,7 +661,7 @@ START_TEST(test_sl_fetch_multiple)
 }
 END_TEST
 
-START_TEST(test_sl_contains_empty)
+START_TEST(test_sl_elem_empty)
 {
 	bool found;
 	uint8_t val = 1;
@@ -669,7 +669,7 @@ START_TEST(test_sl_contains_empty)
 
 	list = sl_create(&props);
 
-	found = sl_contains(list, &val);
+	found = sl_elem(list, &val);
 
 	ck_assert(!found);
 
@@ -681,7 +681,7 @@ START_TEST(test_sl_contains_empty)
 }
 END_TEST
 
-START_TEST(test_sl_contains_single)
+START_TEST(test_sl_elem_single)
 {
 	bool found1;
 	bool found2;
@@ -693,8 +693,8 @@ START_TEST(test_sl_contains_single)
 	list = sl_create(&props);
 	sl_push_head(list, &in);
 
-	found1 = sl_contains(list, &val1);
-	found2 = sl_contains(list, &val2);
+	found1 = sl_elem(list, &val1);
+	found2 = sl_elem(list, &val2);
 
 	ck_assert(found1);
 	ck_assert(!found2);
@@ -707,7 +707,7 @@ START_TEST(test_sl_contains_single)
 }
 END_TEST
 
-START_TEST(test_sl_contains_multiple)
+START_TEST(test_sl_elem_multiple)
 {
 	bool found[5];
 	uint8_t in[] = {1, 2, 3, 4};
@@ -722,11 +722,11 @@ START_TEST(test_sl_contains_multiple)
 	sl_push_tail(list, &in[3]);
 
 	/* Check the elements out of order. */
-	found[0] = sl_contains(list, &val[2]);
-	found[1] = sl_contains(list, &val[0]);
-	found[2] = sl_contains(list, &val[1]);
-	found[3] = sl_contains(list, &val[3]);
-	found[4] = sl_contains(list, &val[4]);
+	found[0] = sl_elem(list, &val[2]);
+	found[1] = sl_elem(list, &val[0]);
+	found[2] = sl_elem(list, &val[1]);
+	found[3] = sl_elem(list, &val[3]);
+	found[4] = sl_elem(list, &val[4]);
 
 	ck_assert(DS_PRIV(list)->head);
 	ck_assert(DS_PRIV(list)->tail);
@@ -1557,7 +1557,7 @@ Suite * sl_suite(void)
 	TCase * case_sl_delete;
 	TCase * case_sl_remove;
 	TCase * case_sl_fetch;
-	TCase * case_sl_contains;
+	TCase * case_sl_elem;
 	TCase * case_sl_any;
 	TCase * case_sl_all;
 	TCase * case_sl_filter;
@@ -1580,7 +1580,7 @@ Suite * sl_suite(void)
 	case_sl_delete = tcase_create("sl_delete");
 	case_sl_remove = tcase_create("sl_remove");
 	case_sl_fetch = tcase_create("sl_fetch");
-	case_sl_contains = tcase_create("sl_contains");
+	case_sl_elem = tcase_create("sl_elem");
 	case_sl_any = tcase_create("sl_any");
 	case_sl_all = tcase_create("sl_all");
 	case_sl_filter = tcase_create("sl_filter");
@@ -1615,9 +1615,9 @@ Suite * sl_suite(void)
 	tcase_add_test(case_sl_fetch, test_sl_fetch_empty);
 	tcase_add_test(case_sl_fetch, test_sl_fetch_single);
 	tcase_add_test(case_sl_fetch, test_sl_fetch_multiple);
-	tcase_add_test(case_sl_contains, test_sl_contains_empty);
-	tcase_add_test(case_sl_contains, test_sl_contains_single);
-	tcase_add_test(case_sl_contains, test_sl_contains_multiple);
+	tcase_add_test(case_sl_elem, test_sl_elem_empty);
+	tcase_add_test(case_sl_elem, test_sl_elem_single);
+	tcase_add_test(case_sl_elem, test_sl_elem_multiple);
 	tcase_add_test(case_sl_any, test_sl_any_empty);
 	tcase_add_test(case_sl_any, test_sl_any_single);
 	tcase_add_test(case_sl_any, test_sl_any_multiple);
@@ -1656,7 +1656,7 @@ Suite * sl_suite(void)
 	suite_add_tcase(suite, case_sl_delete);
 	suite_add_tcase(suite, case_sl_remove);
 	suite_add_tcase(suite, case_sl_fetch);
-	suite_add_tcase(suite, case_sl_contains);
+	suite_add_tcase(suite, case_sl_elem);
 	suite_add_tcase(suite, case_sl_any);
 	suite_add_tcase(suite, case_sl_all);
 	suite_add_tcase(suite, case_sl_filter);

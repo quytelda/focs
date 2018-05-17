@@ -399,7 +399,7 @@ void * sl_fetch(single_list list, size_t pos)
 }
 
 /**
- * sl_contains() - Determines if a list contains a value
+ * sl_elem() - Determines if a list contains a value
  * @list: The list to search
  * @data: The data to search for in the list
  *
@@ -409,7 +409,7 @@ void * sl_fetch(single_list list, size_t pos)
  *
  * Return: ``true`` if a matching entry is found, otherwise ``false``
  */
-bool sl_contains(single_list list, void * data)
+bool sl_elem(single_list list, void * data)
 {
 	bool success = false;
 	struct sl_element * current;

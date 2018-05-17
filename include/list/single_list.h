@@ -273,7 +273,7 @@ bool sl_null(single_list list);
  *
  * @return `true` if a matching entry is found, otherwise `false`
  */
-bool sl_contains(single_list list, void * data);
+bool sl_elem(single_list list, void * data);
 
 /**
  * Determine if any value in a list satisifies some condition.
@@ -341,7 +341,7 @@ bool sl_take_while(single_list list, pred_fn p);
 
 static const struct mgmt_operations mgmt_ops = {
 	.empty = (empty_mgmt_fn) sl_null,
-	.elem  = (elem_mgmt_fn)  sl_contains,
+	.elem  = (elem_mgmt_fn)  sl_elem,
 };
 
 static const struct hof_operations hof_ops = {

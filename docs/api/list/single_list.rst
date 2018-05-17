@@ -27,7 +27,7 @@ Data Management
 Functional Utilities
 --------------------
 .. doxygenfunction:: sl_null
-.. doxygenfunction:: sl_contains
+.. doxygenfunction:: sl_elem
 .. doxygenfunction:: sl_map
 .. doxygenfunction:: sl_foldr
 .. doxygenfunction:: sl_foldl
