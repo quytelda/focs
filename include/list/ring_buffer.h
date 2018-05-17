@@ -420,6 +420,7 @@ void rb_drop_while(ring_buffer buf, const pred_fn pred);
 void rb_take_while(ring_buffer buf, const pred_fn pred);
 
 #ifdef DEBUG
+
 #include <stdio.h>
 
 /**
@@ -430,7 +431,8 @@ void rb_take_while(ring_buffer buf, const pred_fn pred);
  * information on addresses, indices, and the locations of the head and tail
  * pointers.
  */
-void rb_dump(ring_buffer buf);
+void rb_dump(const ring_buffer buf);
+
 #endif /* DEBUG */
 
 #ifdef GENERICS

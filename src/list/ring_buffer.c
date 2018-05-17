@@ -568,7 +568,7 @@ void rb_take_while(ring_buffer buf, const pred_fn pred)
 
 #ifdef DEBUG
 
-void rb_dump(ring_buffer buf)
+void rb_dump(const ring_buffer buf)
 {
 	struct ring_buffer_priv * priv;
 
