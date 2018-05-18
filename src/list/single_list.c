@@ -647,11 +647,6 @@ bool sl_take_while(single_list list, const pred_fn pred)
 
 #ifdef DEBUG
 
-#define PUT_HR(char, len)                                      \
-		for(size_t i = 0; i < len; i++)                \
-			putchar(char);                         \
-		putchar('\n')
-
 void sl_element_dump(const single_list list, const struct sl_element * current)
 {
 	uint8_t * bytes = current->data;

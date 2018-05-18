@@ -152,4 +152,24 @@
  */
 #define aligned(addr, size, offset) (((addr) - (offset)) % (size) == 0)
 
+#ifdef DEBUG
+
+#include <stdio.h>
+
+/**
+ * Print a horizontal line.
+ * @param char The character to print
+ * @param len  The number of characters to print
+ *
+ * `PUT_HR()` prints `len` characters (which are `char`) followed by a newline.
+ */
+#define PUT_HR(char, len)                       \
+	({                                      \
+		for(size_t i = 0; i < len; i++) \
+			putchar(char);          \
+		putchar('\n');                  \
+	})
+
+#endif
+
 #endif /* __FOCS_H */
