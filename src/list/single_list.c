@@ -1,4 +1,4 @@
-/* double_list.c - Doubly Linked List Implementation
+/* single_list.c - Singly Linked List Implementation
  * Copyright (C) 2018 Quytelda Kahja
  *
  * This file is part of focs.
@@ -264,6 +264,7 @@ single_list sl_create(const struct ds_properties * props)
 
 	DS_INIT(list, props, &mgmt_ops, &hof_ops);
 
+	/* Private Area Initialization */
 	priv = DS_PRIV(list);
 	priv->head = NULL;
 	priv->tail = NULL;
@@ -276,7 +277,6 @@ single_list sl_create(const struct ds_properties * props)
 
 exit:
 	sl_destroy(&list);
-
 	return NULL;
 }
 
@@ -647,6 +647,8 @@ bool sl_take_while(single_list list, const pred_fn pred)
 
 #ifdef DEBUG
 
+#define BYTES_PER_ROW 8
+
 void sl_element_dump(const single_list list, const struct sl_element * current)
 {
 	uint8_t * bytes = current->data;
@@ -654,22 +656,22 @@ void sl_element_dump(const single_list list, const struct sl_element * current)
 
 	printf("Address: %p", (void *) current);
 	if(current == DS_PRIV(list)->head)
-		printf(" (head)");
+		fputs(" (head)", stdout);
 	if(current == DS_PRIV(list)->tail)
-		printf(" (tail)");
+		fputs(" (tail)", stdout);
 
 	printf("\nNext:    %p\n", (void *) current->next);
 	PUT_HR('-', 64);
 
 	for(i = 0; i < DS_DATA_SIZE(list); i++) {
-		printf("%#04x ", bytes[i]);
+		/* Print BYTES_PER_ROW bytes per line, space seperated. */
+		printf("0x%02x ", bytes[i]);
 
-		/* Print 8 bytes per line. */
-		if((i > 0) && aligned(i, 8, 0))
+		if((i > 0) && aligned(i, BYTES_PER_ROW, 0))
 			putchar('\n');
 	}
 
-	if(!aligned(i, 8, 0))
+	if(!aligned(i, BYTES_PER_ROW, 0))
 		putchar('\n');
 }
 
