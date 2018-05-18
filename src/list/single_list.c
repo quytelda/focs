@@ -41,6 +41,17 @@ exit:
 	return NULL;
 }
 
+bool __elem(single_list list, const void * data)
+{
+	struct sl_element * current;
+
+	linked_list_foreach(list, current)
+		if(DS_DATA_EQ(list, current->data, data))
+			return true;
+
+	return false;
+}
+
 static struct sl_element * __lookup(const single_list list, const size_t pos)
 {
 	struct sl_element * current;
@@ -299,18 +310,10 @@ bool sl_empty(single_list list)
 
 bool sl_elem(single_list list, const void * data)
 {
-	bool success = false;
-	struct sl_element * current;
+	bool success;
 
 	rwlock_reader_entry(DS_PRIV(list)->rwlock);
-
-	linked_list_foreach(list, current) {
-		if(memcmp(current->data, data, DS_DATA_SIZE(list)) == 0) {
-			success = true;
-			break;
-		}
-	}
-
+	success = __elem(list, data);
 	rwlock_reader_exit(DS_PRIV(list)->rwlock);
 
 	return success;
