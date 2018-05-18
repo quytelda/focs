@@ -168,7 +168,7 @@ static struct sl_element * __remove(single_list list, const size_t pos)
 	return current;
 }
 
-static void __delete_element(single_list list, struct sl_element * elem)
+static void __delete(single_list list, struct sl_element * elem)
 {
 	struct sl_element * prev;
 
@@ -578,7 +578,7 @@ bool sl_filter(single_list list, const pred_fn pred)
 		if(!pred(current->data)) {
 			changed = true;
 
-			__delete_element(list, current);
+			__delete(list, current);
 			free(current->data);
 			free(current);
 		}
