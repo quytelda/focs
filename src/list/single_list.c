@@ -145,7 +145,7 @@ static bool __insert(single_list list,
 	return true;
 }
 
-static struct sl_element * __remove_element(single_list list, size_t pos)
+static struct sl_element * __remove(single_list list, const size_t pos)
 {
 	struct sl_element * current;
 	struct sl_element * prev;
@@ -391,7 +391,7 @@ bool sl_delete(single_list list, const size_t pos)
 	struct sl_element * current;
 
 	rwlock_writer_entry(DS_PRIV(list)->rwlock);
-	current = __remove_element(list, pos);
+	current = __remove(list, pos);
 	rwlock_writer_exit(DS_PRIV(list)->rwlock);
 
 	if(current) {
@@ -410,7 +410,7 @@ void * sl_remove(single_list list, const size_t pos)
 	struct sl_element * current;
 
 	rwlock_writer_entry(DS_PRIV(list)->rwlock);
-	current = __remove_element(list, pos);
+	current = __remove(list, pos);
 	rwlock_writer_exit(DS_PRIV(list)->rwlock);
 
 	if(current) {
