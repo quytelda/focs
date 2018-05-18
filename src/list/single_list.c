@@ -59,10 +59,12 @@ static struct sl_element * __lookup(const single_list list, const size_t pos)
 	if(pos >= DS_PRIV(list)->length)
 		return NULL;
 
-	current = DS_PRIV(list)->head;
-	for(size_t i = 0; i < pos; i++)
-		current = current->next;
-	return current;
+	size_t i;
+	linked_list_foreach_i(list, current, i)
+		if(i == pos)
+			return current;
+
+	return NULL;
 }
 
 static void __push_head(single_list list, struct sl_element * current)
