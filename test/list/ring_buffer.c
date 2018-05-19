@@ -29,18 +29,9 @@ static const struct ds_properties props = {
 
 static ring_buffer buffer;
 
-void setup0(void)
+void setup(void)
 {
 	buffer = rb_create(&props);
-}
-
-void setup3(void)
-{
-	uint8_t in[] = {1, 2, 3};
-	setup0();
-
-	for(size_t i = 0; i < array_size(in); i++)
-		rb_push_tail(buffer, &in[i]);
 }
 
 void takedown(void)
@@ -421,11 +412,54 @@ START_TEST(test_rb_fetch_multiple)
 }
 END_TEST
 
+START_TEST(test_rb_reverse_empty)
+{
+	bool success;
+
+	success = rb_reverse(buffer);
+
+	ck_assert(success);
+	ck_assert(rb_empty(buffer));
+}
+END_TEST
+
+START_TEST(test_rb_reverse)
+{
+	uint8_t in[] = {1, 2, 3};
+	uint8_t * out;
+	bool success;
+
+	for(size_t i = 0; i < array_size(in); i++)
+		rb_push_head(buffer, &in[i]);
+
+	success = rb_reverse(buffer);
+
+	ck_assert(success);
+	ck_assert_int_eq(rb_size(buffer), array_size(in));
+
+	for(size_t i = 0; i < array_size(in); i++) {
+		out = rb_pop_head(buffer);
+
+		ck_assert(out);
+		ck_assert_int_eq(*out, in[i]);
+	}
+}
+END_TEST
+
 uint8_t increment(uint8_t n)
 {
 	return n + 1;
 }
 WRAP_MAPPABLE(increment, uint8_t, transform);
+
+START_TEST(test_rb_map_empty)
+{
+	/* `buffer` is initially empty. */
+	rb_map(buffer, transform);
+
+	ck_assert(rb_empty(buffer));
+}
+END_TEST
 
 START_TEST(test_rb_map)
 {
@@ -455,6 +489,19 @@ int8_t subtract(const int8_t a, const int8_t b)
 WRAP_RFOLDABLE(subtract, int8_t, reduce_right);
 WRAP_LFOLDABLE(subtract, int8_t, reduce_left);
 
+START_TEST(test_rb_foldr_empty)
+{
+	int8_t init = 0;
+	int8_t * out;
+
+	out = rb_foldr(buffer, reduce_right, &init);
+
+	ck_assert(out);
+	ck_assert_int_eq(*out, init);
+	ck_assert(rb_empty(buffer));
+}
+END_TEST
+
 START_TEST(test_rb_foldr)
 {
 	int8_t in[] = {1, 2, 3};
@@ -469,6 +516,19 @@ START_TEST(test_rb_foldr)
 	ck_assert(out);
 	ck_assert_int_eq(*out, 2);
 	ck_assert_int_eq(rb_size(buffer), array_size(in));
+}
+END_TEST
+
+START_TEST(test_rb_foldl_empty)
+{
+	int8_t init = 0;
+	int8_t * out;
+
+	out = rb_foldl(buffer, reduce_left, &init);
+
+	ck_assert(out);
+	ck_assert_int_eq(*out, init);
+	ck_assert(rb_empty(buffer));
 }
 END_TEST
 
@@ -501,6 +561,17 @@ bool lt0(int8_t data)
 }
 WRAP_PREDICATE(lt0, int8_t, pred_lt0);
 
+START_TEST(test_rb_any_empty)
+{
+	bool any;
+
+	any = rb_any(buffer, pred_gte0);
+
+	ck_assert(!any);
+	ck_assert(rb_empty(buffer));
+}
+END_TEST
+
 START_TEST(test_rb_any)
 {
 	bool any[2];
@@ -518,6 +589,34 @@ START_TEST(test_rb_any)
 }
 END_TEST
 
+START_TEST(test_rb_all_empty)
+{
+	bool all;
+
+	all = rb_all(buffer, pred_gte0);
+
+	ck_assert(!all);
+	ck_assert(rb_empty(buffer));
+}
+END_TEST
+
+START_TEST(test_rb_all)
+{
+	bool all[2];
+	int8_t in[] = {1, 2, 3};
+
+	for(size_t i = 0; i < array_size(in); i++)
+		rb_push_head(buffer, &in[i]);
+
+	all[0] = rb_all(buffer, pred_gte0);
+	all[1] = rb_all(buffer, pred_lt0);
+
+	ck_assert(all[0]);
+	ck_assert(!all[1]);
+	ck_assert_int_eq(rb_size(buffer), array_size(in));
+}
+END_TEST
+
 Suite * rb_suite(void)
 {
 	Suite * suite;
@@ -528,6 +627,7 @@ Suite * rb_suite(void)
 	TCase * case_rb_pop_tail;
 	TCase * case_rb_insert;
 	TCase * case_rb_fetch;
+	TCase * case_rb_reverse;
 	TCase * case_rb_map;
 	TCase * case_rb_foldr;
 	TCase * case_rb_foldl;
@@ -543,20 +643,22 @@ Suite * rb_suite(void)
 	case_rb_pop_tail  = tcase_create("rb_pop_tail");
 	case_rb_insert    = tcase_create("rb_insert");
 	case_rb_fetch     = tcase_create("rb_fetch");
+	case_rb_reverse   = tcase_create("rb_reverse");
 	case_rb_map       = tcase_create("rb_map");
 	case_rb_foldr     = tcase_create("rb_foldr");
 	case_rb_foldl     = tcase_create("rb_foldl");
 	case_rb_any       = tcase_create("rb_any");
 	case_rb_all       = tcase_create("rb_all");
 
-	tcase_add_checked_fixture(case_rb_create,    setup0, takedown);
-	tcase_add_checked_fixture(case_rb_push_head, setup0, takedown);
-	tcase_add_checked_fixture(case_rb_push_tail, setup0, takedown);
-	tcase_add_checked_fixture(case_rb_map,       setup0, takedown);
-	tcase_add_checked_fixture(case_rb_foldr,     setup0, takedown);
-	tcase_add_checked_fixture(case_rb_foldl,     setup0, takedown);
-	tcase_add_checked_fixture(case_rb_any,       setup0, takedown);
-	tcase_add_checked_fixture(case_rb_all,       setup0, takedown);
+	tcase_add_checked_fixture(case_rb_create,    setup, takedown);
+	tcase_add_checked_fixture(case_rb_push_head, setup, takedown);
+	tcase_add_checked_fixture(case_rb_push_tail, setup, takedown);
+	tcase_add_checked_fixture(case_rb_reverse,   setup, takedown);
+	tcase_add_checked_fixture(case_rb_map,       setup, takedown);
+	tcase_add_checked_fixture(case_rb_foldr,     setup, takedown);
+	tcase_add_checked_fixture(case_rb_foldl,     setup, takedown);
+	tcase_add_checked_fixture(case_rb_any,       setup, takedown);
+	tcase_add_checked_fixture(case_rb_all,       setup, takedown);
 
 	tcase_add_test(case_rb_create,    test_rb_create);
 	tcase_add_test(case_rb_push_head, test_rb_push_head_single);
@@ -574,10 +676,18 @@ Suite * rb_suite(void)
 	tcase_add_test(case_rb_fetch,     test_rb_fetch_empty);
 	tcase_add_test(case_rb_fetch,     test_rb_fetch_single);
 	tcase_add_test(case_rb_fetch,     test_rb_fetch_multiple);
+	tcase_add_test(case_rb_reverse,   test_rb_reverse_empty);
+	tcase_add_test(case_rb_reverse,   test_rb_reverse);
+	tcase_add_test(case_rb_map,       test_rb_map_empty);
 	tcase_add_test(case_rb_map,       test_rb_map);
+	tcase_add_test(case_rb_foldr,     test_rb_foldr_empty);
 	tcase_add_test(case_rb_foldr,     test_rb_foldr);
+	tcase_add_test(case_rb_foldl,     test_rb_foldl_empty);
 	tcase_add_test(case_rb_foldl,     test_rb_foldl);
+	tcase_add_test(case_rb_any,       test_rb_any_empty);
 	tcase_add_test(case_rb_any,       test_rb_any);
+	tcase_add_test(case_rb_all,       test_rb_all_empty);
+	tcase_add_test(case_rb_all,       test_rb_all);
 
 	suite_add_tcase(suite, case_rb_create);
 	suite_add_tcase(suite, case_rb_push_head);
@@ -586,9 +696,12 @@ Suite * rb_suite(void)
 	suite_add_tcase(suite, case_rb_pop_tail);
 	suite_add_tcase(suite, case_rb_insert);
 	suite_add_tcase(suite, case_rb_fetch);
+	suite_add_tcase(suite, case_rb_reverse);
 	suite_add_tcase(suite, case_rb_map);
 	suite_add_tcase(suite, case_rb_foldr);
 	suite_add_tcase(suite, case_rb_foldl);
+	suite_add_tcase(suite, case_rb_any);
+	suite_add_tcase(suite, case_rb_all);
 
 	return suite;
 }
