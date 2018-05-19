@@ -661,7 +661,7 @@ START_TEST(test_dl_fetch_multiple)
 }
 END_TEST
 
-START_TEST(test_dl_contains_empty)
+START_TEST(test_dl_elem_empty)
 {
 	bool found;
 	uint8_t val = 1;
@@ -669,7 +669,7 @@ START_TEST(test_dl_contains_empty)
 
 	list = dl_create(&props);
 
-	found = dl_contains(list, &val);
+	found = dl_elem(list, &val);
 
 	ck_assert(!found);
 
@@ -681,7 +681,7 @@ START_TEST(test_dl_contains_empty)
 }
 END_TEST
 
-START_TEST(test_dl_contains_single)
+START_TEST(test_dl_elem_single)
 {
 	bool found1;
 	bool found2;
@@ -693,8 +693,8 @@ START_TEST(test_dl_contains_single)
 	list = dl_create(&props);
 	dl_push_head(list, &in);
 
-	found1 = dl_contains(list, &val1);
-	found2 = dl_contains(list, &val2);
+	found1 = dl_elem(list, &val1);
+	found2 = dl_elem(list, &val2);
 
 	ck_assert(found1);
 	ck_assert(!found2);
@@ -707,7 +707,7 @@ START_TEST(test_dl_contains_single)
 }
 END_TEST
 
-START_TEST(test_dl_contains_multiple)
+START_TEST(test_dl_elem_multiple)
 {
 	bool found[5];
 	uint8_t in[] = {1, 2, 3, 4};
@@ -722,11 +722,11 @@ START_TEST(test_dl_contains_multiple)
 	dl_push_tail(list, &in[3]);
 
 	/* Check the elements out of order. */
-	found[0] = dl_contains(list, &val[2]);
-	found[1] = dl_contains(list, &val[0]);
-	found[2] = dl_contains(list, &val[1]);
-	found[3] = dl_contains(list, &val[3]);
-	found[4] = dl_contains(list, &val[4]);
+	found[0] = dl_elem(list, &val[2]);
+	found[1] = dl_elem(list, &val[0]);
+	found[2] = dl_elem(list, &val[1]);
+	found[3] = dl_elem(list, &val[3]);
+	found[4] = dl_elem(list, &val[4]);
 
 	ck_assert(DS_PRIV(list)->head);
 	ck_assert(DS_PRIV(list)->tail);
@@ -1557,7 +1557,7 @@ Suite * dl_suite(void)
 	TCase * case_dl_delete;
 	TCase * case_dl_remove;
 	TCase * case_dl_fetch;
-	TCase * case_dl_contains;
+	TCase * case_dl_elem;
 	TCase * case_dl_any;
 	TCase * case_dl_all;
 	TCase * case_dl_filter;
@@ -1580,7 +1580,7 @@ Suite * dl_suite(void)
 	case_dl_delete = tcase_create("dl_delete");
 	case_dl_remove = tcase_create("dl_remove");
 	case_dl_fetch = tcase_create("dl_fetch");
-	case_dl_contains = tcase_create("dl_contains");
+	case_dl_elem = tcase_create("dl_elem");
 	case_dl_any = tcase_create("dl_any");
 	case_dl_all = tcase_create("dl_all");
 	case_dl_filter = tcase_create("dl_filter");
@@ -1615,9 +1615,9 @@ Suite * dl_suite(void)
 	tcase_add_test(case_dl_fetch, test_dl_fetch_empty);
 	tcase_add_test(case_dl_fetch, test_dl_fetch_single);
 	tcase_add_test(case_dl_fetch, test_dl_fetch_multiple);
-	tcase_add_test(case_dl_contains, test_dl_contains_empty);
-	tcase_add_test(case_dl_contains, test_dl_contains_single);
-	tcase_add_test(case_dl_contains, test_dl_contains_multiple);
+	tcase_add_test(case_dl_elem, test_dl_elem_empty);
+	tcase_add_test(case_dl_elem, test_dl_elem_single);
+	tcase_add_test(case_dl_elem, test_dl_elem_multiple);
 	tcase_add_test(case_dl_any, test_dl_any_empty);
 	tcase_add_test(case_dl_any, test_dl_any_single);
 	tcase_add_test(case_dl_any, test_dl_any_multiple);
@@ -1656,7 +1656,7 @@ Suite * dl_suite(void)
 	suite_add_tcase(suite, case_dl_delete);
 	suite_add_tcase(suite, case_dl_remove);
 	suite_add_tcase(suite, case_dl_fetch);
-	suite_add_tcase(suite, case_dl_contains);
+	suite_add_tcase(suite, case_dl_elem);
 	suite_add_tcase(suite, case_dl_any);
 	suite_add_tcase(suite, case_dl_all);
 	suite_add_tcase(suite, case_dl_filter);

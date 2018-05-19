@@ -348,7 +348,7 @@ bool dl_empty(double_list list);
  *
  * @return `true` if a matching entry is found, otherwise `false`
  */
-bool dl_contains(double_list list, void * data);
+bool dl_elem(double_list list, void * data);
 
 /**
  * Determine if any value in a list satisifies some condition.
@@ -416,7 +416,7 @@ bool dl_take_while(double_list list, pred_fn p);
 
 static const struct mgmt_operations mgmt_ops = {
 	.empty = (empty_mgmt_fn) dl_empty,
-	.elem  = (elem_mgmt_fn)  dl_contains,
+	.elem  = (elem_mgmt_fn)  dl_elem,
 };
 
 static const struct hof_operations hof_ops = {

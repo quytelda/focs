@@ -398,7 +398,7 @@ void * dl_fetch(double_list list, size_t pos)
 	return NULL;
 }
 
-bool dl_contains(double_list list, void * data)
+bool dl_elem(double_list list, void * data)
 {
 	bool success = false;
 	struct dl_element * current;
