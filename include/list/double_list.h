@@ -48,6 +48,8 @@ struct dl_element {
 	struct rwlock * rwlock;
 } END_DS(double_list);
 
+#define __LENGTH(list) (DS_PRIV(list)->length)
+
 /**
  * Return a pointer to the previous element, if this element is defined.
  * @param current A pointer to a doubly linked list element (struct dl_element)
@@ -146,6 +148,15 @@ double_list dl_create(const struct ds_properties * props);
  * `list`, as well as de-allocating all data elements contained within `list`.
  */
 void dl_destroy(double_list * list);
+
+/**
+ * Determine the number of data elements stored in a doubly linked list.
+ * @param list The list to check (non-NULL)
+ *
+ * @return This function shall return the number of data elements stored in
+ * `list`.
+ */
+size_t dl_size(const double_list list);
 
 /**
  * Determine if a list is empty.

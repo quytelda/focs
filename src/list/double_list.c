@@ -268,6 +268,17 @@ void dl_destroy(double_list * list)
 	DS_FREE(list);
 }
 
+size_t dl_size(const double_list list)
+{
+	size_t length;
+
+	rwlock_reader_entry(DS_PRIV(list)->rwlock);
+	length = __LENGTH(list);
+	rwlock_reader_exit(DS_PRIV(list)->rwlock);
+
+	return length;
+}
+
 bool dl_empty(double_list list)
 {
 	bool null;
