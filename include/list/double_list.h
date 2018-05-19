@@ -43,7 +43,7 @@ struct dl_element {
  * @struct double_list
  * Represents a doubly linked list.
  *
- * Initialize this structure with dl_alloc(), and destroy it with dl_free().
+ * Initialize this structure with dl_alloc(), and destroy it with dl_destroy().
  */
  START_DS(double_list) {
 	struct dl_element * head;
@@ -151,7 +151,7 @@ double_list dl_create(const struct ds_properties * props);
  * De-allocates the doubly linked list at the structure pointer pointed to by
  * `list`, as well as de-allocating all data elements contained within `list`.
  */
-void dl_free(double_list * list);
+void dl_destroy(double_list * list);
 
 /* ############################# *
  * # Data Management Functions # *
@@ -255,7 +255,7 @@ void * dl_remove(double_list list, size_t pos);
  *
  * @return A pointer to the data at index `pos`, or `NULL` on failure.
  * This pointer should **not** be free()d explicitly, or the list will become
- * corrupted.  This pointer will be free()d when dl_free() is called, so if
+ * corrupted.  This pointer will be free()d when dl_destroy() is called, so if
  * the data is needed after the list is destroyed, make a copy of it, or make
  * sure to call dl_remove() on the data's index before destroying the list.
  */

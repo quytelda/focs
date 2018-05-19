@@ -246,12 +246,12 @@ double_list dl_create(const struct ds_properties * props)
 	return list;
 
 exit:
-	dl_free(&list);
+	dl_destroy(&list);
 
 	return NULL;
 }
 
-void dl_free(double_list * list)
+void dl_destroy(double_list * list)
 {
 	struct dl_element * current;
 

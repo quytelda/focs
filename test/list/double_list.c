@@ -34,7 +34,7 @@ START_TEST(test_dl_alloc)
 	ck_assert(list);
 	ck_assert(dl_empty(list));
 
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -44,7 +44,7 @@ START_TEST(test_dl_empty_true)
 
 	list = dl_create(&props);
 	ck_assert(dl_empty(list));
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -56,7 +56,7 @@ START_TEST(test_dl_empty_false)
 	list = dl_create(&props);
 	dl_push_head(list, &val);
 	ck_assert(!dl_empty(list));
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -73,7 +73,7 @@ START_TEST(test_dl_push_head_single)
 	ck_assert_int_eq(DS_PRIV(list)->length, 1);
 	ck_assert_int_eq(*(uint8_t *) DS_PRIV(list)->head->data, val);
 
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -102,7 +102,7 @@ START_TEST(test_dl_push_head_multiple)
 	ck_assert_int_eq(*(uint8_t *) current->data, val1);
 	ck_assert(!current->next);
 
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -119,7 +119,7 @@ START_TEST(test_dl_push_tail_single)
 	ck_assert_int_eq(DS_PRIV(list)->length, 1);
 	ck_assert_int_eq(*(uint8_t *) DS_PRIV(list)->head->data, val);
 
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -148,7 +148,7 @@ START_TEST(test_dl_push_tail_multiple)
 	ck_assert_int_eq(*(uint8_t *) current->data, val3);
 	ck_assert(!current->next);
 
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -166,7 +166,7 @@ START_TEST(test_dl_pop_head_empty)
 	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_empty(list));
 
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -186,7 +186,7 @@ START_TEST(test_dl_pop_head_single)
 	ck_assert(dl_empty(list));
 
 	free(out);
-	dl_free(&list);
+	dl_destroy(&list);
 
 }
 END_TEST
@@ -226,7 +226,7 @@ START_TEST(test_dl_pop_head_multiple)
 	free(out1);
 	free(out2);
 	free(out3);
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -244,7 +244,7 @@ START_TEST(test_dl_pop_tail_empty)
 	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_empty(list));
 
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -264,7 +264,7 @@ START_TEST(test_dl_pop_tail_single)
 	ck_assert(dl_empty(list));
 
 	free(out);
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -299,7 +299,7 @@ START_TEST(test_dl_pop_tail_multiple)
 	free(out1);
 	free(out2);
 	free(out3);
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -318,7 +318,7 @@ START_TEST(test_dl_insert_single)
 	ck_assert(DS_PRIV(list)->tail);
 	ck_assert_int_eq(DS_PRIV(list)->length, 1);
 
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -371,7 +371,7 @@ START_TEST(test_dl_insert_multiple)
 	free(out2);
 	free(out3);
 	free(out4);
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -393,7 +393,7 @@ START_TEST(test_dl_delete_empty)
 	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_empty(list));
 
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -420,7 +420,7 @@ START_TEST(test_dl_delete_single)
 	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_empty(list));
 
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -466,7 +466,7 @@ START_TEST(test_dl_delete_multiple)
 	ck_assert(r4);
 	ck_assert(!r5);
 
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -488,7 +488,7 @@ START_TEST(test_dl_remove_empty)
 	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_empty(list));
 
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -511,7 +511,7 @@ START_TEST(test_dl_remove_single)
 	ck_assert(dl_empty(list));
 
 	free(out);
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -566,7 +566,7 @@ START_TEST(test_dl_remove_multiple)
 	free(out2);
 	free(out3);
 	free(out4);
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -588,7 +588,7 @@ START_TEST(test_dl_fetch_empty)
 	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_empty(list));
 
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -610,7 +610,7 @@ START_TEST(test_dl_fetch_single)
 	ck_assert(DS_PRIV(list)->tail);
 	ck_assert_int_eq(DS_PRIV(list)->length, 1);
 
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -657,7 +657,7 @@ START_TEST(test_dl_fetch_multiple)
 	ck_assert_int_eq(*out3, in2);
 	ck_assert_int_eq(*out4, in4);
 
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -677,7 +677,7 @@ START_TEST(test_dl_elem_empty)
 	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_empty(list));
 
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -703,7 +703,7 @@ START_TEST(test_dl_elem_single)
 	ck_assert(DS_PRIV(list)->tail);
 	ck_assert_int_eq(DS_PRIV(list)->length, 1);
 
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -738,7 +738,7 @@ START_TEST(test_dl_elem_multiple)
 	ck_assert(found[3]);
 	ck_assert(!found[4]);
 
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -767,7 +767,7 @@ START_TEST(test_dl_any_empty)
 	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_empty(list));
 
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -790,7 +790,7 @@ START_TEST(test_dl_any_single)
 	ck_assert(DS_PRIV(list)->tail);
 	ck_assert_int_eq(DS_PRIV(list)->length, 1);
 
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -817,7 +817,7 @@ START_TEST(test_dl_any_multiple)
 	ck_assert(any[0]);
 	ck_assert(!any[1]);
 
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -836,7 +836,7 @@ START_TEST(test_dl_all_empty)
 	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_empty(list));
 
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -859,7 +859,7 @@ START_TEST(test_dl_all_single)
 	ck_assert(DS_PRIV(list)->tail);
 	ck_assert_int_eq(DS_PRIV(list)->length, 1);
 
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -886,7 +886,7 @@ START_TEST(test_dl_all_multiple)
 	ck_assert(all[0]);
 	ck_assert(!all[1]);
 
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -905,7 +905,7 @@ START_TEST(test_dl_filter_empty)
 	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_empty(list));
 
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -932,7 +932,7 @@ START_TEST(test_dl_filter_single)
 	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_empty(list));
 
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -967,7 +967,7 @@ START_TEST(test_dl_filter_multiple)
 	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_empty(list));
 
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -986,7 +986,7 @@ START_TEST(test_dl_drop_while_empty)
 	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_empty(list));
 
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -1016,7 +1016,7 @@ START_TEST(test_dl_drop_while_single)
 	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_empty(list));
 
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -1051,7 +1051,7 @@ START_TEST(test_dl_drop_while_multiple)
 	ck_assert(DS_PRIV(list)->tail);
 	ck_assert_int_eq(DS_PRIV(list)->length, 2);
 
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -1070,7 +1070,7 @@ START_TEST(test_dl_take_while_empty)
 	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_empty(list));
 
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -1100,7 +1100,7 @@ START_TEST(test_dl_take_while_single)
 	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_empty(list));
 
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -1132,7 +1132,7 @@ START_TEST(test_dl_take_while_multiple)
 	ck_assert(DS_PRIV(list)->tail);
 	ck_assert_int_eq(DS_PRIV(list)->length, 1);
 
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -1166,7 +1166,7 @@ START_TEST(test_dl_map_empty)
 	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_empty(list));
 
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -1191,7 +1191,7 @@ START_TEST(test_dl_map_single)
 
 	ck_assert_int_eq(*out, in + 2);
 
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -1229,7 +1229,7 @@ START_TEST(test_dl_map_multiple)
 	ck_assert_int_eq(*out2, in2 + 2);
 	ck_assert_int_eq(*out3, in3 + 2);
 
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -1245,7 +1245,7 @@ START_TEST(test_dl_reverse_empty)
 	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_empty(list));
 
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -1268,7 +1268,7 @@ START_TEST(test_dl_reverse_single)
 	ck_assert(DS_PRIV(list)->tail);
 	ck_assert_int_eq(DS_PRIV(list)->length, 1);
 
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -1305,7 +1305,7 @@ START_TEST(test_dl_reverse_multiple)
 	ck_assert_int_eq(*out[1], in[1]);
 	ck_assert_int_eq(*out[2], in[0]);
 
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -1385,7 +1385,7 @@ START_TEST(test_dl_foldr_empty)
 
 	free(out1);
 	free(out2);
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -1413,7 +1413,7 @@ START_TEST(test_dl_foldr_single)
 
 	free(out1);
 	free(out2);
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -1448,7 +1448,7 @@ START_TEST(test_dl_foldr_multiple)
 
 	free(out1);
 	free(out2);
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -1475,7 +1475,7 @@ START_TEST(test_dl_foldl_empty)
 
 	free(out1);
 	free(out2);
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -1505,7 +1505,7 @@ START_TEST(test_dl_foldl_single)
 
 	free(out1);
 	free(out2);
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
@@ -1540,7 +1540,7 @@ START_TEST(test_dl_foldl_multiple)
 
 	free(out1);
 	free(out2);
-	dl_free(&list);
+	dl_destroy(&list);
 }
 END_TEST
 
