@@ -527,6 +527,17 @@ bool lt0(int8_t data)
 }
 WRAP_PREDICATE(lt0, int8_t, pred_lt0);
 
+START_TEST(test_rb_any_empty)
+{
+	bool any;
+
+	any = rb_any(buffer, pred_gte0);
+
+	ck_assert(!any);
+	ck_assert(rb_empty(buffer));
+}
+END_TEST
+
 START_TEST(test_rb_any)
 {
 	bool any[2];
@@ -540,6 +551,34 @@ START_TEST(test_rb_any)
 
 	ck_assert(any[0]);
 	ck_assert(!any[1]);
+	ck_assert_int_eq(rb_size(buffer), array_size(in));
+}
+END_TEST
+
+START_TEST(test_rb_all_empty)
+{
+	bool all;
+
+	all = rb_all(buffer, pred_gte0);
+
+	ck_assert(!all);
+	ck_assert(rb_empty(buffer));
+}
+END_TEST
+
+START_TEST(test_rb_all)
+{
+	bool all[2];
+	int8_t in[] = {1, 2, 3};
+
+	for(size_t i = 0; i < array_size(in); i++)
+		rb_push_head(buffer, &in[i]);
+
+	all[0] = rb_all(buffer, pred_gte0);
+	all[1] = rb_all(buffer, pred_lt0);
+
+	ck_assert(all[0]);
+	ck_assert(!all[1]);
 	ck_assert_int_eq(rb_size(buffer), array_size(in));
 }
 END_TEST
@@ -606,7 +645,10 @@ Suite * rb_suite(void)
 	tcase_add_test(case_rb_foldr,     test_rb_foldr);
 	tcase_add_test(case_rb_foldl,     test_rb_foldl_empty);
 	tcase_add_test(case_rb_foldl,     test_rb_foldl);
+	tcase_add_test(case_rb_any,       test_rb_any_empty);
 	tcase_add_test(case_rb_any,       test_rb_any);
+	tcase_add_test(case_rb_all,       test_rb_all_empty);
+	tcase_add_test(case_rb_all,       test_rb_all);
 
 	suite_add_tcase(suite, case_rb_create);
 	suite_add_tcase(suite, case_rb_push_head);
@@ -618,6 +660,8 @@ Suite * rb_suite(void)
 	suite_add_tcase(suite, case_rb_map);
 	suite_add_tcase(suite, case_rb_foldr);
 	suite_add_tcase(suite, case_rb_foldl);
+	suite_add_tcase(suite, case_rb_any);
+	suite_add_tcase(suite, case_rb_all);
 
 	return suite;
 }
