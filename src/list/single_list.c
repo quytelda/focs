@@ -69,25 +69,25 @@ static struct sl_element * __lookup(const single_list list, const size_t pos)
 
 static void __push_head(single_list list, struct sl_element * current)
 {
-	current->next = DS_PRIV(list)->head;
-	DS_PRIV(list)->head = current;
+	current->next = __HEAD(list);
+	__HEAD(list) = current;
 
-	if(!DS_PRIV(list)->tail)
-		DS_PRIV(list)->tail = current;
+	if(!__TAIL(list))
+		__TAIL(list) = current;
 
 	(DS_PRIV(list)->length)++;
 }
 
 static void __push_tail(single_list list, struct sl_element * current)
 {
-	if(DS_PRIV(list)->tail)
-		DS_PRIV(list)->tail->next = current;
+	if(__TAIL(list))
+		__TAIL(list)->next = current;
 
 	current->next = NULL;
-	DS_PRIV(list)->tail = current;
+	__TAIL(list) = current;
 
-	if(!DS_PRIV(list)->head)
-		DS_PRIV(list)->head = current;
+	if(!__HEAD(list))
+		__HEAD(list) = current;
 
 	(DS_PRIV(list)->length)++;
 }
@@ -99,11 +99,11 @@ static struct sl_element * __pop_head(single_list list)
 	if(DS_PRIV(list)->length == 0)
 		return NULL;
 
-	current = DS_PRIV(list)->head;
-	DS_PRIV(list)->head = current->next;
+	current = __HEAD(list);
+	__HEAD(list) = current->next;
 
-	if(!DS_PRIV(list)->head)
-		DS_PRIV(list)->tail = NULL;
+	if(!__HEAD(list))
+		__TAIL(list) = NULL;
 
 	(DS_PRIV(list)->length)--;
 
@@ -119,15 +119,15 @@ static struct sl_element * __pop_tail(single_list list)
 		return NULL;
 
 	/* Find the previous element. */
-	linked_list_while(list, prev, prev->next != DS_PRIV(list)->tail) {}
+	linked_list_while(list, prev, prev->next != __TAIL(list)) {}
 
-	current = DS_PRIV(list)->tail;
-	DS_PRIV(list)->tail = prev;
+	current = __TAIL(list);
+	__TAIL(list) = prev;
 
-	if(DS_PRIV(list)->tail)
-		DS_PRIV(list)->tail->next = NULL;
+	if(__TAIL(list))
+		__TAIL(list)->next = NULL;
 	else
-		DS_PRIV(list)->head = NULL;
+		__HEAD(list) = NULL;
 
 	(DS_PRIV(list)->length)--;
 
@@ -188,10 +188,10 @@ static void __delete(single_list list, struct sl_element * elem)
 	linked_list_while(list, prev, prev->next != elem) {}
 
 	/* Fix head and tail. */
-	if(DS_PRIV(list)->head == elem)
-		DS_PRIV(list)->head = elem->next;
-	if(DS_PRIV(list)->tail == elem)
-		DS_PRIV(list)->tail = prev;
+	if(__HEAD(list) == elem)
+		__HEAD(list) = elem->next;
+	if(__TAIL(list) == elem)
+		__TAIL(list) = prev;
 
 	if(prev)
 		prev->next = elem->next;
@@ -210,9 +210,9 @@ static void __delete_before(single_list list, struct sl_element * mark)
 		(DS_PRIV(list)->length)--;
 	}
 
-	DS_PRIV(list)->head = mark;
+	__HEAD(list) = mark;
 	if(!mark)
-		DS_PRIV(list)->tail = NULL;
+		__TAIL(list) = NULL;
 }
 
 static void __delete_after(single_list list, struct sl_element * mark)
@@ -232,11 +232,11 @@ static void __delete_after(single_list list, struct sl_element * mark)
 			passover = false;
 	}
 
-	DS_PRIV(list)->tail = mark;
+	__TAIL(list) = mark;
 	if(mark)
 		mark->next = NULL;
 	else
-		DS_PRIV(list)->head = NULL;
+		__HEAD(list) = NULL;
 }
 
 void __reverse(single_list list)
@@ -250,9 +250,9 @@ void __reverse(single_list list)
 	}
 
 	/* Swap the list head and tail */
-	tmp = DS_PRIV(list)->head;
-	DS_PRIV(list)->head = DS_PRIV(list)->tail;
-	DS_PRIV(list)->tail = tmp;
+	tmp = __HEAD(list);
+	__HEAD(list) = __TAIL(list);
+	__TAIL(list) = tmp;
 }
 
 single_list sl_create(const struct ds_properties * props)
@@ -657,9 +657,9 @@ void sl_element_dump(const single_list list, const struct sl_element * current)
 	size_t i;
 
 	printf("Address: %p", (void *) current);
-	if(current == DS_PRIV(list)->head)
+	if(current == __HEAD(list))
 		fputs(" (head)", stdout);
-	if(current == DS_PRIV(list)->tail)
+	if(current == __TAIL(list))
 		fputs(" (tail)", stdout);
 
 	printf("\nNext:    %p\n", (void *) current->next);

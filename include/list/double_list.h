@@ -79,7 +79,7 @@ struct dl_element {
  * linked_list_foreach_safe() instead.
  */
 #define double_list_foreach_rev(list, current)				\
-	for(current = DS_PRIV(list)->tail; current; current = current->prev)
+	for(current = __TAIL(list); current; current = current->prev)
 
 /**
  * Advance through a doubly linked list in reverse.
@@ -90,7 +90,7 @@ struct dl_element {
  */
 #define double_list_foreach_rev_safe(list, current)		\
 	struct dl_element * _tmp;				\
-	for(current = DS_PRIV(list)->tail, _tmp = PREV_SAFE(current);	\
+	for(current = __TAIL(list), _tmp = PREV_SAFE(current);	\
 	    current;						\
 	    current = _tmp, _tmp = PREV_SAFE(current))
 
@@ -108,7 +108,7 @@ struct dl_element {
  * instead.
  */
 #define double_list_while_rev(list, current, condition)	\
-	for(current = DS_PRIV(list)->tail;			\
+	for(current = __TAIL(list);			\
 	    current && (condition);			\
 	    current = current->prev)
 
@@ -123,7 +123,7 @@ struct dl_element {
  */
 #define double_list_while_rev_safe(list, current, condition)	\
 	struct dl_element * _tmp;				\
-	for(current = DS_PRIV(list)->tail, _tmp = PREV_SAFE(current);	\
+	for(current = __TAIL(list), _tmp = PREV_SAFE(current);	\
 	    current && (condition);				\
 	    current = _tmp, _tmp = PREV_SAFE(current))
 

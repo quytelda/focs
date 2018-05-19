@@ -17,6 +17,9 @@
  * along with focs.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define __HEAD(list) (DS_PRIV(list)->head)
+#define __TAIL(list) (DS_PRIV(list)->tail)
+
 #define NEXT_SAFE(current) ((current) ? (current)->next : NULL)
 
 /**

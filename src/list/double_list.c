@@ -48,7 +48,7 @@ static struct dl_element * __lookup_element(double_list list, size_t pos)
 	if(pos >= DS_PRIV(list)->length)
 		return NULL;
 
-	current = DS_PRIV(list)->head;
+	current = __HEAD(list);
 	for(size_t i = 0; i < pos; i++)
 		current = current->next;
 	return current;
@@ -56,15 +56,15 @@ static struct dl_element * __lookup_element(double_list list, size_t pos)
 
 static void __push_head(double_list list, struct dl_element * current)
 {
-	if(DS_PRIV(list)->head)
-		DS_PRIV(list)->head->prev = current;
+	if(__HEAD(list))
+		__HEAD(list)->prev = current;
 
-	current->next = DS_PRIV(list)->head;
+	current->next = __HEAD(list);
 	current->prev = NULL;
-	DS_PRIV(list)->head = current;
+	__HEAD(list) = current;
 
-	if(!DS_PRIV(list)->tail)
-		DS_PRIV(list)->tail = current;
+	if(!__TAIL(list))
+		__TAIL(list) = current;
 
 	(DS_PRIV(list)->length)++;
 }
@@ -76,13 +76,13 @@ static struct dl_element * __pop_head(double_list list)
 	if(DS_PRIV(list)->length == 0)
 		return NULL;
 
-	current = DS_PRIV(list)->head;
-	DS_PRIV(list)->head = current->next;
+	current = __HEAD(list);
+	__HEAD(list) = current->next;
 
-	if(DS_PRIV(list)->head)
-		DS_PRIV(list)->head->prev = NULL;
+	if(__HEAD(list))
+		__HEAD(list)->prev = NULL;
 	else
-		DS_PRIV(list)->tail = NULL;
+		__TAIL(list) = NULL;
 
 	(DS_PRIV(list)->length)--;
 
@@ -91,15 +91,15 @@ static struct dl_element * __pop_head(double_list list)
 
 static void __push_tail(double_list list, struct dl_element * current)
 {
-	if(DS_PRIV(list)->tail)
-		DS_PRIV(list)->tail->next = current;
+	if(__TAIL(list))
+		__TAIL(list)->next = current;
 
-	current->prev = DS_PRIV(list)->tail;
+	current->prev = __TAIL(list);
 	current->next = NULL;
-	DS_PRIV(list)->tail = current;
+	__TAIL(list) = current;
 
-	if(!DS_PRIV(list)->head)
-		DS_PRIV(list)->head = current;
+	if(!__HEAD(list))
+		__HEAD(list) = current;
 
 	(DS_PRIV(list)->length)++;
 }
@@ -111,13 +111,13 @@ static struct dl_element * __pop_tail(double_list list)
 	if(DS_PRIV(list)->length == 0)
 		return NULL;
 
-	current = DS_PRIV(list)->tail;
-	DS_PRIV(list)->tail = current->prev;
+	current = __TAIL(list);
+	__TAIL(list) = current->prev;
 
-	if(DS_PRIV(list)->tail)
-		DS_PRIV(list)->tail->next = NULL;
+	if(__TAIL(list))
+		__TAIL(list)->next = NULL;
 	else
-		DS_PRIV(list)->head = NULL;
+		__HEAD(list) = NULL;
 
 	(DS_PRIV(list)->length)--;
 
@@ -174,10 +174,10 @@ static struct dl_element * __remove_element(double_list list, size_t pos)
 static void __delete_element(double_list list, struct dl_element * elem)
 {
 	/* Fix head and tail. */
-	if(DS_PRIV(list)->head == elem)
-		DS_PRIV(list)->head = elem->next;
-	if(DS_PRIV(list)->tail == elem)
-		DS_PRIV(list)->tail = elem->prev;
+	if(__HEAD(list) == elem)
+		__HEAD(list) = elem->next;
+	if(__TAIL(list) == elem)
+		__TAIL(list) = elem->prev;
 
 	/* Fix pointers in surrounding elements. */
 	if(elem->prev)
@@ -199,11 +199,11 @@ static void __delete_before(double_list list, struct dl_element * mark)
 		(DS_PRIV(list)->length)--;
 	}
 
-	DS_PRIV(list)->head = mark;
+	__HEAD(list) = mark;
 	if(mark)
 		mark->prev = NULL;
 	else
-		DS_PRIV(list)->tail = NULL;
+		__TAIL(list) = NULL;
 }
 
 static void __delete_after(double_list list, struct dl_element * mark)
@@ -217,11 +217,11 @@ static void __delete_after(double_list list, struct dl_element * mark)
 		(DS_PRIV(list)->length)--;
 	}
 
-	DS_PRIV(list)->tail = mark;
+	__TAIL(list) = mark;
 	if(mark)
 		mark->next = NULL;
 	else
-		DS_PRIV(list)->head = NULL;
+		__HEAD(list) = NULL;
 }
 
 double_list dl_create(const struct ds_properties * props)
@@ -284,7 +284,7 @@ bool dl_empty(const double_list list)
 	bool null;
 
 	rwlock_reader_entry(DS_PRIV(list)->rwlock);
-	null = (DS_PRIV(list)->length == 0);
+	null = __IS_EMPTY(list);
 	rwlock_reader_exit(DS_PRIV(list)->rwlock);
 
 	return null;
@@ -581,9 +581,9 @@ void dl_reverse(double_list list)
 	}
 
 	/* Swap the list head and tail */
-	tmp = DS_PRIV(list)->head;
-	DS_PRIV(list)->head = DS_PRIV(list)->tail;
-	DS_PRIV(list)->tail = tmp;
+	tmp = __HEAD(list);
+	__HEAD(list) = __TAIL(list);
+	__TAIL(list) = tmp;
 }
 
 void * dl_foldr(const double_list list,
@@ -658,9 +658,9 @@ void __nonulls dl_element_dump(const double_list list,
 	size_t i;
 
 	printf("Address:  %p", (void *) current);
-	if(current == DS_PRIV(list)->head)
+	if(current == __HEAD(list))
 		fputs(" (head)", stdout);
-	if(current == DS_PRIV(list)->tail)
+	if(current == __TAIL(list))
 		fputs(" (tail)", stdout);
 
 	printf("\nPrevious: %p\nNext:     %p\n",
