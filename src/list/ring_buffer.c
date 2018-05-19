@@ -291,7 +291,7 @@ bool __nonulls __all(const ring_buffer buf, const pred_fn pred)
 		if(!pred(current))
 			return false;
 
-	return true;
+	return (!__IS_EMPTY(buf));
 }
 
 void __filter(ring_buffer buf, const pred_fn pred)
