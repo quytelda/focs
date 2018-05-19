@@ -32,30 +32,30 @@ START_TEST(test_dl_alloc)
 	list = dl_create(&props);
 
 	ck_assert(list);
-	ck_assert(dl_null(list));
+	ck_assert(dl_empty(list));
 
 	dl_free(&list);
 }
 END_TEST
 
-START_TEST(test_dl_null_true)
+START_TEST(test_dl_empty_true)
 {
 	double_list list;
 
 	list = dl_create(&props);
-	ck_assert(dl_null(list));
+	ck_assert(dl_empty(list));
 	dl_free(&list);
 }
 END_TEST
 
-START_TEST(test_dl_null_false)
+START_TEST(test_dl_empty_false)
 {
 	uint8_t val = 1;
 	double_list list;
 
 	list = dl_create(&props);
 	dl_push_head(list, &val);
-	ck_assert(!dl_null(list));
+	ck_assert(!dl_empty(list));
 	dl_free(&list);
 }
 END_TEST
@@ -164,7 +164,7 @@ START_TEST(test_dl_pop_head_empty)
 	ck_assert(!val);
 	ck_assert(!DS_PRIV(list)->head);
 	ck_assert(!DS_PRIV(list)->tail);
-	ck_assert(dl_null(list));
+	ck_assert(dl_empty(list));
 
 	dl_free(&list);
 }
@@ -183,7 +183,7 @@ START_TEST(test_dl_pop_head_single)
 
 	ck_assert(!DS_PRIV(list)->head);
 	ck_assert(!DS_PRIV(list)->tail);
-	ck_assert(dl_null(list));
+	ck_assert(dl_empty(list));
 
 	free(out);
 	dl_free(&list);
@@ -221,7 +221,7 @@ START_TEST(test_dl_pop_head_multiple)
 
 	ck_assert(!DS_PRIV(list)->head);
 	ck_assert(!DS_PRIV(list)->tail);
-	ck_assert(dl_null(list));
+	ck_assert(dl_empty(list));
 
 	free(out1);
 	free(out2);
@@ -242,7 +242,7 @@ START_TEST(test_dl_pop_tail_empty)
 	ck_assert(!val);
 	ck_assert(!DS_PRIV(list)->head);
 	ck_assert(!DS_PRIV(list)->tail);
-	ck_assert(dl_null(list));
+	ck_assert(dl_empty(list));
 
 	dl_free(&list);
 }
@@ -261,7 +261,7 @@ START_TEST(test_dl_pop_tail_single)
 	ck_assert_int_eq(*out, in);
 	ck_assert(!DS_PRIV(list)->head);
 	ck_assert(!DS_PRIV(list)->tail);
-	ck_assert(dl_null(list));
+	ck_assert(dl_empty(list));
 
 	free(out);
 	dl_free(&list);
@@ -294,7 +294,7 @@ START_TEST(test_dl_pop_tail_multiple)
 
 	ck_assert(!DS_PRIV(list)->head);
 	ck_assert(!DS_PRIV(list)->tail);
-	ck_assert(dl_null(list));
+	ck_assert(dl_empty(list));
 
 	free(out1);
 	free(out2);
@@ -391,7 +391,7 @@ START_TEST(test_dl_delete_empty)
 
 	ck_assert(!DS_PRIV(list)->head);
 	ck_assert(!DS_PRIV(list)->tail);
-	ck_assert(dl_null(list));
+	ck_assert(dl_empty(list));
 
 	dl_free(&list);
 }
@@ -418,7 +418,7 @@ START_TEST(test_dl_delete_single)
 
 	ck_assert(!DS_PRIV(list)->head);
 	ck_assert(!DS_PRIV(list)->tail);
-	ck_assert(dl_null(list));
+	ck_assert(dl_empty(list));
 
 	dl_free(&list);
 }
@@ -458,7 +458,7 @@ START_TEST(test_dl_delete_multiple)
 
 	ck_assert(!DS_PRIV(list)->head);
 	ck_assert(!DS_PRIV(list)->tail);
-	ck_assert(dl_null(list));
+	ck_assert(dl_empty(list));
 
 	ck_assert(r1);
 	ck_assert(r2);
@@ -486,7 +486,7 @@ START_TEST(test_dl_remove_empty)
 
 	ck_assert(!DS_PRIV(list)->head);
 	ck_assert(!DS_PRIV(list)->tail);
-	ck_assert(dl_null(list));
+	ck_assert(dl_empty(list));
 
 	dl_free(&list);
 }
@@ -508,7 +508,7 @@ START_TEST(test_dl_remove_single)
 
 	ck_assert(!DS_PRIV(list)->head);
 	ck_assert(!DS_PRIV(list)->tail);
-	ck_assert(dl_null(list));
+	ck_assert(dl_empty(list));
 
 	free(out);
 	dl_free(&list);
@@ -549,7 +549,7 @@ START_TEST(test_dl_remove_multiple)
 
 	ck_assert(!DS_PRIV(list)->head);
 	ck_assert(!DS_PRIV(list)->tail);
-	ck_assert(dl_null(list));
+	ck_assert(dl_empty(list));
 
 	ck_assert(out1);
 	ck_assert(out2);
@@ -586,7 +586,7 @@ START_TEST(test_dl_fetch_empty)
 
 	ck_assert(!DS_PRIV(list)->head);
 	ck_assert(!DS_PRIV(list)->tail);
-	ck_assert(dl_null(list));
+	ck_assert(dl_empty(list));
 
 	dl_free(&list);
 }
@@ -675,7 +675,7 @@ START_TEST(test_dl_contains_empty)
 
 	ck_assert(!DS_PRIV(list)->head);
 	ck_assert(!DS_PRIV(list)->tail);
-	ck_assert(dl_null(list));
+	ck_assert(dl_empty(list));
 
 	dl_free(&list);
 }
@@ -765,7 +765,7 @@ START_TEST(test_dl_any_empty)
 
 	ck_assert(!DS_PRIV(list)->head);
 	ck_assert(!DS_PRIV(list)->tail);
-	ck_assert(dl_null(list));
+	ck_assert(dl_empty(list));
 
 	dl_free(&list);
 }
@@ -834,7 +834,7 @@ START_TEST(test_dl_all_empty)
 
 	ck_assert(!DS_PRIV(list)->head);
 	ck_assert(!DS_PRIV(list)->tail);
-	ck_assert(dl_null(list));
+	ck_assert(dl_empty(list));
 
 	dl_free(&list);
 }
@@ -903,7 +903,7 @@ START_TEST(test_dl_filter_empty)
 
 	ck_assert(!DS_PRIV(list)->head);
 	ck_assert(!DS_PRIV(list)->tail);
-	ck_assert(dl_null(list));
+	ck_assert(dl_empty(list));
 
 	dl_free(&list);
 }
@@ -930,7 +930,7 @@ START_TEST(test_dl_filter_single)
 
 	ck_assert(!DS_PRIV(list)->head);
 	ck_assert(!DS_PRIV(list)->tail);
-	ck_assert(dl_null(list));
+	ck_assert(dl_empty(list));
 
 	dl_free(&list);
 }
@@ -965,7 +965,7 @@ START_TEST(test_dl_filter_multiple)
 
 	ck_assert(!DS_PRIV(list)->head);
 	ck_assert(!DS_PRIV(list)->tail);
-	ck_assert(dl_null(list));
+	ck_assert(dl_empty(list));
 
 	dl_free(&list);
 }
@@ -984,7 +984,7 @@ START_TEST(test_dl_drop_while_empty)
 
 	ck_assert(!DS_PRIV(list)->head);
 	ck_assert(!DS_PRIV(list)->tail);
-	ck_assert(dl_null(list));
+	ck_assert(dl_empty(list));
 
 	dl_free(&list);
 }
@@ -1014,7 +1014,7 @@ START_TEST(test_dl_drop_while_single)
 	ck_assert(changed);
 	ck_assert(!DS_PRIV(list)->head);
 	ck_assert(!DS_PRIV(list)->tail);
-	ck_assert(dl_null(list));
+	ck_assert(dl_empty(list));
 
 	dl_free(&list);
 }
@@ -1068,7 +1068,7 @@ START_TEST(test_dl_take_while_empty)
 
 	ck_assert(!DS_PRIV(list)->head);
 	ck_assert(!DS_PRIV(list)->tail);
-	ck_assert(dl_null(list));
+	ck_assert(dl_empty(list));
 
 	dl_free(&list);
 }
@@ -1098,7 +1098,7 @@ START_TEST(test_dl_take_while_single)
 	ck_assert(changed);
 	ck_assert(!DS_PRIV(list)->head);
 	ck_assert(!DS_PRIV(list)->tail);
-	ck_assert(dl_null(list));
+	ck_assert(dl_empty(list));
 
 	dl_free(&list);
 }
@@ -1164,7 +1164,7 @@ START_TEST(test_dl_map_empty)
 
 	ck_assert(!DS_PRIV(list)->head);
 	ck_assert(!DS_PRIV(list)->tail);
-	ck_assert(dl_null(list));
+	ck_assert(dl_empty(list));
 
 	dl_free(&list);
 }
@@ -1243,7 +1243,7 @@ START_TEST(test_dl_reverse_empty)
 
 	ck_assert(!DS_PRIV(list)->head);
 	ck_assert(!DS_PRIV(list)->tail);
-	ck_assert(dl_null(list));
+	ck_assert(dl_empty(list));
 
 	dl_free(&list);
 }
@@ -1381,7 +1381,7 @@ START_TEST(test_dl_foldr_empty)
 
 	ck_assert(!DS_PRIV(list)->head);
 	ck_assert(!DS_PRIV(list)->tail);
-	ck_assert(dl_null(list));
+	ck_assert(dl_empty(list));
 
 	free(out1);
 	free(out2);
@@ -1471,7 +1471,7 @@ START_TEST(test_dl_foldl_empty)
 
 	ck_assert(!DS_PRIV(list)->head);
 	ck_assert(!DS_PRIV(list)->tail);
-	ck_assert(dl_null(list));
+	ck_assert(dl_empty(list));
 
 	free(out1);
 	free(out2);
@@ -1548,7 +1548,7 @@ Suite * dl_suite(void)
 {
 	Suite * suite;
 	TCase * case_dl_alloc;
-	TCase * case_dl_null;
+	TCase * case_dl_empty;
 	TCase * case_dl_push_head;
 	TCase * case_dl_push_tail;
 	TCase * case_dl_pop_head;
@@ -1571,7 +1571,7 @@ Suite * dl_suite(void)
 	suite = suite_create("Linked List");
 
 	case_dl_alloc = tcase_create("dl_alloc");
-	case_dl_null = tcase_create("dl_null");
+	case_dl_empty = tcase_create("dl_empty");
 	case_dl_push_head = tcase_create("dl_push_head");
 	case_dl_push_tail = tcase_create("dl_push_tail");
 	case_dl_pop_head = tcase_create("dl_pop_head");
@@ -1592,8 +1592,8 @@ Suite * dl_suite(void)
 	case_dl_foldr = tcase_create("dl_foldr");
 
 	tcase_add_test(case_dl_alloc, test_dl_alloc);
-	tcase_add_test(case_dl_null, test_dl_null_true);
-	tcase_add_test(case_dl_null, test_dl_null_false);
+	tcase_add_test(case_dl_empty, test_dl_empty_true);
+	tcase_add_test(case_dl_empty, test_dl_empty_false);
 	tcase_add_test(case_dl_push_head, test_dl_push_head_single);
 	tcase_add_test(case_dl_push_head, test_dl_push_head_multiple);
 	tcase_add_test(case_dl_push_tail, test_dl_push_tail_single);
@@ -1647,7 +1647,7 @@ Suite * dl_suite(void)
 	tcase_add_test(case_dl_foldl, test_dl_foldl_multiple);
 
 	suite_add_tcase(suite, case_dl_alloc);
-	suite_add_tcase(suite, case_dl_null);
+	suite_add_tcase(suite, case_dl_empty);
 	suite_add_tcase(suite, case_dl_push_head);
 	suite_add_tcase(suite, case_dl_push_tail);
 	suite_add_tcase(suite, case_dl_pop_head);

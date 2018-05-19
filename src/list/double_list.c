@@ -268,7 +268,7 @@ void dl_free(double_list * list)
 	DS_FREE(list);
 }
 
-bool dl_null(double_list list)
+bool dl_empty(double_list list)
 {
 	bool null;
 
@@ -422,7 +422,7 @@ bool dl_any(double_list list, pred_fn p)
 	bool success = false;
 	struct dl_element * current;
 
-	if(dl_null(list))
+	if(dl_empty(list))
 		return false;
 
 	rwlock_reader_entry(DS_PRIV(list)->rwlock);
@@ -444,7 +444,7 @@ bool dl_all(double_list list, pred_fn p)
 	bool success = true;
 	struct dl_element * current;
 
-	if(dl_null(list))
+	if(dl_empty(list))
 		return false;
 
 	rwlock_reader_entry(DS_PRIV(list)->rwlock);
@@ -466,7 +466,7 @@ bool dl_filter(double_list list, pred_fn p)
 	bool changed = false;
 	struct dl_element * current;
 
-	if(dl_null(list))
+	if(dl_empty(list))
 		return false;
 
 	rwlock_writer_entry(DS_PRIV(list)->rwlock);

@@ -335,7 +335,7 @@ void * dl_foldl(const double_list list,
  *
  * @return `true` if `list` is empty, `false` otherwise.
  */
-bool dl_null(double_list list);
+bool dl_empty(double_list list);
 
 /**
  * Determine if a list contains a value.
@@ -415,7 +415,7 @@ bool dl_take_while(double_list list, pred_fn p);
 #ifdef GENERICS
 
 static const struct mgmt_operations mgmt_ops = {
-	.empty = (empty_mgmt_fn) dl_null,
+	.empty = (empty_mgmt_fn) dl_empty,
 	.elem  = (elem_mgmt_fn)  dl_contains,
 };
 
