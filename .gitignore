@@ -23,4 +23,5 @@ test/ring_buffer
 # temporary files
 *.orig
 *~
+*.*~*
 \#*#
