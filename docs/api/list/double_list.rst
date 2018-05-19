@@ -11,7 +11,7 @@ To use the doubly linked list implementation, create a pointer to a ``struct dou
 Creation and Destruction
 ------------------------
 .. doxygenfunction:: dl_alloc
-.. doxygenfunction:: dl_free
+.. doxygenfunction:: dl_destroy
 
 Data Management
 ---------------
@@ -26,8 +26,8 @@ Data Management
 
 Functional Utilities
 --------------------
-.. doxygenfunction:: dl_null
-.. doxygenfunction:: dl_contains
+.. doxygenfunction:: dl_empty
+.. doxygenfunction:: dl_elem
 .. doxygenfunction:: dl_map
 .. doxygenfunction:: dl_foldr
 .. doxygenfunction:: dl_foldl

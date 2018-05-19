@@ -39,12 +39,6 @@ struct dl_element {
 	void * data;
 };
 
-/**
- * @struct double_list
- * Represents a doubly linked list.
- *
- * Initialize this structure with dl_alloc(), and destroy it with dl_free().
- */
  START_DS(double_list) {
 	struct dl_element * head;
 	struct dl_element * tail;
@@ -64,6 +58,10 @@ struct dl_element {
  * otherwise `NULL`.
  */
 #define PREV_SAFE(current) ((current) ? (current)->prev : NULL)
+
+/* #################### *
+ * # Iteration Macros # *
+ * #################### */
 
 /**
  * Advance through a doubly linked list in reverse.
@@ -125,10 +123,6 @@ struct dl_element {
 	    current && (condition);				\
 	    current = _tmp, _tmp = PREV_SAFE(current))
 
-/* ########################## *
- * # Creation & Destruction # *
- * ########################## */
-
 /**
  * Allocate and initialize a new doubly linked list.
  * @param list A pointer to a `struct double_list` pointer.
@@ -151,11 +145,15 @@ double_list dl_create(const struct ds_properties * props);
  * De-allocates the doubly linked list at the structure pointer pointed to by
  * `list`, as well as de-allocating all data elements contained within `list`.
  */
-void dl_free(double_list * list);
+void dl_destroy(double_list * list);
 
-/* ############################# *
- * # Data Management Functions # *
- * ############################# */
+/**
+ * Determine if a list is empty.
+ * @param list The list to check
+ *
+ * @return `true` if `list` is empty, `false` otherwise.
+ */
+bool dl_empty(double_list list);
 
 /**
  * Push a new data element to the head of the list.
@@ -255,15 +253,25 @@ void * dl_remove(double_list list, size_t pos);
  *
  * @return A pointer to the data at index `pos`, or `NULL` on failure.
  * This pointer should **not** be free()d explicitly, or the list will become
- * corrupted.  This pointer will be free()d when dl_free() is called, so if
+ * corrupted.  This pointer will be free()d when dl_destroy() is called, so if
  * the data is needed after the list is destroyed, make a copy of it, or make
  * sure to call dl_remove() on the data's index before destroying the list.
  */
 void * dl_fetch(double_list list, size_t pos);
 
-/* ############################ *
- * # Transformation Functions # *
- * ############################ */
+/**
+ * Reverse a list in place.
+ * @param list The list to reverse
+ *
+ * Reverses a list in place so that the elements are in reverse order and the
+ * head and tail are switched.
+ */
+void dl_reverse(double_list list);
+
+/* ########################## *
+ * # Higher Order Functions # *
+ * ########################## */
+
 /**
  * Map a function over a linked list in-place.
  * @param list A list of values
@@ -278,15 +286,6 @@ void * dl_fetch(double_list list, size_t pos);
  * ```
  */
 void dl_map(double_list list, map_fn fn);
-
-/**
- * Reverse a list in place.
- * @param list The list to reverse
- *
- * Reverses a list in place so that the elements are in reverse order and the
- * head and tail are switched.
- */
-void dl_reverse(double_list list);
 
 /**
  * Right associative fold for doubly linked lists.
@@ -326,17 +325,6 @@ void * dl_foldl(const double_list list,
 		foldl_fn fn,
 		const void * init);
 
-/* ############################ *
- * # Data Properties # *
- * ############################ */
-/**
- * Determine if a list is empty.
- * @param list The list to check
- *
- * @return `true` if `list` is empty, `false` otherwise.
- */
-bool dl_null(double_list list);
-
 /**
  * Determine if a list contains a value.
  * @param list The list to search
@@ -348,7 +336,7 @@ bool dl_null(double_list list);
  *
  * @return `true` if a matching entry is found, otherwise `false`
  */
-bool dl_contains(double_list list, void * data);
+bool dl_elem(double_list list, void * data);
 
 /**
  * Determine if any value in a list satisifies some condition.
@@ -376,9 +364,6 @@ bool dl_any(double_list list, pred_fn p);
  */
 bool dl_all(double_list list, pred_fn p);
 
-/* ############################ *
- * # Filtering # *
- * ############################ */
 /**
  * Filter a list to contain only values that satisfy some predicate.
  * @param list The list to filter
@@ -411,5 +396,56 @@ bool dl_drop_while(double_list list, pred_fn p);
  * This function is an in-place equivalent of Haskell's takeWhile.
  */
 bool dl_take_while(double_list list, pred_fn p);
+
+#ifdef GENERICS
+
+static const struct mgmt_operations mgmt_ops = {
+	.empty = (empty_mgmt_fn) dl_empty,
+	.elem  = (elem_mgmt_fn)  dl_elem,
+};
+
+static const struct hof_operations hof_ops = {
+	.map        = (map_hof_fn)        dl_map,
+	.foldr      = (foldr_hof_fn)      dl_foldr,
+	.foldl      = (foldl_hof_fn)      dl_foldl,
+	.any        = (any_hof_fn)        dl_any,
+	.all        = (all_hof_fn)        dl_all,
+	.filter     = (filter_hof_fn)     dl_filter,
+	.drop_while = (drop_while_hof_fn) dl_drop_while,
+	.take_while = (take_while_hof_fn) dl_take_while,
+};
+
+#else /* GENERICS */
+
+static const __unused void * mgmt_ops = NULL;
+static const __unused void * hof_ops  = NULL;
+
+#endif /* GENERICS */
+
+#ifdef DEBUG
+
+#include <stdio.h>
+
+/**
+ * Dump the contents of a dl_element to standard output.
+ * @param list    The list containing the element in question
+ * @param current The element to print information about
+ *
+ * Prints the contents of a `current` in nice format, including information on
+ * addresses, data, and the locations of the head and tail pointers.
+ */
+void __nonulls dl_element_dump(const double_list list,
+	                       const struct dl_element * current);
+
+/**
+ * Dump the contents of a ring_buffer to standard output.
+ * @param list The list to display.
+ *
+ * Prints the contents of `list` in nice format, including information on
+ * addresses, data, and the locations of the head and tail pointers.
+ */
+void __nonulls dl_dump(const double_list list);
+
+#endif
 
 #endif /* __LINKED_LIST_H */

@@ -41,6 +41,32 @@
 	    current = current->next)
 
 /**
+ * Advance through a linked list element by element with a counter.
+ * @param list    The list to iterate over
+ * @param current A list element pointer that will point to the current element
+ * @param i       The numeric counter to increment on each iteration
+ *
+ * linked_list_foreach_i() should be used like a for loop; for example:
+ * ```
+ * int i;
+ * struct element_type * current;
+ * linked_list_foreach(list, current, i) {
+ *         if(some_condition(i)) {
+ *                 do_something(current);
+ *         }
+ * }
+ * ```
+ *
+ * Do not modify the element's `next` pointer inside the body of the loop, or
+ * the behavior of linked_list_foreach() is undefined.
+ * See linked_list_foreach_i_safe() instead.
+ */
+#define linked_list_foreach_i(list, current, i)   \
+	for(current = DS_PRIV(list)->head, i = 0; \
+	    current;                              \
+	    current = current->next, i++)
+
+/**
  * Advance through a linked list element by element.
  * @param list The list to iterate over
  * @param current A list element pointer that will point to the current element
@@ -54,6 +80,22 @@
 	for(current = DS_PRIV(list)->head, _tmp = NEXT_SAFE(current);	\
 	    current;							\
 	    current = _tmp, _tmp = NEXT_SAFE(current))
+
+/**
+ * Advance through a linked list element by element with a counter.
+ * @param list    The list to iterate over
+ * @param current A list element pointer that will point to the current element
+ * @param i       The numeric counter to increment on each iteration
+ *
+ * The syntax of `linked_list_foreach_safe()` is the same as
+ * `linked_list_foreach_i()`.  However, it is safe to change the `next` pointer
+ * in the current element during the loop body.
+ */
+#define linked_list_foreach_i_safe(list, current, i)                         \
+	void * _tmp;                                                         \
+	for(current = DS_PRIV(list)->head, _tmp = NEXT_SAFE(current), i = 0; \
+	    current;                                                         \
+	    current = _tmp, _tmp = NEXT_SAFE(current), i++)
 
 /**
  * Advance through a linked list while some condition is true.

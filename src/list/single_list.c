@@ -1,4 +1,4 @@
-/* double_list.c - Doubly Linked List Implementation
+/* single_list.c - Singly Linked List Implementation
  * Copyright (C) 2018 Quytelda Kahja
  *
  * This file is part of focs.
@@ -41,17 +41,30 @@ exit:
 	return NULL;
 }
 
-static struct sl_element * __lookup_element(single_list list, size_t pos)
+bool __elem(single_list list, const void * data)
+{
+	struct sl_element * current;
+
+	linked_list_foreach(list, current)
+		if(DS_DATA_EQ(list, current->data, data))
+			return true;
+
+	return false;
+}
+
+static struct sl_element * __lookup(const single_list list, const size_t pos)
 {
 	struct sl_element * current;
 
 	if(pos >= DS_PRIV(list)->length)
 		return NULL;
 
-	current = DS_PRIV(list)->head;
-	for(size_t i = 0; i < pos; i++)
-		current = current->next;
-	return current;
+	size_t i;
+	linked_list_foreach_i(list, current, i)
+		if(i == pos)
+			return current;
+
+	return NULL;
 }
 
 static void __push_head(single_list list, struct sl_element * current)
@@ -121,7 +134,9 @@ static struct sl_element * __pop_tail(single_list list)
 	return current;
 }
 
-static bool __insert_element(single_list list, struct sl_element * current, size_t pos)
+static bool __insert(single_list list,
+	             struct sl_element * current,
+	             const size_t pos)
 {
 	struct sl_element * prev;
 
@@ -133,7 +148,7 @@ static bool __insert_element(single_list list, struct sl_element * current, size
 	} else if(pos == DS_PRIV(list)->length) {
 		__push_tail(list, current);
 	} else {
-		prev = __lookup_element(list, pos - 1);
+		prev = __lookup(list, pos - 1);
 		current->next = prev->next;
 		prev->next = current;
 
@@ -143,7 +158,7 @@ static bool __insert_element(single_list list, struct sl_element * current, size
 	return true;
 }
 
-static struct sl_element * __remove_element(single_list list, size_t pos)
+static struct sl_element * __remove(single_list list, const size_t pos)
 {
 	struct sl_element * current;
 	struct sl_element * prev;
@@ -156,7 +171,7 @@ static struct sl_element * __remove_element(single_list list, size_t pos)
 	} else if(pos == DS_PRIV(list)->length - 1) {
 		current = __pop_tail(list);
 	} else {
-		prev = __lookup_element(list, pos - 1);
+		prev = __lookup(list, pos - 1);
 		current = prev->next;
 		prev->next = current->next;
 
@@ -166,7 +181,7 @@ static struct sl_element * __remove_element(single_list list, size_t pos)
 	return current;
 }
 
-static void __delete_element(single_list list, struct sl_element * elem)
+static void __delete(single_list list, struct sl_element * elem)
 {
 	struct sl_element * prev;
 
@@ -224,6 +239,22 @@ static void __delete_after(single_list list, struct sl_element * mark)
 		DS_PRIV(list)->head = NULL;
 }
 
+void __reverse(single_list list)
+{
+	struct sl_element * current;
+	struct sl_element * tmp = NULL;
+
+	linked_list_foreach_safe(list, current) {
+		current->next = tmp;
+		tmp = current;
+	}
+
+	/* Swap the list head and tail */
+	tmp = DS_PRIV(list)->head;
+	DS_PRIV(list)->head = DS_PRIV(list)->tail;
+	DS_PRIV(list)->tail = tmp;
+}
+
 single_list sl_create(const struct ds_properties * props)
 {
 	single_list list;
@@ -235,6 +266,7 @@ single_list sl_create(const struct ds_properties * props)
 
 	DS_INIT(list, props, &mgmt_ops, &hof_ops);
 
+	/* Private Area Initialization */
 	priv = DS_PRIV(list);
 	priv->head = NULL;
 	priv->tail = NULL;
@@ -247,7 +279,6 @@ single_list sl_create(const struct ds_properties * props)
 
 exit:
 	sl_destroy(&list);
-
 	return NULL;
 }
 
@@ -281,18 +312,10 @@ bool sl_empty(single_list list)
 
 bool sl_elem(single_list list, const void * data)
 {
-	bool success = false;
-	struct sl_element * current;
+	bool success;
 
 	rwlock_reader_entry(DS_PRIV(list)->rwlock);
-
-	linked_list_foreach(list, current) {
-		if(memcmp(current->data, data, DS_DATA_SIZE(list)) == 0) {
-			success = true;
-			break;
-		}
-	}
-
+	success = __elem(list, data);
 	rwlock_reader_exit(DS_PRIV(list)->rwlock);
 
 	return success;
@@ -362,7 +385,7 @@ bool sl_insert(single_list list, const void * data, const size_t pos)
 	current = __create_element(data, DS_DATA_SIZE(list));
 
 	rwlock_writer_entry(DS_PRIV(list)->rwlock);
-	success = __insert_element(list, current, pos);
+	success = __insert(list, current, pos);
 	rwlock_writer_exit(DS_PRIV(list)->rwlock);
 
 	return success;
@@ -373,7 +396,7 @@ bool sl_delete(single_list list, const size_t pos)
 	struct sl_element * current;
 
 	rwlock_writer_entry(DS_PRIV(list)->rwlock);
-	current = __remove_element(list, pos);
+	current = __remove(list, pos);
 	rwlock_writer_exit(DS_PRIV(list)->rwlock);
 
 	if(current) {
@@ -392,7 +415,7 @@ void * sl_remove(single_list list, const size_t pos)
 	struct sl_element * current;
 
 	rwlock_writer_entry(DS_PRIV(list)->rwlock);
-	current = __remove_element(list, pos);
+	current = __remove(list, pos);
 	rwlock_writer_exit(DS_PRIV(list)->rwlock);
 
 	if(current) {
@@ -408,7 +431,7 @@ void * sl_fetch(single_list list, const size_t pos)
 	struct sl_element * current;
 
 	rwlock_reader_entry(DS_PRIV(list)->rwlock);
-	current = __lookup_element(list, pos);
+	current = __lookup(list, pos);
 	rwlock_reader_exit(DS_PRIV(list)->rwlock);
 
 	if(current)
@@ -419,18 +442,9 @@ void * sl_fetch(single_list list, const size_t pos)
 
 void sl_reverse(single_list list)
 {
-	struct sl_element * current;
-	struct sl_element * tmp = NULL;
-
-	linked_list_foreach_safe(list, current) {
-		current->next = tmp;
-		tmp = current;
-	}
-
-	/* Swap the list head and tail */
-	tmp = DS_PRIV(list)->head;
-	DS_PRIV(list)->head = DS_PRIV(list)->tail;
-	DS_PRIV(list)->tail = tmp;
+	rwlock_writer_entry(DS_PRIV(list)->rwlock);
+	__reverse(list);
+	rwlock_writer_exit(DS_PRIV(list)->rwlock);
 }
 
 void sl_map(single_list list, const map_fn fn)
@@ -569,7 +583,7 @@ bool sl_filter(single_list list, const pred_fn pred)
 		if(!pred(current->data)) {
 			changed = true;
 
-			__delete_element(list, current);
+			__delete(list, current);
 			free(current->data);
 			free(current);
 		}
@@ -635,10 +649,7 @@ bool sl_take_while(single_list list, const pred_fn pred)
 
 #ifdef DEBUG
 
-#define PUT_HR(char, len)                                      \
-		for(size_t i = 0; i < len; i++)                \
-			putchar(char);                         \
-		putchar('\n')
+#define BYTES_PER_ROW 8
 
 void sl_element_dump(const single_list list, const struct sl_element * current)
 {
@@ -647,22 +658,22 @@ void sl_element_dump(const single_list list, const struct sl_element * current)
 
 	printf("Address: %p", (void *) current);
 	if(current == DS_PRIV(list)->head)
-		printf(" (head)");
+		fputs(" (head)", stdout);
 	if(current == DS_PRIV(list)->tail)
-		printf(" (tail)");
+		fputs(" (tail)", stdout);
 
 	printf("\nNext:    %p\n", (void *) current->next);
 	PUT_HR('-', 64);
 
 	for(i = 0; i < DS_DATA_SIZE(list); i++) {
-		printf("%#04x ", bytes[i]);
+		/* Print BYTES_PER_ROW bytes per line, space seperated. */
+		printf("0x%02x ", bytes[i]);
 
-		/* Print 8 bytes per line. */
-		if((i > 0) && aligned(i, 8, 0))
+		if((i > 0) && aligned(i, BYTES_PER_ROW, 0))
 			putchar('\n');
 	}
 
-	if(!aligned(i, 8, 0))
+	if(!aligned(i, BYTES_PER_ROW, 0))
 		putchar('\n');
 }
 

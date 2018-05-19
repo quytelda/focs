@@ -82,6 +82,8 @@ struct ds_properties {
 #define DS_ENTRIES(ds)   (DS_PROPS(ds)->entries)
 #define DS_OVERWRITE(ds) (DS_PROPS(ds)->overwrite)
 
+#define DS_DATA_EQ(ds, s1, s2) (memcmp(s1, s2, DS_DATA_SIZE(ds)) == 0)
+
 #define DS_ALLOC(ds) (ds = malloc(sizeof(*ds)))
 #define DS_FREE(ds) (free_null(*ds))
 
