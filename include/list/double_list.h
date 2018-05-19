@@ -412,4 +412,29 @@ bool dl_drop_while(double_list list, pred_fn p);
  */
 bool dl_take_while(double_list list, pred_fn p);
 
+#ifdef GENERICS
+
+static const struct mgmt_operations mgmt_ops = {
+	.empty = (empty_mgmt_fn) dl_null,
+	.elem  = (elem_mgmt_fn)  dl_contains,
+};
+
+static const struct hof_operations hof_ops = {
+	.map        = (map_hof_fn)        dl_map,
+	.foldr      = (foldr_hof_fn)      dl_foldr,
+	.foldl      = (foldl_hof_fn)      dl_foldl,
+	.any        = (any_hof_fn)        dl_any,
+	.all        = (all_hof_fn)        dl_all,
+	.filter     = (filter_hof_fn)     dl_filter,
+	.drop_while = (drop_while_hof_fn) dl_drop_while,
+	.take_while = (take_while_hof_fn) dl_take_while,
+};
+
+#else /* GENERICS */
+
+static const __unused void * mgmt_ops = NULL;
+static const __unused void * hof_ops  = NULL;
+
+#endif /* GENERICS */
+
 #endif /* __LINKED_LIST_H */

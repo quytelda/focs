@@ -233,7 +233,7 @@ double_list dl_create(const struct ds_properties * props)
 	if(!list)
 		return_with_errno(ENOMEM, NULL);
 
-	DS_INIT(list, props, NULL, NULL);
+	DS_INIT(list, props, &mgmt_ops, &hof_ops);
 
 	priv = DS_PRIV(list);
 	priv->head = NULL;
