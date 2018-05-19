@@ -279,7 +279,7 @@ size_t dl_size(const double_list list)
 	return length;
 }
 
-bool dl_empty(double_list list)
+bool dl_empty(const double_list list)
 {
 	bool null;
 

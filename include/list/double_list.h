@@ -50,6 +50,8 @@ struct dl_element {
 
 #define __LENGTH(list) (DS_PRIV(list)->length)
 
+#define __IS_EMPTY(list) (__LENGTH(list) <= 0)
+
 /**
  * Return a pointer to the previous element, if this element is defined.
  * @param current A pointer to a doubly linked list element (struct dl_element)
@@ -164,7 +166,7 @@ size_t dl_size(const double_list list);
  *
  * @return `true` if `list` is empty, `false` otherwise.
  */
-bool dl_empty(double_list list);
+bool dl_empty(const double_list list);
 
 /**
  * Push a new data element to the head of the list.
