@@ -634,3 +634,50 @@ void * dl_foldl(const double_list list,
 
 	return accumulator;
 }
+
+#ifdef DEBUG
+
+#define HR_LEN 40
+#define BYTES_PER_ROW 8
+
+void __nonulls dl_element_dump(const double_list list,
+	                       const struct dl_element * current)
+{
+	uint8_t * bytes = current->data;
+	size_t i;
+
+	printf("Address:  %p", (void *) current);
+	if(current == DS_PRIV(list)->head)
+		fputs(" (head)", stdout);
+	if(current == DS_PRIV(list)->tail)
+		fputs(" (tail)", stdout);
+
+	printf("\nPrevious: %p\nNext:     %p\n",
+		(void *) current->prev,
+		(void *) current->next);
+	PUT_HR('-', HR_LEN);
+
+	for(i = 0; i < DS_DATA_SIZE(list); i++) {
+		/* Print BYTES_PER_ROW bytes per line, space seperated. */
+		printf("0x%02x ", bytes[i]);
+
+		if((i > 0) && aligned(i, BYTES_PER_ROW, 0))
+			putchar('\n');
+	}
+
+	if(!aligned(i, BYTES_PER_ROW, 0))
+		putchar('\n');
+}
+
+void dl_dump(const double_list list)
+{
+	struct dl_element * current;
+
+	PUT_HR('#', HR_LEN);
+	linked_list_foreach(list, current) {
+		dl_element_dump(list, current);
+		PUT_HR('#', HR_LEN);
+	}
+}
+
+#endif /* DEBUG */

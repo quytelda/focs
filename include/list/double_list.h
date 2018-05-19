@@ -437,4 +437,30 @@ static const __unused void * hof_ops  = NULL;
 
 #endif /* GENERICS */
 
+#ifdef DEBUG
+
+#include <stdio.h>
+
+/**
+ * Dump the contents of a dl_element to standard output.
+ * @param list    The list containing the element in question
+ * @param current The element to print information about
+ *
+ * Prints the contents of a `current` in nice format, including information on
+ * addresses, data, and the locations of the head and tail pointers.
+ */
+void __nonulls dl_element_dump(const double_list list,
+	                       const struct dl_element * current);
+
+/**
+ * Dump the contents of a ring_buffer to standard output.
+ * @param list The list to display.
+ *
+ * Prints the contents of `list` in nice format, including information on
+ * addresses, data, and the locations of the head and tail pointers.
+ */
+void __nonulls dl_dump(const double_list list);
+
+#endif
+
 #endif /* __LINKED_LIST_H */
