@@ -1,0 +1,387 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Linked Lists &mdash; FOCS 0.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Ring Buffers" href="ring_buffer.html" />
+    <link rel="prev" title="Doubly Linked Lists" href="double_list.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> FOCS
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../installation/obtaining.html">Obtaining FOCS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation/makefile.html">Building FOCS Using a Makefile</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../list.html">API: Lists</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="single_list.html">Singly Linked Lists</a></li>
+<li class="toctree-l2"><a class="reference internal" href="double_list.html">Doubly Linked Lists</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Linked Lists</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ring_buffer.html">Ring Buffers</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../sync.html">API: Thread Synchronization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev.html">Developer Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">FOCS</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../list.html">API: Lists</a> &raquo;</li>
+        
+      <li>Linked Lists</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/api/list/linked_list.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="linked-lists">
+<h1>Linked Lists<a class="headerlink" href="#linked-lists" title="Permalink to this headline">¶</a></h1>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric">Defines</p>
+<dl class="macro">
+<dt id="c.NEXT_SAFE">
+<span class="target" id="linked__list_8h_1a7a0f26e71ab94da6e1078d0ce9b5ed2c"></span><code class="descname">NEXT_SAFE</code><span class="sig-paren">(</span>current<span class="sig-paren">)</span><a class="headerlink" href="#c.NEXT_SAFE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="macro">
+<dt id="c.linked_list_foreach">
+<span class="target" id="linked__list_8h_1ab4f47eb43374d2e271bdd94efc899cca"></span><code class="descname">linked_list_foreach</code><span class="sig-paren">(</span>list, current<span class="sig-paren">)</span><a class="headerlink" href="#c.linked_list_foreach" title="Permalink to this definition">¶</a></dt>
+<dd><p>Advance through a linked list element by element. </p>
+<p>
+linked_list_foreach() should be used like a for loop; for example: <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">element_type</span> <span class="o">*</span> <span class="n">current</span><span class="p">;</span>
+<span class="n">linked_list_foreach</span><span class="p">(</span><span class="n">list</span><span class="p">,</span> <span class="n">current</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">do_something</span><span class="p">(</span><span class="n">current</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+ Do not modify the element’s <code class="docutils literal notranslate"><span class="pre">next</span></code> pointer inside the body of the loop, or the behavior of linked_list_foreach() is undefined. See linked_list_foreach_safe() instead. <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: The list to iterate over </li>
+<li><code class="docutils literal notranslate"><span class="pre">current</span></code>: A list element pointer that will point to the current element</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="macro">
+<dt id="c.linked_list_foreach_i">
+<span class="target" id="linked__list_8h_1af13d32805d37ea2eed79251cc300f22e"></span><code class="descname">linked_list_foreach_i</code><span class="sig-paren">(</span>list, current, i<span class="sig-paren">)</span><a class="headerlink" href="#c.linked_list_foreach_i" title="Permalink to this definition">¶</a></dt>
+<dd><p>Advance through a linked list element by element with a counter. </p>
+<p>
+linked_list_foreach_i() should be used like a for loop; for example: <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span> <span class="n">i</span><span class="p">;</span>
+<span class="k">struct</span> <span class="n">element_type</span> <span class="o">*</span> <span class="n">current</span><span class="p">;</span>
+<span class="n">linked_list_foreach</span><span class="p">(</span><span class="n">list</span><span class="p">,</span> <span class="n">current</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">some_condition</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="p">{</span>
+                <span class="n">do_something</span><span class="p">(</span><span class="n">current</span><span class="p">);</span>
+        <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: The list to iterate over </li>
+<li><code class="docutils literal notranslate"><span class="pre">current</span></code>: A list element pointer that will point to the current element </li>
+<li><code class="docutils literal notranslate"><span class="pre">i</span></code>: The numeric counter to increment on each iteration</li>
+</ul>
+</dd>
+</dl>
+</p>
+<p>Do not modify the element’s <code class="docutils literal notranslate"><span class="pre">next</span></code> pointer inside the body of the loop, or the behavior of linked_list_foreach() is undefined. See linked_list_foreach_i_safe() instead. </p>
+</dd></dl>
+
+<dl class="macro">
+<dt id="c.linked_list_foreach_safe">
+<span class="target" id="linked__list_8h_1a3fbd5434d4ecd2c756171c1afb1ff3e5"></span><code class="descname">linked_list_foreach_safe</code><span class="sig-paren">(</span>list, current<span class="sig-paren">)</span><a class="headerlink" href="#c.linked_list_foreach_safe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Advance through a linked list element by element. </p>
+<p>
+The syntax of linked_list_foreach_safe() is the same as linked_list_foreach(). However, it is safe to change the <code class="docutils literal notranslate"><span class="pre">next</span></code> pointer in the current element during the loop body. <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: The list to iterate over </li>
+<li><code class="docutils literal notranslate"><span class="pre">current</span></code>: A list element pointer that will point to the current element</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="macro">
+<dt id="c.linked_list_foreach_i_safe">
+<span class="target" id="linked__list_8h_1a7f5e7e7ca7c1a5807031f4c79fef5e65"></span><code class="descname">linked_list_foreach_i_safe</code><span class="sig-paren">(</span>list, current, i<span class="sig-paren">)</span><a class="headerlink" href="#c.linked_list_foreach_i_safe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Advance through a linked list element by element with a counter. </p>
+<p>
+The syntax of <code class="docutils literal notranslate"><span class="pre">linked_list_foreach_safe()</span></code> is the same as <code class="docutils literal notranslate"><span class="pre">linked_list_foreach_i()</span></code>. However, it is safe to change the <code class="docutils literal notranslate"><span class="pre">next</span></code> pointer in the current element during the loop body. <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: The list to iterate over </li>
+<li><code class="docutils literal notranslate"><span class="pre">current</span></code>: A list element pointer that will point to the current element </li>
+<li><code class="docutils literal notranslate"><span class="pre">i</span></code>: The numeric counter to increment on each iteration</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="macro">
+<dt id="c.linked_list_while">
+<span class="target" id="linked__list_8h_1a646c6aa43db7a0cae490c0be7d3a3607"></span><code class="descname">linked_list_while</code><span class="sig-paren">(</span>list, current, condition<span class="sig-paren">)</span><a class="headerlink" href="#c.linked_list_while" title="Permalink to this definition">¶</a></dt>
+<dd><p>Advance through a linked list while some condition is true. </p>
+<p>
+linked_list_while() should be used like a while loop; for example: <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">element_type</span> <span class="o">*</span> <span class="n">current</span><span class="p">;</span>
+<span class="n">linked_list_while</span><span class="p">(</span><span class="n">list</span><span class="p">,</span> <span class="n">current</span><span class="p">,</span> <span class="n">current</span><span class="o">-&gt;</span><span class="n">data</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">do_something</span><span class="p">(</span><span class="n">current</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+ Do not modify the element’s <code class="docutils literal notranslate"><span class="pre">next</span></code> pointer inside the body of the loop, or the behavior of linked_list_while() is undefined. See linked_list_while_safe() instead. <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: The list to iterate over </li>
+<li><code class="docutils literal notranslate"><span class="pre">current</span></code>: A list element pointer that will point to the current element </li>
+<li><code class="docutils literal notranslate"><span class="pre">condition</span></code>: A condition that will determine whether to continue iterating</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="macro">
+<dt id="c.linked_list_while_safe">
+<span class="target" id="linked__list_8h_1ac9e9f03feb98fc40d169f5f61897929e"></span><code class="descname">linked_list_while_safe</code><span class="sig-paren">(</span>list, current, condition<span class="sig-paren">)</span><a class="headerlink" href="#c.linked_list_while_safe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Advance through a linked list element by element. </p>
+<p>
+The syntax of linked_list_while_safe() is the same as linked_list_while(). However, it is safe to change the <code class="docutils literal notranslate"><span class="pre">next</span></code> pointer in the current element during the loop body. <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: The list to iterate over </li>
+<li><code class="docutils literal notranslate"><span class="pre">current</span></code>: A list element pointer that will point to the current element </li>
+<li><code class="docutils literal notranslate"><span class="pre">condition</span></code>: A condition that will determine whether to continue iterating</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="macro">
+<dt id="c.otherwise">
+<span class="target" id="linked__list_8h_1abe73c7f0cdbb9bfb0d5b5e9d2685d8d1"></span><code class="descname">otherwise</code><span class="sig-paren">(</span>current<span class="sig-paren">)</span><a class="headerlink" href="#c.otherwise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run a block of code if the preceeding loop did not break. </p>
+<p>
+otherwise() should directly follow a linklist loop in the same way an <code class="docutils literal notranslate"><span class="pre">else</span></code> statement follows an <code class="docutils literal notranslate"><span class="pre">if</span></code> block. It’s function is the same as the <code class="docutils literal notranslate"><span class="pre">for/else</span></code> construction in Python. If the preceeding loop advanced all the way through the list and did not break or exit the loop on any element, the otherwise block will be called. For example: <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">linked_list_foreach</span><span class="p">(</span><span class="n">list</span><span class="p">,</span> <span class="n">current</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">current</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">)</span>
+                <span class="k">break</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">otherwise</span><span class="p">(</span><span class="n">current</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">puts</span><span class="p">(</span><span class="s">&quot;No NULL data elements.&quot;</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+ <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">current</span></code>: The same current element used in the preceeding loop.</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="ring_buffer.html" class="btn btn-neutral float-right" title="Ring Buffers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="double_list.html" class="btn btn-neutral" title="Doubly Linked Lists" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Quytelda Kahja.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.0.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

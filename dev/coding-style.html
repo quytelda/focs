@@ -1,0 +1,321 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Coding Style Guidelines &mdash; FOCS 0.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Submitting Patches" href="submit-patch.html" />
+    <link rel="prev" title="Developer Documentation" href="../dev.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> FOCS
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation/obtaining.html">Obtaining FOCS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation/makefile.html">Building FOCS Using a Makefile</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/list.html">API: Lists</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/sync.html">API: Thread Synchronization</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../dev.html">Developer Documentation</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Coding Style Guidelines</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#indentation">Indentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#alignment">Alignment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#line-length">Line Length</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#naming">Naming</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#hungarian-notation">Hungarian Notation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#t-notation">“_t” Notation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#function-structure">Function Structure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#conditionals">Conditionals</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="submit-patch.html">Submitting Patches</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dev.html#how-can-i-contribute">How Can I Contribute?</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">FOCS</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../dev.html">Developer Documentation</a> &raquo;</li>
+        
+      <li>Coding Style Guidelines</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/dev/coding-style.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="coding-style-guidelines">
+<h1>Coding Style Guidelines<a class="headerlink" href="#coding-style-guidelines" title="Permalink to this headline">¶</a></h1>
+<p>The coding style guidelines for FOCS are very similar to the coding style guidelines for the Linux Kernel, with a few notable exceptions.  If you cannot find the information you are looking for in this document, try checking the Linux Kernel Coding Style Guidelines at <a class="reference external" href="https://www.kernel.org/doc/html/v4.16/process/coding-style.html">https://www.kernel.org/doc/html/v4.16/process/coding-style.html</a>, and use those guidelines unless otherwise specified.</p>
+<div class="section" id="indentation">
+<h2>Indentation<a class="headerlink" href="#indentation" title="Permalink to this headline">¶</a></h2>
+<p>FOCS uses tabs for indentation, with a tab width of 8 characters.  8 characters may seem like a lot, but it is helpful in highlighting overly complex code - if your code starts to wrap way too far to the right, it should probably be refactored.  A good guideline is that your code shouldn’t normally surpass 3 levels of indentation.</p>
+</div>
+<div class="section" id="alignment">
+<h2>Alignment<a class="headerlink" href="#alignment" title="Permalink to this headline">¶</a></h2>
+<p>Because alignment doesn’t always work with just tabs, stick to the rule “use tabs for indentation and spaces for alignment.”  This means that when you are working at indentation level 2 (2 tabs), and you need to align further to the right, add two tabs, then continue to use spaces to line up the code as necessary.</p>
+</div>
+<div class="section" id="line-length">
+<h2>Line Length<a class="headerlink" href="#line-length" title="Permalink to this headline">¶</a></h2>
+<p>To prevent code from becoming overly complex, line length is restricted to 80 characters.  Generally, older terminal devices and most terminal emulators have a default line length of 80 characters, so lines longer than this will become wrapped or disappear off the end of the screen, which is ugly and unhelpful.  If your code has lines longer than 80 characters, you should refactor it by renaming functions and variables with shorter names, reducing function chaining, or breaking up calculation into multiple steps.</p>
+<p>Sometimes there will be cases where lines over the character limit cannot be shortened without dramatically hurting the readability or utility of the code; in this case, readability and utility take precedance, and the line will just have to remain too long.</p>
+</div>
+<div class="section" id="naming">
+<h2>Naming<a class="headerlink" href="#naming" title="Permalink to this headline">¶</a></h2>
+<p>FOCS uses snake case for all symbol names.  Camel case is shorter, but more difficult to read.</p>
+<p>Try to give symbols names that are both as descriptive and succint as possible.  The use of common variable naming conventions is encouraged with the following exceptions:</p>
+<div class="section" id="hungarian-notation">
+<h3>Hungarian Notation<a class="headerlink" href="#hungarian-notation" title="Permalink to this headline">¶</a></h3>
+<p>C is a strongly typed language.  You should be able to figure out what the types of your variables are without inserting it into the name.</p>
+</div>
+<div class="section" id="t-notation">
+<h3>“_t” Notation<a class="headerlink" href="#t-notation" title="Permalink to this headline">¶</a></h3>
+<p>It is sometimes common practice in C programs to name typedef’d structs with names ending in “_t”.  Do not typedef structs in FOCS, and do not use the “_t” affix on struct names.  For primitive data types, it is not recommended that you use typedefs, but if need compells you, the “_t” suffix is acceptable to remain consistent with ISO C99 standard library types like <cite>uint8_t</cite>, <cite>size_t</cite>, etc.  If you use a typedef for function pointers, the typedef should end in either “_fn” (for abstract function types) or “_dop” for data structure specific operations.</p>
+</div>
+</div>
+<div class="section" id="function-structure">
+<h2>Function Structure<a class="headerlink" href="#function-structure" title="Permalink to this headline">¶</a></h2>
+<p>Functions should be structured using the following template (optional keywords and symbols are in square brackets <code class="docutils literal notranslate"><span class="pre">[]</span></code>):</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="k">static</span><span class="p">]</span> <span class="p">[</span><span class="kr">inline</span><span class="p">]</span> <span class="o">&lt;</span><span class="n">return_type</span><span class="o">&gt;</span> <span class="n">function_name</span><span class="p">(</span><span class="o">&lt;</span><span class="n">arg1_type</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">arg1</span><span class="o">&gt;</span><span class="p">,</span>
+                                              <span class="o">&lt;</span><span class="n">arg2_type</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">arg2</span><span class="o">&gt;</span><span class="p">)</span>
+<span class="p">{</span>
+        <span class="n">success</span> <span class="o">=</span> <span class="n">do_something</span><span class="p">(...);</span>
+        <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">success</span><span class="p">)</span>
+                <span class="k">goto</span> <span class="n">exit</span><span class="p">;</span>
+
+        <span class="n">do_something_else</span><span class="p">(...);</span>
+
+<span class="p">[</span><span class="nl">exit</span><span class="p">:]</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">value</span><span class="p">];</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Note that the opening curly brace (<code class="docutils literal notranslate"><span class="pre">{</span></code>) for a function definition occurs on the line <em>after</em> the function signature.  This is different from how FOCS handles other statements that use curly braces, but it makes the function signature easier to separate from the implementation.</p>
+<p><code class="docutils literal notranslate"><span class="pre">goto</span></code> statements are useful to provide common exit sections for functions that might terminate in several different ways, such as under error conditions.  This prevents the programmer from having to copy past function cleanup and exit routines to every exit branch in the function.  However, the use of a goto label is optional, and it shouldn’t be used if the function is not complex enough to require it.  If a common exit label is needed, it should be named <code class="docutils literal notranslate"><span class="pre">exit</span></code>.  Other <code class="docutils literal notranslate"><span class="pre">goto</span></code> labels used to provide common exit points which preceed <code class="docutils literal notranslate"><span class="pre">exit</span></code> should be name <code class="docutils literal notranslate"><span class="pre">exit_&lt;something</span> <span class="pre">else&gt;</span></code>.</p>
+<p>Don’t write functions on one line like so:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span> <span class="nf">myfunction</span><span class="p">(</span><span class="kt">int</span> <span class="n">a</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span> <span class="p">}</span>
+</pre></div>
+</div>
+<p>If your function looks like this, it would be better off as a macro, probably.</p>
+</div>
+<div class="section" id="conditionals">
+<h2>Conditionals<a class="headerlink" href="#conditionals" title="Permalink to this headline">¶</a></h2>
+<p>Conditionals statements should be written with first curly brace on the same line as the <code class="docutils literal notranslate"><span class="pre">if</span></code>, <code class="docutils literal notranslate"><span class="pre">else</span> <span class="pre">if</span></code> or <code class="docutils literal notranslate"><span class="pre">else</span></code> statement they are associated with.  <code class="docutils literal notranslate"><span class="pre">else</span></code> or <code class="docutils literal notranslate"><span class="pre">else</span> <span class="pre">if</span></code> statements should appear on the same line as the closing curly brace of the previous block, like so:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">if</span><span class="p">(</span><span class="o">&lt;</span><span class="n">condition</span><span class="o">&gt;</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">do_this</span><span class="p">(...);</span>
+        <span class="n">do_that</span><span class="p">(...);</span>
+<span class="p">}</span> <span class="k">else</span> <span class="k">if</span><span class="p">(</span><span class="o">&lt;</span><span class="n">condition</span><span class="o">&gt;</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">do_this</span><span class="p">(...);</span>
+<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="n">do_that</span><span class="p">(...);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Note that there should be a space between curly braces and the statements the preceed/follow, but there is no space between the keyword <code class="docutils literal notranslate"><span class="pre">if</span></code> and it’s conditional.  If all the branches in the conditional statement are single lines, the curly braces may be ommited, like so:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">if</span><span class="p">(</span><span class="o">&lt;</span><span class="n">condition</span><span class="o">&gt;</span><span class="p">)</span>
+        <span class="n">func_one</span><span class="p">(...);</span>
+<span class="k">else</span> <span class="nf">if</span><span class="p">(</span><span class="o">&lt;</span><span class="n">condition</span><span class="o">&gt;</span><span class="p">)</span>
+        <span class="n">func_two</span><span class="p">(...);</span>
+<span class="k">else</span>
+        <span class="nf">func_three</span><span class="p">(...);</span>
+</pre></div>
+</div>
+<p>This saves spaces and increases readability.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="submit-patch.html" class="btn btn-neutral float-right" title="Submitting Patches" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../dev.html" class="btn btn-neutral" title="Developer Documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Quytelda Kahja.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.0.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

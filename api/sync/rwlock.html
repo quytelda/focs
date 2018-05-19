@@ -1,0 +1,297 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Reader Writer Lock &mdash; FOCS 0.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Developer Documentation" href="../../dev.html" />
+    <link rel="prev" title="API: Thread Synchronization" href="../sync.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> FOCS
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../installation/obtaining.html">Obtaining FOCS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation/makefile.html">Building FOCS Using a Makefile</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../list.html">API: Lists</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../sync.html">API: Thread Synchronization</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Reader Writer Lock</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev.html">Developer Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">FOCS</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../sync.html">API: Thread Synchronization</a> &raquo;</li>
+        
+      <li>Reader Writer Lock</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/api/sync/rwlock.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="reader-writer-lock">
+<h1>Reader Writer Lock<a class="headerlink" href="#reader-writer-lock" title="Permalink to this headline">¶</a></h1>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric">Functions</p>
+<dl class="function">
+<dt id="_CPPv312rwlock_allocPP6rwlock">
+<span id="_CPPv212rwlock_allocPP6rwlock"></span><span id="rwlock_alloc__rwlockPP"></span><span class="target" id="rwlock_8h_1a0532bf52394c7a7f90c6af484bde992a"></span>int <code class="descname">rwlock_alloc</code><span class="sig-paren">(</span><em class="property">struct</em> <a class="reference internal" href="#_CPPv312rwlock_allocPP6rwlock" title="rwlock_alloc::rwlock">rwlock</a> **<em>rwlock</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv312rwlock_allocPP6rwlock" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="_CPPv311rwlock_freePP6rwlock">
+<span id="_CPPv211rwlock_freePP6rwlock"></span><span id="rwlock_free__rwlockPP"></span><span class="target" id="rwlock_8h_1a6190c415500116ba86431946d6be5f2e"></span>void <code class="descname">rwlock_free</code><span class="sig-paren">(</span><em class="property">struct</em> <a class="reference internal" href="#_CPPv311rwlock_freePP6rwlock" title="rwlock_free::rwlock">rwlock</a> **<em>rwlock</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv311rwlock_freePP6rwlock" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="_CPPv319rwlock_writer_entryP6rwlock">
+<span id="_CPPv219rwlock_writer_entryP6rwlock"></span><span id="rwlock_writer_entry__rwlockP"></span><span class="target" id="rwlock_8h_1a0af81a35dcb6eceb64409287f2dba673"></span>void <code class="descname">rwlock_writer_entry</code><span class="sig-paren">(</span><em class="property">struct</em> <a class="reference internal" href="#_CPPv319rwlock_writer_entryP6rwlock" title="rwlock_writer_entry::rwlock">rwlock</a> *<em>rwlock</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv319rwlock_writer_entryP6rwlock" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="_CPPv318rwlock_writer_exitP6rwlock">
+<span id="_CPPv218rwlock_writer_exitP6rwlock"></span><span id="rwlock_writer_exit__rwlockP"></span><span class="target" id="rwlock_8h_1a55e75d35caf02b4eabc473f5a73cb952"></span>void <code class="descname">rwlock_writer_exit</code><span class="sig-paren">(</span><em class="property">struct</em> <a class="reference internal" href="#_CPPv318rwlock_writer_exitP6rwlock" title="rwlock_writer_exit::rwlock">rwlock</a> *<em>rwlock</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv318rwlock_writer_exitP6rwlock" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="_CPPv319rwlock_reader_entryP6rwlock">
+<span id="_CPPv219rwlock_reader_entryP6rwlock"></span><span id="rwlock_reader_entry__rwlockP"></span><span class="target" id="rwlock_8h_1abce667c2f69184c7f57ed07103948bf3"></span>void <code class="descname">rwlock_reader_entry</code><span class="sig-paren">(</span><em class="property">struct</em> <a class="reference internal" href="#_CPPv319rwlock_reader_entryP6rwlock" title="rwlock_reader_entry::rwlock">rwlock</a> *<em>rwlock</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv319rwlock_reader_entryP6rwlock" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="_CPPv318rwlock_reader_exitP6rwlock">
+<span id="_CPPv218rwlock_reader_exitP6rwlock"></span><span id="rwlock_reader_exit__rwlockP"></span><span class="target" id="rwlock_8h_1a788f9887719f964b7d7853d069e60f9d"></span>void <code class="descname">rwlock_reader_exit</code><span class="sig-paren">(</span><em class="property">struct</em> <a class="reference internal" href="#_CPPv318rwlock_reader_exitP6rwlock" title="rwlock_reader_exit::rwlock">rwlock</a> *<em>rwlock</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv318rwlock_reader_exitP6rwlock" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<dl class="class">
+<dt id="_CPPv36rwlock">
+<span id="_CPPv26rwlock"></span><span id="rwlock"></span><span class="target" id="structrwlock"></span><em class="property">struct </em><code class="descname">rwlock</code><a class="headerlink" href="#_CPPv36rwlock" title="Permalink to this definition">¶</a><br /></dt>
+<dd><div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric">Public Members</p>
+<dl class="member">
+<dt id="_CPPv3N6rwlock4lockE">
+<span id="_CPPv2N6rwlock4lockE"></span><span id="rwlock::lock__pthread_mutex_t"></span><span class="target" id="structrwlock_1ae6e322d01022b6dc0b089f6d3bbb2ef5"></span>pthread_mutex_t <a class="reference internal" href="#_CPPv36rwlock" title="rwlock">rwlock</a><code class="descname">lock</code><a class="headerlink" href="#_CPPv3N6rwlock4lockE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="member">
+<dt id="_CPPv3N6rwlock4condE">
+<span id="_CPPv2N6rwlock4condE"></span><span id="rwlock::cond__pthread_cond_t"></span><span class="target" id="structrwlock_1a1a68c8365ced5429481bb4510cd91dcb"></span>pthread_cond_t <a class="reference internal" href="#_CPPv36rwlock" title="rwlock">rwlock</a><code class="descname">cond</code><a class="headerlink" href="#_CPPv3N6rwlock4condE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="member">
+<dt id="_CPPv3N6rwlock7readersE">
+<span id="_CPPv2N6rwlock7readersE"></span><span id="rwlock::readers__s"></span><span class="target" id="structrwlock_1aa3d32470c073c087f6cccac70bb73f1f"></span>size_t <a class="reference internal" href="#_CPPv36rwlock" title="rwlock">rwlock</a><code class="descname">readers</code><a class="headerlink" href="#_CPPv3N6rwlock7readersE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="member">
+<dt id="_CPPv3N6rwlock7writersE">
+<span id="_CPPv2N6rwlock7writersE"></span><span id="rwlock::writers__s"></span><span class="target" id="structrwlock_1a38eafd5b8213c725ebb118d051c4fdcb"></span>size_t <a class="reference internal" href="#_CPPv36rwlock" title="rwlock">rwlock</a><code class="descname">writers</code><a class="headerlink" href="#_CPPv3N6rwlock7writersE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="member">
+<dt id="_CPPv3N6rwlock7writingE">
+<span id="_CPPv2N6rwlock7writingE"></span><span id="rwlock::writing__b"></span><span class="target" id="structrwlock_1ac63c0d5e07024bb37c4eed912fb92b38"></span>bool <a class="reference internal" href="#_CPPv36rwlock" title="rwlock">rwlock</a><code class="descname">writing</code><a class="headerlink" href="#_CPPv3N6rwlock7writingE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../../dev.html" class="btn btn-neutral float-right" title="Developer Documentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../sync.html" class="btn btn-neutral" title="API: Thread Synchronization" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Quytelda Kahja.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.0.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

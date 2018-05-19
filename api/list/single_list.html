@@ -1,0 +1,700 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Singly Linked Lists &mdash; FOCS 0.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Doubly Linked Lists" href="double_list.html" />
+    <link rel="prev" title="API: Lists" href="../list.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> FOCS
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../installation/obtaining.html">Obtaining FOCS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation/makefile.html">Building FOCS Using a Makefile</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../list.html">API: Lists</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Singly Linked Lists</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#creation-and-destruction">Creation and Destruction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data-management">Data Management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#functional-utilities">Functional Utilities</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="double_list.html">Doubly Linked Lists</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linked_list.html">Linked Lists</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ring_buffer.html">Ring Buffers</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../sync.html">API: Thread Synchronization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev.html">Developer Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">FOCS</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../list.html">API: Lists</a> &raquo;</li>
+        
+      <li>Singly Linked Lists</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/api/list/single_list.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="singly-linked-lists">
+<h1>Singly Linked Lists<a class="headerlink" href="#singly-linked-lists" title="Permalink to this headline">¶</a></h1>
+<p>To use the doubly linked list implementation, create a pointer to a <code class="docutils literal notranslate"><span class="pre">struct</span> <span class="pre">single_list</span></code>, and initialize it using <code class="docutils literal notranslate"><span class="pre">sl_alloc()</span></code>.  You can then use the data management functions to add and remove elements from the list.  You can also use the functional data operations to transform, reduce, or filter the data in the list.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* revabs_sll.h - Reverse and take the absolute value of a list of numbers</span>
+<span class="cm"> *                using a singly linked list as a stack.</span>
+<span class="cm"> * Copyright (C) 2018 Quytelda Kahja</span>
+<span class="cm"> *</span>
+<span class="cm"> * This file is part of focs.</span>
+<span class="cm"> *</span>
+<span class="cm"> * focs is free software: you can redistribute it and/or modify</span>
+<span class="cm"> * it under the terms of the GNU General Public License as published by</span>
+<span class="cm"> * the Free Software Foundation, either version 3 of the License, or</span>
+<span class="cm"> * (at your option) any later version.</span>
+<span class="cm"> *</span>
+<span class="cm"> * focs is distributed in the hope that it will be useful,</span>
+<span class="cm"> * but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="cm"> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="cm"> * GNU General Public License for more details.</span>
+<span class="cm"> *</span>
+<span class="cm"> * You should have received a copy of the GNU General Public License</span>
+<span class="cm"> * along with focs.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="cm"> */</span>
+
+<span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;list/single_list.h&gt;</span><span class="cp"></span>
+
+<span class="k">static</span> <span class="kt">int</span> <span class="o">*</span> <span class="nf">my_abs</span><span class="p">(</span><span class="kt">int</span> <span class="o">*</span> <span class="n">n</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="o">*</span><span class="n">n</span> <span class="o">=</span> <span class="n">abs</span><span class="p">(</span><span class="o">*</span><span class="n">n</span><span class="p">);</span>
+	<span class="k">return</span> <span class="n">n</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span> <span class="n">argv</span><span class="p">[])</span>
+<span class="p">{</span>
+	<span class="kt">int</span> <span class="n">err</span><span class="p">;</span>
+	<span class="kt">int</span> <span class="o">*</span> <span class="n">inputs</span><span class="p">;</span>
+	<span class="kt">int</span> <span class="o">**</span> <span class="n">outputs</span><span class="p">;</span>
+
+	<span class="k">struct</span> <span class="n">single_list</span> <span class="o">*</span> <span class="n">my_list</span><span class="p">;</span>
+
+	<span class="n">inputs</span>  <span class="o">=</span> <span class="n">calloc</span><span class="p">(</span><span class="n">argc</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">));</span>
+	<span class="n">outputs</span> <span class="o">=</span> <span class="n">calloc</span><span class="p">(</span><span class="n">argc</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span> <span class="o">*</span><span class="p">));</span>
+	<span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">inputs</span> <span class="o">||</span> <span class="o">!</span><span class="n">outputs</span><span class="p">)</span>
+		<span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span> <span class="c1">// out of memory</span>
+
+	<span class="n">err</span> <span class="o">=</span> <span class="n">sl_alloc</span><span class="p">(</span><span class="o">&amp;</span><span class="n">my_list</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">));</span>
+	<span class="k">if</span><span class="p">(</span><span class="n">err</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
+		<span class="k">return</span> <span class="o">-</span><span class="mi">2</span><span class="p">;</span> <span class="c1">// failed to create my_list</span>
+
+	<span class="cm">/* Push the numbers onto the stack. */</span>
+	<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">argc</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+		<span class="n">inputs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">atoi</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+		<span class="n">sl_push_head</span><span class="p">(</span><span class="n">my_list</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">inputs</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+	<span class="p">}</span>
+
+	<span class="cm">/* Transform the list by mapping my_abs over the list. */</span>
+	<span class="n">sl_map</span><span class="p">(</span><span class="n">my_list</span><span class="p">,</span> <span class="p">(</span><span class="n">map_fn</span><span class="p">)</span> <span class="n">my_abs</span><span class="p">);</span>
+
+	<span class="cm">/* Output each number popped from the stack. */</span>
+	<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">argc</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+		<span class="n">outputs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">sl_pop_head</span><span class="p">(</span><span class="n">my_list</span><span class="p">);</span>
+		<span class="n">printf</span><span class="p">(</span><span class="s">&quot;%d &quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">outputs</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+	<span class="p">}</span>
+
+	<span class="n">putchar</span><span class="p">(</span><span class="sc">&#39;\n&#39;</span><span class="p">);</span>
+
+	<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="class">
+<dt id="_CPPv311single_list">
+<span id="_CPPv211single_list"></span><span id="single_list"></span><span class="target" id="structsingle__list"></span><em class="property">struct </em><code class="descname">single_list</code><a class="headerlink" href="#_CPPv311single_list" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Represents a singly linked list. </p>
+<p>Initialize this structure with sl_alloc(), and destroy it with sl_destroy(). </p>
+</dd></dl>
+
+<div class="section" id="creation-and-destruction">
+<h2>Creation and Destruction<a class="headerlink" href="#creation-and-destruction" title="Permalink to this headline">¶</a></h2>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">doxygenfunction: Cannot find function “sl_alloc” in doxygen xml output for project “FOCS” from directory: ./xml</p>
+</div>
+<dl class="function">
+<dt>
+<span class="target" id="single__list_8h_1af486deb71fc21d13c8db9284dde128e3"></span><code class="descname">void __nonulls sl_destroy(single_list  * list)</code></dt>
+<dd><p>Destroy and deallocate a singly linked list. </p>
+<p>
+De-allocates the singly linked list at the structure pointer pointed to by <code class="docutils literal notranslate"><span class="pre">list</span></code>, as well as de-allocating all data elements contained within <code class="docutils literal notranslate"><span class="pre">list</span></code>. <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: A pointer to a <code class="docutils literal notranslate"><span class="pre">struct</span> <a class="reference internal" href="#structsingle__list"><span class="std std-ref"><span class="pre">single_list</span></span></a></code> pointer. </li>
+<li><code class="docutils literal notranslate"><span class="pre">data_size</span></code>: The size of data to store in the list</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+</div>
+<div class="section" id="data-management">
+<h2>Data Management<a class="headerlink" href="#data-management" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt>
+<span class="target" id="single__list_8h_1aee321695779903c9da95327108aef913"></span><code class="descname">void __nonulls sl_push_head(single_list list, const void * data)</code></dt>
+<dd><p>Push a new data element to the head of the list. </p>
+<p>
+Push a newly allocated copy of <code class="docutils literal notranslate"><span class="pre">data</span></code> onto the head of <code class="docutils literal notranslate"><span class="pre">list</span></code>. <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: The list to push onto </li>
+<li><code class="docutils literal notranslate"><span class="pre">data</span></code>: A pointer to the data to push</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<span class="target" id="single__list_8h_1a1772ef9c1a22462e894859af12479104"></span><code class="descname">void __nonulls sl_push_tail(single_list list, const void * data)</code></dt>
+<dd><p>Push a new data element to the tail of the list. </p>
+<p>
+Push a newly allocated copy of <code class="docutils literal notranslate"><span class="pre">data</span></code> onto the tail of <code class="docutils literal notranslate"><span class="pre">list</span></code>. <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: The list to push onto </li>
+<li><code class="docutils literal notranslate"><span class="pre">data</span></code>: A pointer to the data to push</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<span class="target" id="single__list_8h_1ae595f7f3eaf27a3756d32b9d5669ea97"></span><code class="descname">void* __nonulls sl_pop_head(single_list list)</code></dt>
+<dd><p>Pop a data element from the head of a list. </p>
+<p>
+Remove and return the data element at the head of <code class="docutils literal notranslate"><span class="pre">list</span></code>. After this operation the returned data element <em>will no longer be stored in</em> <code class="docutils literal notranslate"><span class="pre">list</span></code>.<dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: The list to pop from</li>
+</ul>
+</dd>
+</dl>
+</p>
+<p><dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd>A pointer to the data element at the head of <code class="docutils literal notranslate"><span class="pre">list</span></code>. This pointer must be explicitly freed with free() when it is no longer needed. It is <strong>not</strong> equivalent to the pointer which was used to insert the data into <code class="docutils literal notranslate"><span class="pre">list</span></code>. </dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<span class="target" id="single__list_8h_1a32034acc1b442529d837401070e692c4"></span><code class="descname">void* __nonulls sl_pop_tail(single_list list)</code></dt>
+<dd><p>Pop a data element from the tail of a list. </p>
+<p>
+Remove and return the data element at the tail of <code class="docutils literal notranslate"><span class="pre">list</span></code>. After this operation the returned data element <em>will no longer be stored in</em> <code class="docutils literal notranslate"><span class="pre">list</span></code>.<dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: The list to pop from</li>
+</ul>
+</dd>
+</dl>
+</p>
+<p><dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd>A pointer to the data element at the tail of <code class="docutils literal notranslate"><span class="pre">list</span></code>. This pointer must be explicitly freed with free() when it is no longer needed. It is <strong>not</strong> equivalent to the pointer which was used to insert the data into <code class="docutils literal notranslate"><span class="pre">list</span></code>. </dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<span class="target" id="single__list_8h_1ac7007c6b6d8718a78c6947cb36ed2dfb"></span><code class="descname">bool __nonulls sl_insert(single_list list, const void * data, const size_t pos)</code></dt>
+<dd><p>Insert a new data element to a given position in a list. </p>
+<p>
+Insert a newly allocated copy of <code class="docutils literal notranslate"><span class="pre">data</span></code> into <code class="docutils literal notranslate"><span class="pre">list</span></code> at the index indicated by <code class="docutils literal notranslate"><span class="pre">pos</span></code>.<dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: The list to inesrt into </li>
+<li><code class="docutils literal notranslate"><span class="pre">data</span></code>: A pointer to the data to insert </li>
+<li><code class="docutils literal notranslate"><span class="pre">pos</span></code>: The position to insert the element at (must be an index in the range <code class="docutils literal notranslate"><span class="pre">0..list-&gt;length</span></code>)</li>
+</ul>
+</dd>
+</dl>
+</p>
+<p><dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">true</span></code> if the insertion succeeds, otherwise <code class="docutils literal notranslate"><span class="pre">false</span></code>. </dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<span class="target" id="single__list_8h_1a4210c2feed3bae07dd99b8fb971445da"></span><code class="descname">bool __nonulls sl_delete(single_list list, const size_t pos)</code></dt>
+<dd><p>Delete a data element from a given position in a list. </p>
+<p>
+Delete the copy of <code class="docutils literal notranslate"><span class="pre">data</span></code> stored in <code class="docutils literal notranslate"><span class="pre">list</span></code> at the index indicated by <code class="docutils literal notranslate"><span class="pre">pos</span></code>.<dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: The list to delete from </li>
+<li><code class="docutils literal notranslate"><span class="pre">pos</span></code>: The position to delete the element at (must be an index in the range <code class="docutils literal notranslate"><span class="pre">0..list-&gt;length</span> <span class="pre">-</span> <span class="pre">1</span></code>)</li>
+</ul>
+</dd>
+</dl>
+</p>
+<p><dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">true</span></code> if the deletion succeeds, otherwise <code class="docutils literal notranslate"><span class="pre">false</span></code>. </dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<span class="target" id="single__list_8h_1a125b8b8bb12380a78b9e8bad365dfdaf"></span><code class="descname">void* __nonulls sl_remove(single_list list, const size_t pos)</code></dt>
+<dd><p>Delete and return a data element from a given position in a list. </p>
+<p>
+Delete the reference to <code class="docutils literal notranslate"><span class="pre">data</span></code> stored in <code class="docutils literal notranslate"><span class="pre">list</span></code> at the index indicated by <code class="docutils literal notranslate"><span class="pre">pos</span></code>.<dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: The list to delete from </li>
+<li><code class="docutils literal notranslate"><span class="pre">pos</span></code>: The position to delete the element at (must be an index in the range <code class="docutils literal notranslate"><span class="pre">0..list-&gt;length</span> <span class="pre">-</span> <span class="pre">1</span></code>)</li>
+</ul>
+</dd>
+</dl>
+</p>
+<p><dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd>A pointer to the data removed from <code class="docutils literal notranslate"><span class="pre">list</span></code>, or <code class="docutils literal notranslate"><span class="pre">NULL</span></code> on failure. This pointer must be explicitly freed with free() when it is no longer needed. It is <strong>not</strong> equivalent to the pointer which was used to insert the data into <code class="docutils literal notranslate"><span class="pre">list</span></code>. </dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<span class="target" id="single__list_8h_1ade0ca7b094c699852b164e46c74d2fd8"></span><code class="descname">void* __nonulls sl_fetch(single_list list, const size_t pos)</code></dt>
+<dd><p>Fetch a data element from a given position in a list. </p>
+<p>
+Fetch the data stored at index <code class="docutils literal notranslate"><span class="pre">pos</span></code> in <code class="docutils literal notranslate"><span class="pre">list</span></code>.<dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: The list to fetch from </li>
+<li><code class="docutils literal notranslate"><span class="pre">pos</span></code>: The index to fetch the element from (must be an index in the range <code class="docutils literal notranslate"><span class="pre">0..list-&gt;length</span> <span class="pre">-</span> <span class="pre">1</span></code>)</li>
+</ul>
+</dd>
+</dl>
+</p>
+<p><dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd>A pointer to the data at index <code class="docutils literal notranslate"><span class="pre">pos</span></code>, or <code class="docutils literal notranslate"><span class="pre">NULL</span></code> on failure. This pointer should <strong>not</strong> be free()d explicitly, or the list will become corrupted. This pointer will be free()d when sl_destroy() is called, so if the data is needed after the list is destroyed, make a copy of it, or make sure to call sl_remove() on the data’s index before destroying the list. </dd>
+</dl>
+</p>
+</dd></dl>
+
+</div>
+<div class="section" id="functional-utilities">
+<h2>Functional Utilities<a class="headerlink" href="#functional-utilities" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt>
+<span class="target" id="single__list_8h_1aad0a3f379f4e6093aaba903ec1f60477"></span><code class="descname">bool __nonulls sl_empty(const  single_list list)</code></dt>
+<dd><p>Determine if a list is empty. </p>
+<p><dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">true</span></code> if <code class="docutils literal notranslate"><span class="pre">list</span></code> is empty, <code class="docutils literal notranslate"><span class="pre">false</span></code> otherwise. </dd>
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: The list to check</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<span class="target" id="single__list_8h_1aa55301d66057fb16e189ca549ee43422"></span><code class="descname">bool __nonulls sl_elem(const  single_list list, const void * data)</code></dt>
+<dd><p>Determine if a list contains a value. </p>
+<p>
+Determines if <code class="docutils literal notranslate"><span class="pre">list</span></code> contains an entry matching <code class="docutils literal notranslate"><span class="pre">data</span></code>. The operation compares the contents of the memory pointed to by <code class="docutils literal notranslate"><span class="pre">data</span></code>, and not the memory addresses of the data pointers.<dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: The list to search </li>
+<li><code class="docutils literal notranslate"><span class="pre">data</span></code>: The data to search for in the list</li>
+</ul>
+</dd>
+</dl>
+</p>
+<p><dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">true</span></code> if a matching entry is found, otherwise <code class="docutils literal notranslate"><span class="pre">false</span></code> </dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<span class="target" id="single__list_8h_1a3f3863a29efc3e99e547d6cf29b1809f"></span><code class="descname">void __nonulls sl_map(single_list list, const map_fn fn)</code></dt>
+<dd><p>Map a function over a linked list in-place. </p>
+<p>
+A map operation iterates over <code class="docutils literal notranslate"><span class="pre">list</span></code> and transforms each data element using the function <code class="docutils literal notranslate"><span class="pre">fn</span></code>, replacing the old value with the result of the transformation. In pseudo-code: <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="n">from</span> <span class="mi">0</span> <span class="n">to</span> <span class="n">list</span><span class="o">-&gt;</span><span class="nl">length</span><span class="p">:</span>
+    <span class="n">list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">fn</span><span class="p">(</span><span class="n">list</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+</pre></div>
+</div>
+ <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: A list of values </li>
+<li><code class="docutils literal notranslate"><span class="pre">fn</span></code>: A function that will transform each value in the list</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<span class="target" id="single__list_8h_1af743652ca903fe2a5e4450987ca77c35"></span><code class="descname">void* __nonulls sl_foldr(const  single_list list, const foldr_fn fn, const void * init)</code></dt>
+<dd><p>Right associative fold for singly linked lists. </p>
+<p>
+A right associative fold uses the binary function <code class="docutils literal notranslate"><span class="pre">fn</span></code> to sequentially reduce a list of values to a single value, starting from some initial value <code class="docutils literal notranslate"><span class="pre">init</span></code>: <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">fn</span><span class="p">(</span><span class="n">init</span><span class="p">,</span> <span class="n">fn</span><span class="p">(</span><span class="n">list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">fn</span><span class="p">(</span><span class="n">list</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">...)))</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: A list of values to reduce </li>
+<li><code class="docutils literal notranslate"><span class="pre">fn</span></code>: A binary function that will sequentially reduce values </li>
+<li><code class="docutils literal notranslate"><span class="pre">init</span></code>: An initial value for the fold</li>
+</ul>
+</dd>
+</dl>
+</p>
+<p><dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd>The result of a right associate fold over <code class="docutils literal notranslate"><span class="pre">list</span></code>. If <code class="docutils literal notranslate"><span class="pre">list</span></code> is empty, the fold will be equal to the value of <code class="docutils literal notranslate"><span class="pre">init</span></code>. </dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<span class="target" id="single__list_8h_1a69aeb326d02920a9da2e3fedd7706897"></span><code class="descname">void* __nonulls sl_foldl(const  single_list list, const foldl_fn fn, const void * init)</code></dt>
+<dd><p>Left associative fold for singly linked lists. </p>
+<p>
+A left associative fold uses the binary function <code class="docutils literal notranslate"><span class="pre">fn</span></code> to sequentially reduce a list of values to a single value, starting from some initial value <code class="docutils literal notranslate"><span class="pre">init</span></code>: <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">fn</span><span class="p">(</span><span class="n">fn</span><span class="p">(</span><span class="n">fn</span><span class="p">(...,</span> <span class="n">init</span><span class="p">),</span> <span class="n">list</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">list</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: A list of values to reduce </li>
+<li><code class="docutils literal notranslate"><span class="pre">fn</span></code>: A binary function that will sequentially reduce values </li>
+<li><code class="docutils literal notranslate"><span class="pre">init</span></code>: An initial value for the fold</li>
+</ul>
+</dd>
+</dl>
+</p>
+<p><dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd>The result of a left associate fold over <code class="docutils literal notranslate"><span class="pre">list</span></code>. If <code class="docutils literal notranslate"><span class="pre">list</span></code> is empty, the fold will be equal to the value of <code class="docutils literal notranslate"><span class="pre">init</span></code>. </dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<span class="target" id="single__list_8h_1adf820a3eb716716895bc6db4b2cc20ec"></span><code class="descname">bool __nonulls sl_any(single_list list, const pred_fn pred)</code></dt>
+<dd><p>Determine if any value in a list satisifies some condition. </p>
+<p>
+Iterate over each value stored in <code class="docutils literal notranslate"><span class="pre">list</span></code>, and determine if any of them satisfies <code class="docutils literal notranslate"><span class="pre">pred</span></code>.<dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: A list of values </li>
+<li><code class="docutils literal notranslate"><span class="pre">pred</span></code>: The predicate function</li>
+</ul>
+</dd>
+</dl>
+</p>
+<p><dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd>This function shall return <code class="docutils literal notranslate"><span class="pre">true</span></code> if the predicate <code class="docutils literal notranslate"><span class="pre">pred</span></code> is satisfied by any data element in <code class="docutils literal notranslate"><span class="pre">list</span></code>; otherwise <code class="docutils literal notranslate"><span class="pre">false</span></code> shall be returned. </dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<span class="target" id="single__list_8h_1a38220aacd4ec79d3037c0276bdf42bbe"></span><code class="descname">bool __nonulls sl_all(single_list list, const pred_fn pred)</code></dt>
+<dd><p>Determines if all values in a list satisify some condition. </p>
+<p>
+Iterate over each value stored in <code class="docutils literal notranslate"><span class="pre">list</span></code>, and determine if all of them satisfy <code class="docutils literal notranslate"><span class="pre">pred</span></code>.<dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: A list of values </li>
+<li><code class="docutils literal notranslate"><span class="pre">pred</span></code>: The predicate function (representing a condition to be satisfied).</li>
+</ul>
+</dd>
+</dl>
+</p>
+<p><dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd>This function shall return <code class="docutils literal notranslate"><span class="pre">true</span></code> if the predicate <code class="docutils literal notranslate"><span class="pre">pred</span></code> is satisfied by all data elements in <code class="docutils literal notranslate"><span class="pre">list</span></code>; otherwise <code class="docutils literal notranslate"><span class="pre">false</span></code> shall be returned. </dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<span class="target" id="single__list_8h_1a0a333880889cbcb8018d24d0cabbd52f"></span><code class="descname">bool __nonulls sl_filter(single_list list, const pred_fn pred)</code></dt>
+<dd><p>Filter a list to contain only values that satisfy some predicate. </p>
+<p>
+Filter <code class="docutils literal notranslate"><span class="pre">list</span></code> in-place by removing elements that do not satisfy the predicate <code class="docutils literal notranslate"><span class="pre">pred</span></code>. Elements that do satisfy the predicate <code class="docutils literal notranslate"><span class="pre">pred</span></code> are not removed from the list. <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: The list to filter </li>
+<li><code class="docutils literal notranslate"><span class="pre">pred</span></code>: The predicate</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<span class="target" id="single__list_8h_1a3ffc34a45e2b9de78a106d4089568e80"></span><code class="descname">bool __nonulls sl_drop_while(single_list list, const pred_fn pred)</code></dt>
+<dd><p>Drop elements from the head of the list until the predicate is unsatisfied. </p>
+<p>
+Drop each element that satisfies the predicate <code class="docutils literal notranslate"><span class="pre">pred</span></code>, starting at the beginning of <code class="docutils literal notranslate"><span class="pre">list</span></code> and continuing until reaching the first element that does not satisfy the predicate <code class="docutils literal notranslate"><span class="pre">pred</span></code>.<dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: The list to drop from </li>
+<li><code class="docutils literal notranslate"><span class="pre">pred</span></code>: The predicate</li>
+</ul>
+</dd>
+</dl>
+</p>
+<p>This function is an in-place equivalent of Haskell’s dropWhile. </p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<span class="target" id="single__list_8h_1a307e1e9ead55c19b6ef164d51131109f"></span><code class="descname">bool __nonulls sl_take_while(single_list list, const pred_fn pred)</code></dt>
+<dd><p>Keep elements from the head of the list until the predicate is unsatisfied. </p>
+<p>
+Iterate over each element of <code class="docutils literal notranslate"><span class="pre">list</span></code>, starting at the beginning, that satisfies the predicate <code class="docutils literal notranslate"><span class="pre">pred</span></code>. Once an element that does not satisfy the predicate <code class="docutils literal notranslate"><span class="pre">pred</span></code> is reached, drop the rest of the list, including that element.<dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: The list to take from </li>
+<li><code class="docutils literal notranslate"><span class="pre">pred</span></code>: The predicate</li>
+</ul>
+</dd>
+</dl>
+</p>
+<p>This function is an in-place equivalent of Haskell’s takeWhile. </p>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="double_list.html" class="btn btn-neutral float-right" title="Doubly Linked Lists" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../list.html" class="btn btn-neutral" title="API: Lists" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Quytelda Kahja.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.0.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,679 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Doubly Linked Lists &mdash; FOCS 0.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Linked Lists" href="linked_list.html" />
+    <link rel="prev" title="Singly Linked Lists" href="single_list.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> FOCS
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../installation/obtaining.html">Obtaining FOCS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation/makefile.html">Building FOCS Using a Makefile</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../list.html">API: Lists</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="single_list.html">Singly Linked Lists</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Doubly Linked Lists</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#creation-and-destruction">Creation and Destruction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data-management">Data Management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#functional-utilities">Functional Utilities</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="linked_list.html">Linked Lists</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ring_buffer.html">Ring Buffers</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../sync.html">API: Thread Synchronization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev.html">Developer Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">FOCS</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../list.html">API: Lists</a> &raquo;</li>
+        
+      <li>Doubly Linked Lists</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/api/list/double_list.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="doubly-linked-lists">
+<h1>Doubly Linked Lists<a class="headerlink" href="#doubly-linked-lists" title="Permalink to this headline">¶</a></h1>
+<p>To use the doubly linked list implementation, create a pointer to a <code class="docutils literal notranslate"><span class="pre">struct</span> <span class="pre">double_list</span></code>, and initialize it using <code class="docutils literal notranslate"><span class="pre">dl_alloc()</span></code>.  You can then use the data management functions to add and remove elements from the list.  You can also use the functional data operations to transform, reduce, or filter the data in the list.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* revabs_dll.h - Reverse and take the absolute value of a list of numbers</span>
+<span class="cm"> *                using a doubly linked list as a stack.</span>
+<span class="cm"> * Copyright (C) 2018 Quytelda Kahja</span>
+<span class="cm"> *</span>
+<span class="cm"> * This file is part of focs.</span>
+<span class="cm"> *</span>
+<span class="cm"> * focs is free software: you can redistribute it and/or modify</span>
+<span class="cm"> * it under the terms of the GNU General Public License as published by</span>
+<span class="cm"> * the Free Software Foundation, either version 3 of the License, or</span>
+<span class="cm"> * (at your option) any later version.</span>
+<span class="cm"> *</span>
+<span class="cm"> * focs is distributed in the hope that it will be useful,</span>
+<span class="cm"> * but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="cm"> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="cm"> * GNU General Public License for more details.</span>
+<span class="cm"> *</span>
+<span class="cm"> * You should have received a copy of the GNU General Public License</span>
+<span class="cm"> * along with focs.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="cm"> */</span>
+
+<span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;list/double_list.h&gt;</span><span class="cp"></span>
+
+<span class="k">static</span> <span class="kt">int</span> <span class="o">*</span> <span class="nf">my_abs</span><span class="p">(</span><span class="kt">int</span> <span class="o">*</span> <span class="n">n</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="o">*</span><span class="n">n</span> <span class="o">=</span> <span class="n">abs</span><span class="p">(</span><span class="o">*</span><span class="n">n</span><span class="p">);</span>
+	<span class="k">return</span> <span class="n">n</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span> <span class="n">argv</span><span class="p">[])</span>
+<span class="p">{</span>
+	<span class="kt">int</span> <span class="n">err</span><span class="p">;</span>
+	<span class="kt">int</span> <span class="o">*</span> <span class="n">inputs</span><span class="p">;</span>
+	<span class="kt">int</span> <span class="o">**</span> <span class="n">outputs</span><span class="p">;</span>
+
+	<span class="k">struct</span> <span class="n">double_list</span> <span class="o">*</span> <span class="n">my_list</span><span class="p">;</span>
+
+	<span class="n">inputs</span>  <span class="o">=</span> <span class="n">calloc</span><span class="p">(</span><span class="n">argc</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">));</span>
+	<span class="n">outputs</span> <span class="o">=</span> <span class="n">calloc</span><span class="p">(</span><span class="n">argc</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span> <span class="o">*</span><span class="p">));</span>
+	<span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">inputs</span> <span class="o">||</span> <span class="o">!</span><span class="n">outputs</span><span class="p">)</span>
+		<span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span> <span class="c1">// out of memory</span>
+
+	<span class="n">err</span> <span class="o">=</span> <span class="n">dl_alloc</span><span class="p">(</span><span class="o">&amp;</span><span class="n">my_list</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">));</span>
+	<span class="k">if</span><span class="p">(</span><span class="n">err</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
+		<span class="k">return</span> <span class="o">-</span><span class="mi">2</span><span class="p">;</span> <span class="c1">// failed to create my_list</span>
+
+	<span class="cm">/* Push the numbers onto the stack. */</span>
+	<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">argc</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+		<span class="n">inputs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">atoi</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+		<span class="n">dl_push_head</span><span class="p">(</span><span class="n">my_list</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">inputs</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+	<span class="p">}</span>
+
+	<span class="cm">/* Transform the list by mapping my_abs over the list. */</span>
+	<span class="n">dl_map</span><span class="p">(</span><span class="n">my_list</span><span class="p">,</span> <span class="p">(</span><span class="n">map_fn</span><span class="p">)</span> <span class="n">my_abs</span><span class="p">);</span>
+
+	<span class="cm">/* Output each number popped from the stack. */</span>
+	<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">argc</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+		<span class="n">outputs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">dl_pop_head</span><span class="p">(</span><span class="n">my_list</span><span class="p">);</span>
+		<span class="n">printf</span><span class="p">(</span><span class="s">&quot;%d &quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">outputs</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+	<span class="p">}</span>
+
+	<span class="n">putchar</span><span class="p">(</span><span class="sc">&#39;\n&#39;</span><span class="p">);</span>
+
+	<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">doxygenstruct: Cannot find class “double_list” in doxygen xml output for project “FOCS” from directory: ./xml</p>
+</div>
+<div class="section" id="creation-and-destruction">
+<h2>Creation and Destruction<a class="headerlink" href="#creation-and-destruction" title="Permalink to this headline">¶</a></h2>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">doxygenfunction: Cannot find function “dl_alloc” in doxygen xml output for project “FOCS” from directory: ./xml</p>
+</div>
+<dl class="function">
+<dt id="_CPPv310dl_destroyP11double_list">
+<span id="_CPPv210dl_destroyP11double_list"></span><span id="dl_destroy__double_listP"></span><span class="target" id="double__list_8h_1a88ec0ca7f01124280090b105e009bbba"></span>void <code class="descname">dl_destroy</code><span class="sig-paren">(</span>double_list *<em>list</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv310dl_destroyP11double_list" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Destroy and deallocate a doubly linked list. </p>
+<p>
+De-allocates the doubly linked list at the structure pointer pointed to by <code class="docutils literal notranslate"><span class="pre">list</span></code>, as well as de-allocating all data elements contained within <code class="docutils literal notranslate"><span class="pre">list</span></code>. <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: A pointer to a <code class="docutils literal notranslate"><span class="pre">struct</span> <span class="pre">double_list</span></code> pointer. </li>
+<li><code class="docutils literal notranslate"><span class="pre">data_size</span></code>: The size of data to store in the list</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+</div>
+<div class="section" id="data-management">
+<h2>Data Management<a class="headerlink" href="#data-management" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="_CPPv312dl_push_head11double_listPv">
+<span id="_CPPv212dl_push_head11double_listPv"></span><span id="dl_push_head__double_list.voidP"></span><span class="target" id="double__list_8h_1a57593cb4ae75d4b8779a47af0bbdcd2c"></span>void <code class="descname">dl_push_head</code><span class="sig-paren">(</span>double_list <em>list</em>, void *<em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv312dl_push_head11double_listPv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Push a new data element to the head of the list. </p>
+<p>
+Push a newly allocated copy of <code class="docutils literal notranslate"><span class="pre">data</span></code> onto the head of <code class="docutils literal notranslate"><span class="pre">list</span></code>. <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: The list to push onto </li>
+<li><code class="docutils literal notranslate"><span class="pre">data</span></code>: A pointer to the data to push</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv312dl_push_tail11double_listPv">
+<span id="_CPPv212dl_push_tail11double_listPv"></span><span id="dl_push_tail__double_list.voidP"></span><span class="target" id="double__list_8h_1a48475834f5a9d2bf06fd1dcf37ada459"></span>void <code class="descname">dl_push_tail</code><span class="sig-paren">(</span>double_list <em>list</em>, void *<em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv312dl_push_tail11double_listPv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Push a new data element to the tail of the list. </p>
+<p>
+Push a newly allocated copy of <code class="docutils literal notranslate"><span class="pre">data</span></code> onto the tail of <code class="docutils literal notranslate"><span class="pre">list</span></code>. <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: The list to push onto </li>
+<li><code class="docutils literal notranslate"><span class="pre">data</span></code>: A pointer to the data to push</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv311dl_pop_head11double_list">
+<span id="_CPPv211dl_pop_head11double_list"></span><span id="dl_pop_head__double_list"></span><span class="target" id="double__list_8h_1add4b3228fface4e04bcf291b7da874a6"></span>void *<code class="descname">dl_pop_head</code><span class="sig-paren">(</span>double_list <em>list</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv311dl_pop_head11double_list" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Pop a data element from the head of a list. </p>
+<p>
+Remove and return the data element at the head of <code class="docutils literal notranslate"><span class="pre">list</span></code>. After this operation the returned data element <em>will no longer be stored in</em> <code class="docutils literal notranslate"><span class="pre">list</span></code>.<dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: The list to pop from</li>
+</ul>
+</dd>
+</dl>
+</p>
+<p><dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd>A pointer to the data element at the head of <code class="docutils literal notranslate"><span class="pre">list</span></code>. This pointer must be explicitly freed with free() when it is no longer needed. It is <strong>not</strong> equivalent to the pointer which was used to insert the data into <code class="docutils literal notranslate"><span class="pre">list</span></code>. </dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv311dl_pop_tail11double_list">
+<span id="_CPPv211dl_pop_tail11double_list"></span><span id="dl_pop_tail__double_list"></span><span class="target" id="double__list_8h_1a2ebf5ae63921537e2b5a60b91d923682"></span>void *<code class="descname">dl_pop_tail</code><span class="sig-paren">(</span>double_list <em>list</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv311dl_pop_tail11double_list" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Pop a data element from the tail of a list. </p>
+<p>
+Remove and return the data element at the tail of <code class="docutils literal notranslate"><span class="pre">list</span></code>. After this operation the returned data element <em>will no longer be stored in</em> <code class="docutils literal notranslate"><span class="pre">list</span></code>.<dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: The list to pop from</li>
+</ul>
+</dd>
+</dl>
+</p>
+<p><dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd>A pointer to the data element at the tail of <code class="docutils literal notranslate"><span class="pre">list</span></code>. This pointer must be explicitly freed with free() when it is no longer needed. It is <strong>not</strong> equivalent to the pointer which was used to insert the data into <code class="docutils literal notranslate"><span class="pre">list</span></code>. </dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv39dl_insert11double_listPv6size_t">
+<span id="_CPPv29dl_insert11double_listPv6size_t"></span><span id="dl_insert__double_list.voidP.s"></span><span class="target" id="double__list_8h_1a7bd78a4966d815bad8f6e2ce1d79f51f"></span>bool <code class="descname">dl_insert</code><span class="sig-paren">(</span>double_list <em>list</em>, void *<em>data</em>, size_t <em>pos</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv39dl_insert11double_listPv6size_t" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Insert a new data element to a given position in a list. </p>
+<p>
+Insert a newly allocated copy of <code class="docutils literal notranslate"><span class="pre">data</span></code> into <code class="docutils literal notranslate"><span class="pre">list</span></code> at the index indicated by <code class="docutils literal notranslate"><span class="pre">pos</span></code>.<dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: The list to inesrt into </li>
+<li><code class="docutils literal notranslate"><span class="pre">data</span></code>: A pointer to the data to insert </li>
+<li><code class="docutils literal notranslate"><span class="pre">pos</span></code>: The position to insert the element at (must be an index in the range <code class="docutils literal notranslate"><span class="pre">0..DS_PRIV(list)-&gt;length</span></code>)</li>
+</ul>
+</dd>
+</dl>
+</p>
+<p><dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">true</span></code> if the insertion succeeds, otherwise <code class="docutils literal notranslate"><span class="pre">false</span></code>. </dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv39dl_delete11double_list6size_t">
+<span id="_CPPv29dl_delete11double_list6size_t"></span><span id="dl_delete__double_list.s"></span><span class="target" id="double__list_8h_1a227275332e51337194f72cb8d5f47b95"></span>bool <code class="descname">dl_delete</code><span class="sig-paren">(</span>double_list <em>list</em>, size_t <em>pos</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv39dl_delete11double_list6size_t" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Delete a data element from a given position in a list. </p>
+<p>
+Delete the copy of <code class="docutils literal notranslate"><span class="pre">data</span></code> stored in <code class="docutils literal notranslate"><span class="pre">list</span></code> at the index indicated by <code class="docutils literal notranslate"><span class="pre">pos</span></code>.<dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: The list to delete from </li>
+<li><code class="docutils literal notranslate"><span class="pre">pos</span></code>: The position to delete the element at (must be an index in the range <code class="docutils literal notranslate"><span class="pre">0..DS_PRIV(list)-&gt;length</span> <span class="pre">-</span> <span class="pre">1</span></code>)</li>
+</ul>
+</dd>
+</dl>
+</p>
+<p><dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">true</span></code> if the deletion succeeds, otherwise <code class="docutils literal notranslate"><span class="pre">false</span></code>. </dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv39dl_remove11double_list6size_t">
+<span id="_CPPv29dl_remove11double_list6size_t"></span><span id="dl_remove__double_list.s"></span><span class="target" id="double__list_8h_1af5f9b3d6ad815d3c25237dd426f8eada"></span>void *<code class="descname">dl_remove</code><span class="sig-paren">(</span>double_list <em>list</em>, size_t <em>pos</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv39dl_remove11double_list6size_t" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Delete and return a data element from a given position in a list. </p>
+<p>
+Delete the reference to <code class="docutils literal notranslate"><span class="pre">data</span></code> stored in <code class="docutils literal notranslate"><span class="pre">list</span></code> at the index indicated by <code class="docutils literal notranslate"><span class="pre">pos</span></code>.<dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: The list to delete from </li>
+<li><code class="docutils literal notranslate"><span class="pre">pos</span></code>: The position to delete the element at (must be an index in the range <code class="docutils literal notranslate"><span class="pre">0..DS_PRIV(list)-&gt;length</span> <span class="pre">-</span> <span class="pre">1</span></code>)</li>
+</ul>
+</dd>
+</dl>
+</p>
+<p><dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd>A pointer to the data removed from <code class="docutils literal notranslate"><span class="pre">list</span></code>, or <code class="docutils literal notranslate"><span class="pre">NULL</span></code> on failure. This pointer must be explicitly freed with free() when it is no longer needed. It is <strong>not</strong> equivalent to the pointer which was used to insert the data into <code class="docutils literal notranslate"><span class="pre">list</span></code>. </dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv38dl_fetch11double_list6size_t">
+<span id="_CPPv28dl_fetch11double_list6size_t"></span><span id="dl_fetch__double_list.s"></span><span class="target" id="double__list_8h_1acd6b2744125828faf70c83c1a99486d2"></span>void *<code class="descname">dl_fetch</code><span class="sig-paren">(</span>double_list <em>list</em>, size_t <em>pos</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv38dl_fetch11double_list6size_t" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Fetch a data element from a given position in a list. </p>
+<p>
+Fetch the data stored at index <code class="docutils literal notranslate"><span class="pre">pos</span></code> in <code class="docutils literal notranslate"><span class="pre">list</span></code>.<dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: The list to fetch from </li>
+<li><code class="docutils literal notranslate"><span class="pre">pos</span></code>: The index to fetch the element from (must be an index in the range <code class="docutils literal notranslate"><span class="pre">0..DS_PRIV(list)-&gt;length</span> <span class="pre">-</span> <span class="pre">1</span></code>)</li>
+</ul>
+</dd>
+</dl>
+</p>
+<p><dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd>A pointer to the data at index <code class="docutils literal notranslate"><span class="pre">pos</span></code>, or <code class="docutils literal notranslate"><span class="pre">NULL</span></code> on failure. This pointer should <strong>not</strong> be free()d explicitly, or the list will become corrupted. This pointer will be free()d when dl_destroy() is called, so if the data is needed after the list is destroyed, make a copy of it, or make sure to call dl_remove() on the data’s index before destroying the list. </dd>
+</dl>
+</p>
+</dd></dl>
+
+</div>
+<div class="section" id="functional-utilities">
+<h2>Functional Utilities<a class="headerlink" href="#functional-utilities" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="_CPPv38dl_empty11double_list">
+<span id="_CPPv28dl_empty11double_list"></span><span id="dl_empty__double_list"></span><span class="target" id="double__list_8h_1a7e4e967b459fffd4b0f18adbfbee0190"></span>bool <code class="descname">dl_empty</code><span class="sig-paren">(</span>double_list <em>list</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv38dl_empty11double_list" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Determine if a list is empty. </p>
+<p><dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">true</span></code> if <code class="docutils literal notranslate"><span class="pre">list</span></code> is empty, <code class="docutils literal notranslate"><span class="pre">false</span></code> otherwise. </dd>
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: The list to check</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv37dl_elem11double_listPv">
+<span id="_CPPv27dl_elem11double_listPv"></span><span id="dl_elem__double_list.voidP"></span><span class="target" id="double__list_8h_1ab92b3f83b979039205b8c84fefebe051"></span>bool <code class="descname">dl_elem</code><span class="sig-paren">(</span>double_list <em>list</em>, void *<em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv37dl_elem11double_listPv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Determine if a list contains a value. </p>
+<p>
+Determines if <code class="docutils literal notranslate"><span class="pre">list</span></code> contains an entry matching <code class="docutils literal notranslate"><span class="pre">data</span></code>. The operation compares the contents of the memory pointed to by <code class="docutils literal notranslate"><span class="pre">data</span></code>, and not the memory addresses of the data pointers.<dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: The list to search </li>
+<li><code class="docutils literal notranslate"><span class="pre">data</span></code>: The data to search for in the list</li>
+</ul>
+</dd>
+</dl>
+</p>
+<p><dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">true</span></code> if a matching entry is found, otherwise <code class="docutils literal notranslate"><span class="pre">false</span></code> </dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv36dl_map11double_list6map_fn">
+<span id="_CPPv26dl_map11double_list6map_fn"></span><span id="dl_map__double_list.map_fn"></span><span class="target" id="double__list_8h_1ad8343f77ae6e25a827d0965032d2945c"></span>void <code class="descname">dl_map</code><span class="sig-paren">(</span>double_list <em>list</em>, map_fn <em>fn</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv36dl_map11double_list6map_fn" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Map a function over a linked list in-place. </p>
+<p>
+A map operation iterates over <code class="docutils literal notranslate"><span class="pre">list</span></code> and transforms each data element using the function <code class="docutils literal notranslate"><span class="pre">fn</span></code>, replacing the old value with the result of the transformation. In pseudo-code: <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="n">from</span> <span class="mi">0</span> <span class="n">to</span> <span class="n">DS_PRIV</span><span class="p">(</span><span class="n">list</span><span class="p">)</span><span class="o">-&gt;</span><span class="nl">length</span><span class="p">:</span>
+    <span class="n">list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">fn</span><span class="p">(</span><span class="n">list</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+</pre></div>
+</div>
+ <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: A list of values </li>
+<li><code class="docutils literal notranslate"><span class="pre">fn</span></code>: A function that will transform each value in the list</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv38dl_foldrK11double_list8foldr_fnPKv">
+<span id="_CPPv28dl_foldrK11double_list8foldr_fnPKv"></span><span id="dl_foldr__double_listC.foldr_fn.voidCP"></span><span class="target" id="double__list_8h_1afbdfbf9cf5009204a096d1035bc1833c"></span>void *<code class="descname">dl_foldr</code><span class="sig-paren">(</span><em class="property">const</em> double_list <em>list</em>, foldr_fn <em>fn</em>, <em class="property">const</em> void *<em>init</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv38dl_foldrK11double_list8foldr_fnPKv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Right associative fold for doubly linked lists. </p>
+<p>
+A right associative fold uses the binary function <code class="docutils literal notranslate"><span class="pre">fn</span></code> to sequentially reduce a list of values to a single value, starting from some initial value <code class="docutils literal notranslate"><span class="pre">init</span></code>: <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">fn</span><span class="p">(</span><span class="n">init</span><span class="p">,</span> <span class="n">fn</span><span class="p">(</span><span class="n">list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">fn</span><span class="p">(</span><span class="n">list</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">...)))</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: A list of values to reduce </li>
+<li><code class="docutils literal notranslate"><span class="pre">fn</span></code>: A binary function that will sequentially reduce values </li>
+<li><code class="docutils literal notranslate"><span class="pre">init</span></code>: An initial value for the fold</li>
+</ul>
+</dd>
+</dl>
+</p>
+<p><dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd>The result of a right associate fold over <code class="docutils literal notranslate"><span class="pre">list</span></code>. If <code class="docutils literal notranslate"><span class="pre">list</span></code> is empty, the fold will be equal to the value of <code class="docutils literal notranslate"><span class="pre">init</span></code>. </dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv38dl_foldlK11double_list8foldl_fnPKv">
+<span id="_CPPv28dl_foldlK11double_list8foldl_fnPKv"></span><span id="dl_foldl__double_listC.foldl_fn.voidCP"></span><span class="target" id="double__list_8h_1a0ff9ede1c4a88bc90535104cb308d574"></span>void *<code class="descname">dl_foldl</code><span class="sig-paren">(</span><em class="property">const</em> double_list <em>list</em>, foldl_fn <em>fn</em>, <em class="property">const</em> void *<em>init</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv38dl_foldlK11double_list8foldl_fnPKv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Left associative fold for doubly linked lists. </p>
+<p>
+A left associative fold uses the binary function <code class="docutils literal notranslate"><span class="pre">fn</span></code> to sequentially reduce a list of values to a single value, starting from some initial value <code class="docutils literal notranslate"><span class="pre">init</span></code>: <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">fn</span><span class="p">(</span><span class="n">fn</span><span class="p">(</span><span class="n">fn</span><span class="p">(...,</span> <span class="n">init</span><span class="p">),</span> <span class="n">list</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">list</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: A list of values to reduce </li>
+<li><code class="docutils literal notranslate"><span class="pre">fn</span></code>: A binary function that will sequentially reduce values </li>
+<li><code class="docutils literal notranslate"><span class="pre">init</span></code>: An initial value for the fold</li>
+</ul>
+</dd>
+</dl>
+</p>
+<p><dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd>The result of a left associate fold over <code class="docutils literal notranslate"><span class="pre">list</span></code>. If <code class="docutils literal notranslate"><span class="pre">list</span></code> is empty, the fold will be equal to the value of <code class="docutils literal notranslate"><span class="pre">init</span></code>. </dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv36dl_any11double_list7pred_fn">
+<span id="_CPPv26dl_any11double_list7pred_fn"></span><span id="dl_any__double_list.pred_fn"></span><span class="target" id="double__list_8h_1a45cb8555e41f4be0166010fb8814cf60"></span>bool <code class="descname">dl_any</code><span class="sig-paren">(</span>double_list <em>list</em>, pred_fn <em>p</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv36dl_any11double_list7pred_fn" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Determine if any value in a list satisifies some condition. </p>
+<p>
+Iterate over each value stored in <code class="docutils literal notranslate"><span class="pre">list</span></code>, and determine if any of them satisfies <code class="docutils literal notranslate"><span class="pre">p</span></code> (e.g. <code class="docutils literal notranslate"><span class="pre">p</span></code> returns <code class="docutils literal notranslate"><span class="pre">true</span></code> when passed that value).<dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: A list of values </li>
+<li><code class="docutils literal notranslate"><span class="pre">p</span></code>: The predicate function (representing a condition to be satisfied).</li>
+</ul>
+</dd>
+</dl>
+</p>
+<p><dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">true</span></code> if there is at least one value that satisfies the predicate. Otherwise, it returns <code class="docutils literal notranslate"><span class="pre">false</span></code>. </dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv36dl_all11double_list7pred_fn">
+<span id="_CPPv26dl_all11double_list7pred_fn"></span><span id="dl_all__double_list.pred_fn"></span><span class="target" id="double__list_8h_1a665601ca424966b054e3894306c04058"></span>bool <code class="descname">dl_all</code><span class="sig-paren">(</span>double_list <em>list</em>, pred_fn <em>p</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv36dl_all11double_list7pred_fn" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Determines if all values in a list satisify some condition. </p>
+<p>
+Iterate over each value stored in <code class="docutils literal notranslate"><span class="pre">list</span></code>, and determine if all of them satisfy <code class="docutils literal notranslate"><span class="pre">p</span></code> (e.g. <code class="docutils literal notranslate"><span class="pre">p</span></code> returns true when passed that value).<dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: A list of values </li>
+<li><code class="docutils literal notranslate"><span class="pre">p</span></code>: The predicate function (representing a condition to be satisfied).</li>
+</ul>
+</dd>
+</dl>
+</p>
+<p><dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">false</span></code> if there is at least one value that does not satisfy the predicate. Otherwise, it returns <code class="docutils literal notranslate"><span class="pre">true</span></code>. </dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv39dl_filter11double_list7pred_fn">
+<span id="_CPPv29dl_filter11double_list7pred_fn"></span><span id="dl_filter__double_list.pred_fn"></span><span class="target" id="double__list_8h_1a07f311094e7667fbe5e024fd42f098af"></span>bool <code class="descname">dl_filter</code><span class="sig-paren">(</span>double_list <em>list</em>, pred_fn <em>p</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv39dl_filter11double_list7pred_fn" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Filter a list to contain only values that satisfy some predicate. </p>
+<p>
+Filter <code class="docutils literal notranslate"><span class="pre">list</span></code> in-place by removing elements that do not satisfy the predicate <code class="docutils literal notranslate"><span class="pre">p</span></code>. Elements that do satisfy the predicate <code class="docutils literal notranslate"><span class="pre">p</span></code> are not removed from the list. <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: The list to filter </li>
+<li><code class="docutils literal notranslate"><span class="pre">p</span></code>: The predicate</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv313dl_drop_while11double_list7pred_fn">
+<span id="_CPPv213dl_drop_while11double_list7pred_fn"></span><span id="dl_drop_while__double_list.pred_fn"></span><span class="target" id="double__list_8h_1aaf2aff8323e4bdbfc3c6d8d39eff2035"></span>bool <code class="descname">dl_drop_while</code><span class="sig-paren">(</span>double_list <em>list</em>, pred_fn <em>p</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv313dl_drop_while11double_list7pred_fn" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Drop elements from the head of the list until the predicate is unsatisfied. </p>
+<p>Drop each element that satisfies the predicate <code class="docutils literal notranslate"><span class="pre">p</span></code>, starting at the beginning of <code class="docutils literal notranslate"><span class="pre">list</span></code> and continuing until reaching the first element that does not satisfy the predicate <code class="docutils literal notranslate"><span class="pre">p</span></code>.</p>
+<p>This function is an in-place equivalent of Haskell’s dropWhile. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv313dl_take_while11double_list7pred_fn">
+<span id="_CPPv213dl_take_while11double_list7pred_fn"></span><span id="dl_take_while__double_list.pred_fn"></span><span class="target" id="double__list_8h_1a2339f544d7d7d1e766c5be62507b7546"></span>bool <code class="descname">dl_take_while</code><span class="sig-paren">(</span>double_list <em>list</em>, pred_fn <em>p</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv313dl_take_while11double_list7pred_fn" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Keep elements from the head of the list until the predicate is unsatisfied. </p>
+<p>Iterate over each element of <code class="docutils literal notranslate"><span class="pre">list</span></code>, starting at the beginning, that satisfies the predicate <code class="docutils literal notranslate"><span class="pre">p</span></code>. Once an element that does not satisfy the predicate <code class="docutils literal notranslate"><span class="pre">p</span></code> is reached, drop the rest of the list, including that element.</p>
+<p>This function is an in-place equivalent of Haskell’s takeWhile. </p>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="linked_list.html" class="btn btn-neutral float-right" title="Linked Lists" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="single_list.html" class="btn btn-neutral" title="Singly Linked Lists" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Quytelda Kahja.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.0.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

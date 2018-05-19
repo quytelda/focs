@@ -1,0 +1,258 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Submitting Patches &mdash; FOCS 0.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Coding Style Guidelines" href="coding-style.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> FOCS
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation/obtaining.html">Obtaining FOCS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation/makefile.html">Building FOCS Using a Makefile</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/list.html">API: Lists</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/sync.html">API: Thread Synchronization</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../dev.html">Developer Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="coding-style.html">Coding Style Guidelines</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Submitting Patches</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#how-to-generate-a-patch">How to Generate a Patch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#where-to-send-the-patch">Where to Send the Patch</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../dev.html#how-can-i-contribute">How Can I Contribute?</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">FOCS</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../dev.html">Developer Documentation</a> &raquo;</li>
+        
+      <li>Submitting Patches</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/dev/submit-patch.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="submitting-patches">
+<h1>Submitting Patches<a class="headerlink" href="#submitting-patches" title="Permalink to this headline">¶</a></h1>
+<p>You can submit patches to the project generated using <cite>git format-patch</cite>, <cite>git diff</cite>, or <cite>diff -u</cite> via email.</p>
+<div class="section" id="how-to-generate-a-patch">
+<h2>How to Generate a Patch<a class="headerlink" href="#how-to-generate-a-patch" title="Permalink to this headline">¶</a></h2>
+<p>If you do your development under Git, creating a patch is very easy.  The <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">format-patch</span></code> command will automatically convert your commits to patches that can be applied to the upstream repository.  If there is more than one commit, then a patch is generated for each one and the result is referred to as a “patch series”.  For example:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$ git checkout mybranch
+$ ... <span class="c1"># make changes</span>
+$ git commit -m <span class="s2">&quot;My git commit message.&quot;</span>
+$ git format-patch master..mybranch
+</pre></div>
+</div>
+<p>You should see a new file in the current directory called <code class="docutils literal notranslate"><span class="pre">0001-My-git-commit-message.patch</span></code>.  This is the patch file that describes your changes.  Unless you know what you are doing, it is best to submit the patch as an email attachment, since most email clients/servers do a really good job of mangling patches and rendering them unusable.  Please do not send links to patch file downloads.  If you want, Git itself can be configured to send patches via email in a compatible format.  See <a class="reference external" href="https://git-scm.com/docs/git-send-email">https://git-scm.com/docs/git-send-email</a>.</p>
+</div>
+<div class="section" id="where-to-send-the-patch">
+<h2>Where to Send the Patch<a class="headerlink" href="#where-to-send-the-patch" title="Permalink to this headline">¶</a></h2>
+<p>Once you have generated your patch(es), you may wonder where to send them.  The best way to find out is to use the <code class="docutils literal notranslate"><span class="pre">scripts/get_authors.py</span></code> script.  It will tell you, in sorted order, who has commited the most to a certain file or directory.  Run <code class="docutils literal notranslate"><span class="pre">scripts/get_authors.py</span></code> and pass it the file or directory you modified in your changes:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$ git checkout master <span class="c1"># make sure to check commiters on the master branch</span>
+$ ./scripts/get_authors.py src/list/double_list.c
+Author <span class="s2">&quot;Quytelda Kahja &lt;quytelda@tamalin.org&gt;&quot;</span> has <span class="m">8</span> commit<span class="o">(</span>s<span class="o">)</span>.
+Author <span class="s2">&quot;Erumpet &lt;nhakmiller@gmail.com&gt;&quot;</span> has <span class="m">1</span> commit<span class="o">(</span>s<span class="o">)</span>.
+</pre></div>
+</div>
+<p>Send the patch to the most frequent commiter on the list, and perhaps <code class="docutils literal notranslate"><span class="pre">CC</span></code> the second or third most commiters for good measure.</p>
+<p>Additionally, you can always send patches to the primary project maintainer: Quytelda Kahja &lt;<a class="reference external" href="mailto:quytelda&#37;&#52;&#48;tamalin&#46;org">quytelda<span>&#64;</span>tamalin<span>&#46;</span>org</a>&gt;.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="coding-style.html" class="btn btn-neutral" title="Coding Style Guidelines" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Quytelda Kahja.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.0.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
