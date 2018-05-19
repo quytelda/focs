@@ -418,6 +418,15 @@ uint8_t increment(uint8_t n)
 }
 WRAP_MAPPABLE(increment, uint8_t, transform);
 
+START_TEST(test_rb_map_empty)
+{
+	/* `buffer` is initially empty. */
+	rb_map(buffer, transform);
+
+	ck_assert(rb_empty(buffer));
+}
+END_TEST
+
 START_TEST(test_rb_map)
 {
 	uint8_t in[] = {1, 2, 3};
@@ -565,6 +574,7 @@ Suite * rb_suite(void)
 	tcase_add_test(case_rb_fetch,     test_rb_fetch_empty);
 	tcase_add_test(case_rb_fetch,     test_rb_fetch_single);
 	tcase_add_test(case_rb_fetch,     test_rb_fetch_multiple);
+	tcase_add_test(case_rb_map,       test_rb_map_empty);
 	tcase_add_test(case_rb_map,       test_rb_map);
 	tcase_add_test(case_rb_foldr,     test_rb_foldr);
 	tcase_add_test(case_rb_foldl,     test_rb_foldl);
