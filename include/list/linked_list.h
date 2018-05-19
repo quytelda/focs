@@ -1,4 +1,4 @@
-/* linked_list.h - Doubly Linked List API
+/* linked_list.h - Linked List API
  * Copyright (C) 2018 Quytelda Kahja
  *
  * This file is part of focs.
