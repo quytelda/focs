@@ -211,6 +211,27 @@ static void * __pure __nonulls __fetch(const ring_buffer buf,
 	return data;
 }
 
+bool __nonulls __reverse(ring_buffer buf)
+{
+	void * sa1;
+	void * sa2;
+	void * tmp;
+
+	malloc_rof(tmp, DS_DATA_SIZE(buf), false);
+
+	for(size_t i = 0; i < __LENGTH(buf) / 2; i++) {
+		sa1 = __index_to_addr(buf, i);
+		sa2 = __index_to_addr(buf, __LENGTH(buf) - 1 - i);
+
+		memcpy(tmp, sa1, DS_DATA_SIZE(buf));
+		memcpy(sa1, sa2, DS_DATA_SIZE(buf));
+		memcpy(sa2, tmp, DS_DATA_SIZE(buf));
+	}
+
+	free_null(tmp);
+	return true;
+}
+
 void __nonulls __map(const ring_buffer buf, const map_fn fn)
 {
 	void * current;
@@ -492,6 +513,17 @@ void * __nonulls rb_fetch(const ring_buffer buf, const ssize_t pos)
 	rwlock_writer_exit(DS_PRIV(buf)->rwlock);
 
 	return data;
+}
+
+bool rb_reverse(ring_buffer buf)
+{
+	bool success;
+
+	rwlock_writer_entry(DS_PRIV(buf)->rwlock);
+	success = __reverse(buf);
+	rwlock_writer_exit(DS_PRIV(buf)->rwlock);
+
+	return success;
 }
 
 void __nonulls rb_map(const ring_buffer buf, const map_fn fn)

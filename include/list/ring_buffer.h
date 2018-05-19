@@ -300,6 +300,15 @@ bool __nonulls rb_delete(ring_buffer buf, const size_t pos);
  */
 void * __nonulls rb_remove(ring_buffer buf, const size_t pos);
 
+/**
+ * Reverse the contents of a ring buffer in-place.
+ * @param buf The ring buffer to reverse
+ *
+ * Reverses `buf` in-place so that the data blocks are in reverse order when
+ * enumerated from head to tail.
+ */
+bool __nonulls rb_reverse(ring_buffer buf);
+
 /* ########################## *
  * # Higher Order Functions # *
  * ########################## */
