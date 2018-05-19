@@ -29,18 +29,9 @@ static const struct ds_properties props = {
 
 static ring_buffer buffer;
 
-void setup0(void)
+void setup(void)
 {
 	buffer = rb_create(&props);
-}
-
-void setup3(void)
-{
-	uint8_t in[] = {1, 2, 3};
-	setup0();
-
-	for(size_t i = 0; i < array_size(in); i++)
-		rb_push_tail(buffer, &in[i]);
 }
 
 void takedown(void)
@@ -549,14 +540,14 @@ Suite * rb_suite(void)
 	case_rb_any       = tcase_create("rb_any");
 	case_rb_all       = tcase_create("rb_all");
 
-	tcase_add_checked_fixture(case_rb_create,    setup0, takedown);
-	tcase_add_checked_fixture(case_rb_push_head, setup0, takedown);
-	tcase_add_checked_fixture(case_rb_push_tail, setup0, takedown);
-	tcase_add_checked_fixture(case_rb_map,       setup0, takedown);
-	tcase_add_checked_fixture(case_rb_foldr,     setup0, takedown);
-	tcase_add_checked_fixture(case_rb_foldl,     setup0, takedown);
-	tcase_add_checked_fixture(case_rb_any,       setup0, takedown);
-	tcase_add_checked_fixture(case_rb_all,       setup0, takedown);
+	tcase_add_checked_fixture(case_rb_create,    setup, takedown);
+	tcase_add_checked_fixture(case_rb_push_head, setup, takedown);
+	tcase_add_checked_fixture(case_rb_push_tail, setup, takedown);
+	tcase_add_checked_fixture(case_rb_map,       setup, takedown);
+	tcase_add_checked_fixture(case_rb_foldr,     setup, takedown);
+	tcase_add_checked_fixture(case_rb_foldl,     setup, takedown);
+	tcase_add_checked_fixture(case_rb_any,       setup, takedown);
+	tcase_add_checked_fixture(case_rb_all,       setup, takedown);
 
 	tcase_add_test(case_rb_create,    test_rb_create);
 	tcase_add_test(case_rb_push_head, test_rb_push_head_single);
