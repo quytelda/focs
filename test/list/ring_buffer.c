@@ -412,6 +412,40 @@ START_TEST(test_rb_fetch_multiple)
 }
 END_TEST
 
+START_TEST(test_rb_reverse_empty)
+{
+	bool success;
+
+	success = rb_reverse(buffer);
+
+	ck_assert(success);
+	ck_assert(rb_empty(buffer));
+}
+END_TEST
+
+START_TEST(test_rb_reverse)
+{
+	uint8_t in[] = {1, 2, 3};
+	uint8_t * out;
+	bool success;
+
+	for(size_t i = 0; i < array_size(in); i++)
+		rb_push_head(buffer, &in[i]);
+
+	success = rb_reverse(buffer);
+
+	ck_assert(success);
+	ck_assert_int_eq(rb_size(buffer), array_size(in));
+
+	for(size_t i = 0; i < array_size(in); i++) {
+		out = rb_pop_head(buffer);
+
+		ck_assert(out);
+		ck_assert_int_eq(*out, in[i]);
+	}
+}
+END_TEST
+
 uint8_t increment(uint8_t n)
 {
 	return n + 1;
@@ -593,6 +627,7 @@ Suite * rb_suite(void)
 	TCase * case_rb_pop_tail;
 	TCase * case_rb_insert;
 	TCase * case_rb_fetch;
+	TCase * case_rb_reverse;
 	TCase * case_rb_map;
 	TCase * case_rb_foldr;
 	TCase * case_rb_foldl;
@@ -608,6 +643,7 @@ Suite * rb_suite(void)
 	case_rb_pop_tail  = tcase_create("rb_pop_tail");
 	case_rb_insert    = tcase_create("rb_insert");
 	case_rb_fetch     = tcase_create("rb_fetch");
+	case_rb_reverse   = tcase_create("rb_reverse");
 	case_rb_map       = tcase_create("rb_map");
 	case_rb_foldr     = tcase_create("rb_foldr");
 	case_rb_foldl     = tcase_create("rb_foldl");
@@ -617,6 +653,7 @@ Suite * rb_suite(void)
 	tcase_add_checked_fixture(case_rb_create,    setup, takedown);
 	tcase_add_checked_fixture(case_rb_push_head, setup, takedown);
 	tcase_add_checked_fixture(case_rb_push_tail, setup, takedown);
+	tcase_add_checked_fixture(case_rb_reverse,   setup, takedown);
 	tcase_add_checked_fixture(case_rb_map,       setup, takedown);
 	tcase_add_checked_fixture(case_rb_foldr,     setup, takedown);
 	tcase_add_checked_fixture(case_rb_foldl,     setup, takedown);
@@ -639,6 +676,8 @@ Suite * rb_suite(void)
 	tcase_add_test(case_rb_fetch,     test_rb_fetch_empty);
 	tcase_add_test(case_rb_fetch,     test_rb_fetch_single);
 	tcase_add_test(case_rb_fetch,     test_rb_fetch_multiple);
+	tcase_add_test(case_rb_reverse,   test_rb_reverse_empty);
+	tcase_add_test(case_rb_reverse,   test_rb_reverse);
 	tcase_add_test(case_rb_map,       test_rb_map_empty);
 	tcase_add_test(case_rb_map,       test_rb_map);
 	tcase_add_test(case_rb_foldr,     test_rb_foldr_empty);
@@ -657,6 +696,7 @@ Suite * rb_suite(void)
 	suite_add_tcase(suite, case_rb_pop_tail);
 	suite_add_tcase(suite, case_rb_insert);
 	suite_add_tcase(suite, case_rb_fetch);
+	suite_add_tcase(suite, case_rb_reverse);
 	suite_add_tcase(suite, case_rb_map);
 	suite_add_tcase(suite, case_rb_foldr);
 	suite_add_tcase(suite, case_rb_foldl);
