@@ -455,6 +455,19 @@ int8_t subtract(const int8_t a, const int8_t b)
 WRAP_RFOLDABLE(subtract, int8_t, reduce_right);
 WRAP_LFOLDABLE(subtract, int8_t, reduce_left);
 
+START_TEST(test_rb_foldr_empty)
+{
+	int8_t init = 0;
+	int8_t * out;
+
+	out = rb_foldr(buffer, reduce_right, &init);
+
+	ck_assert(out);
+	ck_assert_int_eq(*out, init);
+	ck_assert(rb_empty(buffer));
+}
+END_TEST
+
 START_TEST(test_rb_foldr)
 {
 	int8_t in[] = {1, 2, 3};
@@ -469,6 +482,19 @@ START_TEST(test_rb_foldr)
 	ck_assert(out);
 	ck_assert_int_eq(*out, 2);
 	ck_assert_int_eq(rb_size(buffer), array_size(in));
+}
+END_TEST
+
+START_TEST(test_rb_foldl_empty)
+{
+	int8_t init = 0;
+	int8_t * out;
+
+	out = rb_foldl(buffer, reduce_left, &init);
+
+	ck_assert(out);
+	ck_assert_int_eq(*out, init);
+	ck_assert(rb_empty(buffer));
 }
 END_TEST
 
@@ -576,7 +602,9 @@ Suite * rb_suite(void)
 	tcase_add_test(case_rb_fetch,     test_rb_fetch_multiple);
 	tcase_add_test(case_rb_map,       test_rb_map_empty);
 	tcase_add_test(case_rb_map,       test_rb_map);
+	tcase_add_test(case_rb_foldr,     test_rb_foldr_empty);
 	tcase_add_test(case_rb_foldr,     test_rb_foldr);
+	tcase_add_test(case_rb_foldl,     test_rb_foldl_empty);
 	tcase_add_test(case_rb_foldl,     test_rb_foldl);
 	tcase_add_test(case_rb_any,       test_rb_any);
 
