@@ -194,6 +194,19 @@ bool __nonulls rb_empty(const ring_buffer buf);
 bool __nonulls rb_full(const ring_buffer buf);
 
 /**
+ * Determine if a ring buffer contains a value.
+ * @param buf  The ring buffer to search
+ * @param data The data to search for
+ *
+ * Determines if `buf` contains an entry matching `data`.
+ * The operation compares the contents of the memory pointed to by `data`, and
+ * not the memory addresses of the data pointers.
+ *
+ * @return `true` if a matching entry is found, otherwise `false`
+ */
+bool __nonulls rb_elem(const ring_buffer buf, const void * data);
+
+/**
  * Push a new data block onto the head of a ring buffer.
  * @param buf The ring buffer to push onto
  * @param data A pointer to the data to push

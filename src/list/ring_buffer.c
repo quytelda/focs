@@ -20,6 +20,17 @@
 #include "list/ring_buffer.h"
 #include "sync/rwlock.h"
 
+static bool __nonulls __elem(const ring_buffer buf, const void * data)
+{
+	void * current;
+
+	ring_buffer_foreach(buf, current)
+		if(memcmp(current, data, DS_DATA_SIZE(buf)) == 0)
+			return true;
+
+	return false;
+}
+
 static __nonulls bool __push_head(ring_buffer buf, const void * data)
 {
 	if(!DS_OVERWRITE(buf) && __IS_FULL(buf))
@@ -422,6 +433,17 @@ bool rb_full(const ring_buffer buf)
 
 	rwlock_reader_entry(DS_PRIV(buf)->rwlock);
 	success = __IS_FULL(buf);
+	rwlock_reader_exit(DS_PRIV(buf)->rwlock);
+
+	return success;
+}
+
+bool rb_elem(const ring_buffer buf, const void * data)
+{
+	bool success;
+
+	rwlock_reader_entry(DS_PRIV(buf)->rwlock);
+	success = __elem(buf, data);
 	rwlock_reader_exit(DS_PRIV(buf)->rwlock);
 
 	return success;
