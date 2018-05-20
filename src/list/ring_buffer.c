@@ -80,9 +80,9 @@ static __nonulls void * __pop_tail(ring_buffer buf)
 	return data;
 }
 
-static void * __shift_forward(const ring_buffer buf,
-			      const size_t start,
-			      const size_t end)
+static __nonulls void * __shift_forward(const ring_buffer buf,
+			                const size_t start,
+			                const size_t end)
 {
 	void * dest;
 	void * front;
@@ -98,9 +98,9 @@ static void * __shift_forward(const ring_buffer buf,
 	return front;
 }
 
-static void * __shift_backward(const ring_buffer buf,
-			       const size_t start,
-			       const size_t end)
+static __nonulls void * __shift_backward(const ring_buffer buf,
+			                 const size_t start,
+			                 const size_t end)
 {
 	void * back;
 	void * dest;
@@ -116,7 +116,7 @@ static void * __shift_backward(const ring_buffer buf,
 	return back;
 }
 
-static void __open_gap(ring_buffer buf, const size_t index)
+static __nonulls void __open_gap(ring_buffer buf, const size_t index)
 {
 	size_t end;
 	void * mark;
@@ -133,7 +133,7 @@ static void __open_gap(ring_buffer buf, const size_t index)
 	(DS_PRIV(buf)->length)++;
 }
 
-static void __close_gap(ring_buffer buf, const size_t index)
+static __nonulls void __close_gap(ring_buffer buf, const size_t index)
 {
 	size_t end;
 
@@ -193,7 +193,7 @@ static __nonulls void * __remove(ring_buffer buf,
 	return keep ? data : addr;
 }
 
-static void * __pure __nonulls __fetch(const ring_buffer buf,
+static __pure __nonulls void * __fetch(const ring_buffer buf,
 	                               const ssize_t relative)
 {
 	void * addr;
@@ -211,7 +211,7 @@ static void * __pure __nonulls __fetch(const ring_buffer buf,
 	return data;
 }
 
-bool __nonulls __reverse(ring_buffer buf)
+static __nonulls bool __reverse(ring_buffer buf)
 {
 	void * sa1;
 	void * sa2;
@@ -232,7 +232,7 @@ bool __nonulls __reverse(ring_buffer buf)
 	return true;
 }
 
-void __nonulls __map(const ring_buffer buf, const map_fn fn)
+static __nonulls void __map(const ring_buffer buf, const map_fn fn)
 {
 	void * current;
 	void * result;
@@ -247,9 +247,9 @@ void __nonulls __map(const ring_buffer buf, const map_fn fn)
 	}
 }
 
-void * __nonulls __foldr(const ring_buffer buf,
-	                 const foldr_fn fn,
-	                 const void * init)
+static __pure __nonulls void * __foldr(const ring_buffer buf,
+	                               const foldr_fn fn,
+	                               const void * init)
 {
 	void * accumulator;
 	void * current;
@@ -270,9 +270,9 @@ void * __nonulls __foldr(const ring_buffer buf,
 	return accumulator;
 }
 
-void * __nonulls __foldl(const ring_buffer buf,
-	                 const foldl_fn fn,
-	                 const void * init)
+static __pure __nonulls void * __foldl(const ring_buffer buf,
+	                               const foldl_fn fn,
+	                               const void * init)
 {
 	void * accumulator;
 	void * current;
@@ -293,7 +293,7 @@ void * __nonulls __foldl(const ring_buffer buf,
 	return accumulator;
 }
 
-bool __nonulls __any(const ring_buffer buf, const pred_fn pred)
+static __pure __nonulls bool __any(const ring_buffer buf, const pred_fn pred)
 {
 	void * current;
 
@@ -304,7 +304,7 @@ bool __nonulls __any(const ring_buffer buf, const pred_fn pred)
 	return false;
 }
 
-bool __nonulls __all(const ring_buffer buf, const pred_fn pred)
+static __pure __nonulls bool __all(const ring_buffer buf, const pred_fn pred)
 {
 	void * current;
 
@@ -315,7 +315,7 @@ bool __nonulls __all(const ring_buffer buf, const pred_fn pred)
 	return (!__IS_EMPTY(buf));
 }
 
-void __filter(ring_buffer buf, const pred_fn pred)
+static __nonulls void __filter(ring_buffer buf, const pred_fn pred)
 {
 	void * current;
 	size_t index;
@@ -325,7 +325,7 @@ void __filter(ring_buffer buf, const pred_fn pred)
 			__remove(buf, index, false);
 }
 
-void __drop_while(ring_buffer buf, const pred_fn pred)
+static __nonulls void __drop_while(ring_buffer buf, const pred_fn pred)
 {
 	void * current;
 	size_t index;
@@ -338,7 +338,7 @@ void __drop_while(ring_buffer buf, const pred_fn pred)
 	}
 }
 
-void __take_while(ring_buffer buf, const pred_fn pred)
+static __nonulls void __take_while(ring_buffer buf, const pred_fn pred)
 {
 	void * current;
 	size_t index;
@@ -482,7 +482,7 @@ bool rb_insert(ring_buffer buf, const void * data, const ssize_t pos)
 	return success;
 }
 
-bool __nonulls rb_delete(ring_buffer buf, const size_t pos)
+bool rb_delete(ring_buffer buf, const size_t pos)
 {
 	void * addr;
 
@@ -493,7 +493,7 @@ bool __nonulls rb_delete(ring_buffer buf, const size_t pos)
 	return (addr != NULL);
 }
 
-void * __nonulls rb_remove(ring_buffer buf, const size_t pos)
+void * rb_remove(ring_buffer buf, const size_t pos)
 {
 	void * data;
 
@@ -504,7 +504,7 @@ void * __nonulls rb_remove(ring_buffer buf, const size_t pos)
 	return data;
 }
 
-void * __nonulls rb_fetch(const ring_buffer buf, const ssize_t pos)
+void * rb_fetch(const ring_buffer buf, const ssize_t pos)
 {
 	void * data;
 
@@ -526,7 +526,7 @@ bool rb_reverse(ring_buffer buf)
 	return success;
 }
 
-void __nonulls rb_map(const ring_buffer buf, const map_fn fn)
+void rb_map(ring_buffer buf, const map_fn fn)
 {
 	rwlock_writer_entry(DS_PRIV(buf)->rwlock);
 	__map(buf, fn);

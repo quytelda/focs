@@ -326,7 +326,7 @@ bool __nonulls rb_reverse(ring_buffer buf);
  * 	buffer[i] = fn(buffer[i])
  * ```
  */
-void __nonulls rb_map(const ring_buffer buf, const map_fn fn);
+void __nonulls rb_map(ring_buffer buf, const map_fn fn);
 
 /**
  * Right associative fold for ring buffers.
