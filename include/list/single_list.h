@@ -51,6 +51,8 @@ START_DS(single_list) {
 	struct rwlock * rwlock;
 } END_DS(single_list);
 
+#define __LENGTH(list) (DS_PRIV(list)->length)
+
 /**
  * Allocate and initialize a new singly linked list.
  * @param list A pointer to a `struct single_list` pointer.
@@ -81,6 +83,14 @@ void __nonulls sl_destroy(single_list * list);
  * @return `true` if `list` is empty, `false` otherwise.
  */
 bool __nonulls sl_empty(const single_list list);
+
+/**
+ * Determine the length of a singly linked list.
+ * @param list The list to measure
+ *
+ * @return The number of data elements stored in `list`.
+ * */
+size_t __nonulls sl_size(const single_list list);
 
 /**
  * Determine if a list contains a value.

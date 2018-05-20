@@ -310,6 +310,17 @@ bool sl_empty(single_list list)
 	return null;
 }
 
+size_t __nonulls sl_size(const single_list list)
+{
+	size_t length;
+
+	rwlock_reader_entry(DS_PRIV(list)->rwlock);
+	length = __LENGTH(list);
+	rwlock_reader_exit(DS_PRIV(list)->rwlock);
+
+	return length;
+}
+
 bool sl_elem(single_list list, const void * data)
 {
 	bool success;
