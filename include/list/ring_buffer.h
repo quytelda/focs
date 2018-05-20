@@ -460,6 +460,7 @@ void rb_dump(const ring_buffer buf);
 #ifdef GENERICS
 
 static const struct mgmt_operations mgmt_ops = {
+	.elem  = (elem_mgmt_fn)  rb_elem,
 	.empty = (empty_mgmt_fn) rb_empty,
 	.full  = (full_mgmt_fn)  rb_full,
 	.size  = (size_mgmt_fn)  rb_size,
