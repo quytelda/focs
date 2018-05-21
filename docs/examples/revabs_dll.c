@@ -22,28 +22,32 @@
 #include <stdlib.h>
 #include <list/double_list.h>
 
-static int * my_abs(int * n)
+static const ds_properties props = {
+	.data_size = sizeof(int),
+};
+
+static int my_abs(int n)
 {
-	*n = abs(*n);
+	if(n < 0)
+		n = (-n);
+
 	return n;
 }
+WRAP_MAPPABLE(my_abs, int, my_abs_mappable);
 
 int main(int argc, char * argv[])
 {
-	int err;
-	int * inputs;
+	int *  inputs;
 	int ** outputs;
 
-	struct double_list * my_list;
+	double_list my_list;
 
 	inputs  = calloc(argc, sizeof(int));
 	outputs = calloc(argc, sizeof(int *));
 	if(!inputs || !outputs)
 		return -1; // out of memory
 
-	err = dl_alloc(&my_list, sizeof(int));
-	if(err < 0)
-		return -2; // failed to create my_list
+	my_list = dl_create(&props);
 
 	/* Push the numbers onto the stack. */
 	for(int i = 1; i < argc; i++) {
@@ -52,7 +56,7 @@ int main(int argc, char * argv[])
 	}
 
 	/* Transform the list by mapping my_abs over the list. */
-	dl_map(my_list, (map_fn) my_abs);
+	dl_map(my_list, my_abs_mappable);
 
 	/* Output each number popped from the stack. */
 	for(int i = 1; i < argc; i++) {
@@ -62,5 +66,7 @@ int main(int argc, char * argv[])
 
 	putchar('\n');
 
+	free(inputs);
+	free(outputs);
 	return 0;
 }
