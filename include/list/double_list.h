@@ -129,8 +129,7 @@ struct dl_element {
 
 /**
  * Allocate and initialize a new doubly linked list.
- * @param list A pointer to a `struct double_list` pointer.
- * @param data_size The size of data to store in the list
+ * @param props The data structure properties
  *
  * Allocates a new doubly linked list at the structure pointer pointed to by
  * `list`.
@@ -144,7 +143,6 @@ double_list dl_create(const struct ds_properties * props);
 /**
  * Destroy and deallocate a doubly linked list.
  * @param list A pointer to a `struct double_list` pointer.
- * @param data_size The size of data to store in the list
  *
  * De-allocates the doubly linked list at the structure pointer pointed to by
  * `list`, as well as de-allocating all data elements contained within `list`.

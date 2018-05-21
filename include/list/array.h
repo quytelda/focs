@@ -30,13 +30,14 @@
 /**
  * Advance through an array element by element with a counter.
  * @param array   The ring buffer to iterate over
+ * @param index   An iteration counter
  * @param current A pointer that will point to the current element
  *
  * array_foreach_i() should be used like a for loop; for example:
  * ```
  * size_t i;
  * struct data_type * current;
- * array_foreach_i(array, current, i) {
+ * array_foreach_i(array, i, current) {
  *         if(some_condition(i)) {
  *                 do_something(current);
  *         }
@@ -45,10 +46,10 @@
  * The loop will work whether `current` is a void pointer or a pointer to a type
  * with the same size as (or theoretically less than) the array's elements.
  */
-#define array_foreach_i(array, current, i) \
-	for(i = 0, current = array[0];     \
-	    i < array_size(array);         \
-	    i++, current = array[i])
+#define array_foreach_i(array, index, current) \
+	for(index = 0, current = array[0];     \
+	    index < array_size(array);         \
+	    index++, current = array[index])
 
 /**
  * Advance through an array element by element.

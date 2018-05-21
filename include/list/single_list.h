@@ -55,8 +55,7 @@ START_DS(single_list) {
 
 /**
  * Allocate and initialize a new singly linked list.
- * @param list A pointer to a `struct single_list` pointer.
- * @param data_size The size of data to store in the list
+ * @param props The data structure properties
  *
  * Allocates a new singly linked list at the structure pointer pointed to by
  * `list`.
@@ -68,8 +67,7 @@ single_list __nonulls sl_create(const struct ds_properties * props);
 
 /**
  * Destroy and deallocate a singly linked list.
- * @param list A pointer to a `struct single_list` pointer.
- * @param data_size The size of data to store in the list
+ * @param list A pointer to a `single_list` instance.
  *
  * De-allocates the singly linked list at the structure pointer pointed to by
  * `list`, as well as de-allocating all data elements contained within `list`.

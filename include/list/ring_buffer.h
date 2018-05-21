@@ -107,7 +107,8 @@ static inline __pure __nonulls void * __next(const ring_buffer buf,
 
 /**
  * Advance through a ring buffer block by block.
- * @param list    The ring buffer to iterate over
+ * @param buf     The ring buffer to iterate over
+ * @param index   An iteration counter
  * @param current A pointer that will point to the current data block
  *
  * ring_buffer_foreach() should be used like a for loop; for example:
@@ -131,7 +132,8 @@ static inline __pure __nonulls void * __next(const ring_buffer buf,
 
 /**
  * Advance through a ring buffer block by block in reverse.
- * @param list    The ring buffer to iterate over
+ * @param buf     The ring buffer to iterate over
+ * @param index   An iteration counter
  * @param current A pointer that will point to the current data block
  *
  * The syntax of ring_buffer_foreach_rev() is the same as ring_buffer_foreach().
@@ -289,8 +291,8 @@ void * __nonulls rb_fetch(const ring_buffer buf, const ssize_t pos);
 
 /**
  * Delete a data element from a given index of a ring buffer.
- * @param list The ring buffer to delete from
- * @param pos  The index to delete the element at
+ * @param buf The ring buffer to delete from
+ * @param pos The index to delete the element at
  *
  * Delete the copy of `data` stored in `buf` at the index indicated by `pos`.
  *
@@ -301,8 +303,8 @@ bool __nonulls rb_delete(ring_buffer buf, const size_t pos);
 
 /**
  * Delete and return a data element from a given index of a ring buffer.
- * @param list The ring buffer to delete from
- * @param pos  The index to delete the element at
+ * @param buf The ring buffer to delete from
+ * @param pos The index to delete the element at
  *
  * Delete the copy of `data` stored in `buf` at the index indicated by `pos`.
  *
@@ -384,12 +386,12 @@ void * __nonulls rb_foldl(const ring_buffer buf,
 	                  const void * init);
 
 /**
- * Determine if any value in a list satisifies some condition.
- * @param list A list of values
- * @param p The predicate function (representing a condition to be satisfied).
+ * Determine if any value in a ring buffer satisifies some condition.
+ * @param buf  A ring buffer to check
+ * @param pred The predicate function (representing a condition to be satisfied).
  *
- * Iterate over each value stored in `list`, and determine if any of them
- * satisfies `p` (e.g. `p` returns `true` when passed that value).
+ * Iterate over each value stored in `buf`, and determine if any of them
+ * satisfies `pred` (e.g. `pred` returns `true` when passed that value).
  *
  * @return `true` if there is at least one value that satisfies the predicate.
  * Otherwise, it returns `false`.
@@ -397,12 +399,12 @@ void * __nonulls rb_foldl(const ring_buffer buf,
 bool rb_any(const ring_buffer buf, const pred_fn pred);
 
 /**
- * Determines if all values in a list satisify some condition
- * @param list A list of values
- * @param p The predicate function (representing a condition to be satisfied).
+ * Determines if all values in a ring buffer satisify some condition
+ * @param buf  A list of values
+ * @param pred The predicate function (representing a condition to be satisfied).
  *
- * Iterate over each value stored in `list`, and determine if all of them
- * satisfy `p` (e.g. `p` returns true when passed that value).
+ * Iterate over each value stored in `buf`, and determine if all of them
+ * satisfy `pred` (e.g. `pred` returns true when passed that value).
  *
  * @return `false` if there is at least one value that does not satisfy the
  * predicate.  Otherwise, it returns `true`.
