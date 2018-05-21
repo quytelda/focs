@@ -6,8 +6,6 @@ To use the singly linked list implementation, create an instance of the ``single
 
 .. literalinclude:: ../../examples/single_list.c
 
-.. doxygenstruct:: single_list
-
 Creation and Destruction
 ------------------------
 .. doxygenfunction:: sl_create

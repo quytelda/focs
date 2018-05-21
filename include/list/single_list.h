@@ -37,12 +37,6 @@ struct sl_element {
 	void * data;
 };
 
-/**
- * @struct single_list
- * Represents a singly linked list.
- *
- * Initialize this structure with sl_alloc(), and destroy it with sl_destroy().
- */
 START_DS(single_list) {
 	struct sl_element * head;
 	struct sl_element * tail;
