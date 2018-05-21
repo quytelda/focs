@@ -1,5 +1,5 @@
-/* revabs_sll.h - Reverse and take the absolute value of a list of numbers
- *                using a singly linked list as a stack.
+/* single_list.h - Reverse and take the absolute value of a list of numbers
+ *                using a doubly linked list as a stack.
  * Copyright (C) 2018 Quytelda Kahja
  *
  * This file is part of focs.
@@ -21,29 +21,34 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <list/single_list.h>
+#include <focs/generics/hof.h>
 
-static int * my_abs(int * n)
+static const struct ds_properties props = {
+	.data_size = sizeof(int),
+};
+
+static int my_abs(int n)
 {
-	*n = abs(*n);
+	if(n < 0)
+		n = (-n);
+
 	return n;
 }
+WRAP_MAPPABLE(my_abs, int, my_abs_mappable);
 
 int main(int argc, char * argv[])
 {
-	int err;
-	int * inputs;
+	int *  inputs;
 	int ** outputs;
 
-	struct single_list * my_list;
+	single_list my_list;
 
 	inputs  = calloc(argc, sizeof(int));
 	outputs = calloc(argc, sizeof(int *));
 	if(!inputs || !outputs)
 		return -1; // out of memory
 
-	err = sl_alloc(&my_list, sizeof(int));
-	if(err < 0)
-		return -2; // failed to create my_list
+	my_list = sl_create(&props);
 
 	/* Push the numbers onto the stack. */
 	for(int i = 1; i < argc; i++) {
@@ -52,7 +57,7 @@ int main(int argc, char * argv[])
 	}
 
 	/* Transform the list by mapping my_abs over the list. */
-	sl_map(my_list, (map_fn) my_abs);
+	map(my_list, my_abs_mappable);
 
 	/* Output each number popped from the stack. */
 	for(int i = 1; i < argc; i++) {
@@ -62,5 +67,8 @@ int main(int argc, char * argv[])
 
 	putchar('\n');
 
+	free(inputs);
+	free(outputs);
+	sl_destroy(&my_list);
 	return 0;
 }
