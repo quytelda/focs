@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include <list/double_list.h>
 
-static const ds_properties props = {
+static const struct ds_properties props = {
 	.data_size = sizeof(int),
 };
 
