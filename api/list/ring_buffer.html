@@ -90,7 +90,8 @@
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Ring Buffers</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#creation-and-destruction">Creation and Destruction</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#data-management">Data Management</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#functional-utilities">Functional Utilities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#higher-order-functions">Higher Order Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#debugging">Debugging</a></li>
 </ul>
 </li>
 </ul>
@@ -165,12 +166,12 @@
             
   <div class="section" id="ring-buffers">
 <h1>Ring Buffers<a class="headerlink" href="#ring-buffers" title="Permalink to this headline">¶</a></h1>
-<p>To use the ring buffer implementation, create an instance of the ring_buffer type, and initialize it using <code class="docutils literal notranslate"><span class="pre">rb_create()</span></code>.  You can then use the data management functions to add and remove data blocks from the buffer.  You can also use the functional data operations to transform, reduce, or filter the data in the buffer as if it were a list.</p>
+<p>To use the ring buffer implementation, create an instance of the <code class="docutils literal notranslate"><span class="pre">ring_buffer</span></code> type using <code class="docutils literal notranslate"><span class="pre">rb_create()</span></code>.  You can then use the data management functions to add and remove data blocks from the buffer.  You can also use the functional data operations to transform, reduce, or filter the data in the buffer as if it were a list.</p>
 <div class="section" id="creation-and-destruction">
 <h2>Creation and Destruction<a class="headerlink" href="#creation-and-destruction" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
-<dt>
-<span class="target" id="ring__buffer_8h_1ab92b78e9aba97c85336575b15ceb9913"></span><code class="descname">ring_buffer __nonulls rb_create(const struct  ds_properties  * props)</code></dt>
+<dt id="_CPPv39rb_createPK13ds_properties">
+<span id="_CPPv29rb_createPK13ds_properties"></span><span id="rb_create__ds_propertiesCP"></span><span class="target" id="ring__buffer_8h_1aff8e25ad33f37e67497f23e68c9cf779"></span>ring_buffer <code class="descname">rb_create</code><span class="sig-paren">(</span><em class="property">const</em> <em class="property">struct</em> ds_properties *<em>props</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv39rb_createPK13ds_properties" title="Permalink to this definition">¶</a><br /></dt>
 <dd><p>Create a new ring buffer with the given properties. </p>
 <p>
 Allocates and initializes a new ring buffer with the given properties.<dl class="docutils">
@@ -189,8 +190,8 @@ Allocates and initializes a new ring buffer with the given properties.<dl class=
 </dd></dl>
 
 <dl class="function">
-<dt>
-<span class="target" id="ring__buffer_8h_1a55e4f712d8d958d3ff85e2d5b684ddc2"></span><code class="descname">void __nonulls rb_destroy(ring_buffer * buf)</code></dt>
+<dt id="_CPPv310rb_destroyP11ring_buffer">
+<span id="_CPPv210rb_destroyP11ring_buffer"></span><span id="rb_destroy__ring_bufferP"></span><span class="target" id="ring__buffer_8h_1a1ea9e9849209ddc046b537388c64ea67"></span>void <code class="descname">rb_destroy</code><span class="sig-paren">(</span>ring_buffer *<em>buf</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv310rb_destroyP11ring_buffer" title="Permalink to this definition">¶</a><br /></dt>
 <dd><p>Destroy and deallocate a ring buffer. </p>
 <p>
 Destroys and deallocates the ring buffer pointed to by <code class="docutils literal notranslate"><span class="pre">buf</span></code>. <dl class="docutils">
@@ -207,15 +208,15 @@ Destroys and deallocates the ring buffer pointed to by <code class="docutils lit
 <div class="section" id="data-management">
 <h2>Data Management<a class="headerlink" href="#data-management" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
-<dt>
-<span class="target" id="ring__buffer_8h_1a17e13633d241f75f4ba4fd3e7294b619"></span><code class="descname">bool __nonulls rb_push_head(ring_buffer buf, const void * data)</code></dt>
-<dd><p>Push a new data block onto the head of a ring buffer. </p>
-<p>
-Push a newly allocated copy of <code class="docutils literal notranslate"><span class="pre">data</span></code> onto the head of <code class="docutils literal notranslate"><span class="pre">buf</span></code>. <dl class="docutils">
+<dt id="_CPPv38rb_emptyK11ring_buffer">
+<span id="_CPPv28rb_emptyK11ring_buffer"></span><span id="rb_empty__ring_bufferC"></span><span class="target" id="ring__buffer_8h_1a604e8fd0c25a2390c7ee0d7b82435020"></span>bool <code class="descname">rb_empty</code><span class="sig-paren">(</span><em class="property">const</em> ring_buffer <em>buf</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv38rb_emptyK11ring_buffer" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Determine if a ring buffer is empty. </p>
+<p><dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd>This function shall return <code class="docutils literal notranslate"><span class="pre">true</span></code> if <code class="docutils literal notranslate"><span class="pre">buf</span></code> is empty, or <code class="docutils literal notranslate"><span class="pre">false</span></code> otherwise. </dd>
 <dt><strong>Parameters</strong></dt>
 <dd><ul class="breatheparameterlist first last simple">
-<li><code class="docutils literal notranslate"><span class="pre">buf</span></code>: The ring buffer to push onto </li>
-<li><code class="docutils literal notranslate"><span class="pre">data</span></code>: A pointer to the data to push</li>
+<li><code class="docutils literal notranslate"><span class="pre">buf</span></code>: The ring buffer to check (non-NULL)</li>
 </ul>
 </dd>
 </dl>
@@ -223,15 +224,15 @@ Push a newly allocated copy of <code class="docutils literal notranslate"><span 
 </dd></dl>
 
 <dl class="function">
-<dt>
-<span class="target" id="ring__buffer_8h_1a512946d31da86502919670213eb09c38"></span><code class="descname">bool __nonulls rb_push_tail(ring_buffer buf, const void * data)</code></dt>
-<dd><p>Push a new data block onto the tail of a ring buffer. </p>
-<p>
-Push a newly allocated copy of <code class="docutils literal notranslate"><span class="pre">data</span></code> onto the tail of <code class="docutils literal notranslate"><span class="pre">buf</span></code>. <dl class="docutils">
+<dt id="_CPPv37rb_fullK11ring_buffer">
+<span id="_CPPv27rb_fullK11ring_buffer"></span><span id="rb_full__ring_bufferC"></span><span class="target" id="ring__buffer_8h_1a66f0001ce7f89d5793d1921e371af0a2"></span>bool <code class="descname">rb_full</code><span class="sig-paren">(</span><em class="property">const</em> ring_buffer <em>buf</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv37rb_fullK11ring_buffer" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Determine if a ring buffer is full. </p>
+<p><dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd>This function shall return <code class="docutils literal notranslate"><span class="pre">true</span></code> if <code class="docutils literal notranslate"><span class="pre">buf</span></code> is full, or <code class="docutils literal notranslate"><span class="pre">false</span></code> otherwise. </dd>
 <dt><strong>Parameters</strong></dt>
 <dd><ul class="breatheparameterlist first last simple">
-<li><code class="docutils literal notranslate"><span class="pre">buf</span></code>: The ring buffer to push onto </li>
-<li><code class="docutils literal notranslate"><span class="pre">data</span></code>: A pointer to the data to push</li>
+<li><code class="docutils literal notranslate"><span class="pre">buf</span></code>: The ring buffer to check (non-NULL)</li>
 </ul>
 </dd>
 </dl>
@@ -239,8 +240,24 @@ Push a newly allocated copy of <code class="docutils literal notranslate"><span 
 </dd></dl>
 
 <dl class="function">
-<dt>
-<span class="target" id="ring__buffer_8h_1afac781b6b9b9d68952e1c7b9bcb5f20d"></span><code class="descname">void* __nonulls rb_pop_head(ring_buffer buf)</code></dt>
+<dt id="_CPPv37rb_sizeK11ring_buffer">
+<span id="_CPPv27rb_sizeK11ring_buffer"></span><span id="rb_size__ring_bufferC"></span><span class="target" id="ring__buffer_8h_1a91ef5ea441295eec17fd1d72b3b54b9c"></span>size_t <code class="descname">rb_size</code><span class="sig-paren">(</span><em class="property">const</em> ring_buffer <em>buf</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv37rb_sizeK11ring_buffer" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Determine the number of data blocks stored in a ring buffer. </p>
+<p><dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd>This function shall return the number of data blocks stored in the ring buffer <code class="docutils literal notranslate"><span class="pre">buf</span></code>. This is distinct from the capacity of the ring buffer, which is the number of entries it will contain when full. </dd>
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">buf</span></code>: The ring buffer to check (non-NULL)</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv311rb_pop_head11ring_buffer">
+<span id="_CPPv211rb_pop_head11ring_buffer"></span><span id="rb_pop_head__ring_buffer"></span><span class="target" id="ring__buffer_8h_1a229e7f4a05de9194a1e92beefb6e80d2"></span>void *<code class="descname">rb_pop_head</code><span class="sig-paren">(</span>ring_buffer <em>buf</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv311rb_pop_head11ring_buffer" title="Permalink to this definition">¶</a><br /></dt>
 <dd><p>Pop a data element from the head of a ring buffer. </p>
 <p>
 Remove and return the data element at the head of <code class="docutils literal notranslate"><span class="pre">buf</span></code>. After this operation the returned data element <em>will no longer be stored in</em> <code class="docutils literal notranslate"><span class="pre">buf</span></code>.<dl class="docutils">
@@ -260,8 +277,8 @@ This pointer must be explicitly freed with free() when it is no longer needed. I
 </dd></dl>
 
 <dl class="function">
-<dt>
-<span class="target" id="ring__buffer_8h_1a7d30bc7bd477c9d098c2de72edd44801"></span><code class="descname">void* __nonulls rb_pop_tail(ring_buffer buf)</code></dt>
+<dt id="_CPPv311rb_pop_tail11ring_buffer">
+<span id="_CPPv211rb_pop_tail11ring_buffer"></span><span id="rb_pop_tail__ring_buffer"></span><span class="target" id="ring__buffer_8h_1a6a5d4b93ae43afa33d24e3cddc599dd7"></span>void *<code class="descname">rb_pop_tail</code><span class="sig-paren">(</span>ring_buffer <em>buf</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv311rb_pop_tail11ring_buffer" title="Permalink to this definition">¶</a><br /></dt>
 <dd><p>Pop a data element from the tail of a ring buffer. </p>
 <p>
 Remove and return the data block at the tail of <code class="docutils literal notranslate"><span class="pre">buf</span></code>. After this operation the returned data block <em>will no longer be stored in</em> <code class="docutils literal notranslate"><span class="pre">buf</span></code>.<dl class="docutils">
@@ -281,8 +298,61 @@ This pointer must be explicitly freed with free() when it is no longer needed. I
 </dd></dl>
 
 <dl class="function">
-<dt>
-<span class="target" id="ring__buffer_8h_1a3ed6a21e29912075aba59866caa30167"></span><code class="descname">bool __nonulls rb_insert(ring_buffer buf, const void * data, const ssize_t pos)</code></dt>
+<dt id="_CPPv312rb_push_head11ring_bufferPKv">
+<span id="_CPPv212rb_push_head11ring_bufferPKv"></span><span id="rb_push_head__ring_buffer.voidCP"></span><span class="target" id="ring__buffer_8h_1ab8d11db74fc565e4a09c4feb2f3715c4"></span>bool <code class="descname">rb_push_head</code><span class="sig-paren">(</span>ring_buffer <em>buf</em>, <em class="property">const</em> void *<em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv312rb_push_head11ring_bufferPKv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Push a new data block onto the head of a ring buffer. </p>
+<p>
+Push a newly allocated copy of <code class="docutils literal notranslate"><span class="pre">data</span></code> onto the head of <code class="docutils literal notranslate"><span class="pre">buf</span></code>. <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">buf</span></code>: The ring buffer to push onto </li>
+<li><code class="docutils literal notranslate"><span class="pre">data</span></code>: A pointer to the data to push</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv312rb_push_tail11ring_bufferPKv">
+<span id="_CPPv212rb_push_tail11ring_bufferPKv"></span><span id="rb_push_tail__ring_buffer.voidCP"></span><span class="target" id="ring__buffer_8h_1a902bf4669680383919bed3565d156eb2"></span>bool <code class="descname">rb_push_tail</code><span class="sig-paren">(</span>ring_buffer <em>buf</em>, <em class="property">const</em> void *<em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv312rb_push_tail11ring_bufferPKv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Push a new data block onto the tail of a ring buffer. </p>
+<p>
+Push a newly allocated copy of <code class="docutils literal notranslate"><span class="pre">data</span></code> onto the tail of <code class="docutils literal notranslate"><span class="pre">buf</span></code>. <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">buf</span></code>: The ring buffer to push onto </li>
+<li><code class="docutils literal notranslate"><span class="pre">data</span></code>: A pointer to the data to push</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv37rb_elemK11ring_bufferPKv">
+<span id="_CPPv27rb_elemK11ring_bufferPKv"></span><span id="rb_elem__ring_bufferC.voidCP"></span><span class="target" id="ring__buffer_8h_1ab6f0e1d7566ae19afbcd93472e7da11f"></span>bool <code class="descname">rb_elem</code><span class="sig-paren">(</span><em class="property">const</em> ring_buffer <em>buf</em>, <em class="property">const</em> void *<em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv37rb_elemK11ring_bufferPKv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Determine if a ring buffer contains a value. </p>
+<p>
+Determines if <code class="docutils literal notranslate"><span class="pre">buf</span></code> contains an entry matching <code class="docutils literal notranslate"><span class="pre">data</span></code>. The operation compares the contents of the memory pointed to by <code class="docutils literal notranslate"><span class="pre">data</span></code>, and not the memory addresses of the data pointers.<dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">buf</span></code>: The ring buffer to search </li>
+<li><code class="docutils literal notranslate"><span class="pre">data</span></code>: The data to search for</li>
+</ul>
+</dd>
+</dl>
+</p>
+<p><dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">true</span></code> if a matching entry is found, otherwise <code class="docutils literal notranslate"><span class="pre">false</span></code> </dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv39rb_insert11ring_bufferPKvK7ssize_t">
+<span id="_CPPv29rb_insert11ring_bufferPKvK7ssize_t"></span><span id="rb_insert__ring_buffer.voidCP.ssize_tC"></span><span class="target" id="ring__buffer_8h_1a65489090a7ac3b54fa5e76db71cd41da"></span>bool <code class="descname">rb_insert</code><span class="sig-paren">(</span>ring_buffer <em>buf</em>, <em class="property">const</em> void *<em>data</em>, <em class="property">const</em> ssize_t <em>pos</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv39rb_insert11ring_bufferPKvK7ssize_t" title="Permalink to this definition">¶</a><br /></dt>
 <dd><p>Insert a data block into a ring buffer at a certain position. </p>
 <p>
 Insert a newly allocated copy of <code class="docutils literal notranslate"><span class="pre">data</span></code> into <code class="docutils literal notranslate"><span class="pre">buf</span></code> at the index indicated by <code class="docutils literal notranslate"><span class="pre">pos</span></code>.<dl class="docutils">
@@ -303,50 +373,8 @@ Insert a newly allocated copy of <code class="docutils literal notranslate"><spa
 </dd></dl>
 
 <dl class="function">
-<dt>
-<span class="target" id="ring__buffer_8h_1a3110ca5537c23acd86840bb0c15ce33a"></span><code class="descname">bool __nonulls rb_delete(ring_buffer buf, const size_t pos)</code></dt>
-<dd><p>Delete a data element from a given index of a ring buffer. </p>
-<p>
-Delete the copy of <code class="docutils literal notranslate"><span class="pre">data</span></code> stored in <code class="docutils literal notranslate"><span class="pre">buf</span></code> at the index indicated by <code class="docutils literal notranslate"><span class="pre">pos</span></code>.<dl class="docutils">
-<dt><strong>Parameters</strong></dt>
-<dd><ul class="breatheparameterlist first last simple">
-<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: The ring buffer to delete from </li>
-<li><code class="docutils literal notranslate"><span class="pre">pos</span></code>: The index to delete the element at</li>
-</ul>
-</dd>
-</dl>
-</p>
-<p><dl class="docutils">
-<dt><strong>Return</strong></dt>
-<dd>Upon successful completion, this function shall return <code class="docutils literal notranslate"><span class="pre">true</span></code>; otherwise, <code class="docutils literal notranslate"><span class="pre">false</span></code> shall be returned and <code class="docutils literal notranslate"><span class="pre">errno</span></code> set appropriately.. </dd>
-</dl>
-</p>
-</dd></dl>
-
-<dl class="function">
-<dt>
-<span class="target" id="ring__buffer_8h_1af31c376c7bbc42ca59fa96a78c707144"></span><code class="descname">void* __nonulls rb_remove(ring_buffer buf, const size_t pos)</code></dt>
-<dd><p>Delete and return a data element from a given index of a ring buffer. </p>
-<p>
-Delete the copy of <code class="docutils literal notranslate"><span class="pre">data</span></code> stored in <code class="docutils literal notranslate"><span class="pre">buf</span></code> at the index indicated by <code class="docutils literal notranslate"><span class="pre">pos</span></code>.<dl class="docutils">
-<dt><strong>Parameters</strong></dt>
-<dd><ul class="breatheparameterlist first last simple">
-<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: The ring buffer to delete from </li>
-<li><code class="docutils literal notranslate"><span class="pre">pos</span></code>: The index to delete the element at</li>
-</ul>
-</dd>
-</dl>
-</p>
-<p><dl class="docutils">
-<dt><strong>Return</strong></dt>
-<dd>A pointer to the data removed from <code class="docutils literal notranslate"><span class="pre">buf</span></code>, or <code class="docutils literal notranslate"><span class="pre">NULL</span></code> on failure. This pointer must be explicitly freed with free() when it is no longer needed. It is <strong>not</strong> equivalent to the pointer which was used to insert the data into <code class="docutils literal notranslate"><span class="pre">buf</span></code>. </dd>
-</dl>
-</p>
-</dd></dl>
-
-<dl class="function">
-<dt>
-<span class="target" id="ring__buffer_8h_1a0605cfd543bb928c003737d496d5a8e4"></span><code class="descname">void* __nonulls rb_fetch(const ring_buffer buf, const ssize_t pos)</code></dt>
+<dt id="_CPPv38rb_fetchK11ring_bufferK7ssize_t">
+<span id="_CPPv28rb_fetchK11ring_bufferK7ssize_t"></span><span id="rb_fetch__ring_bufferC.ssize_tC"></span><span class="target" id="ring__buffer_8h_1a9db68b89bc9d4276bb11b46a1982f1f0"></span>void *<code class="descname">rb_fetch</code><span class="sig-paren">(</span><em class="property">const</em> ring_buffer <em>buf</em>, <em class="property">const</em> ssize_t <em>pos</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv38rb_fetchK11ring_bufferK7ssize_t" title="Permalink to this definition">¶</a><br /></dt>
 <dd><p>Fetch a data block from a given index of a ring buffer. </p>
 <p>
 Fetch the data stored at index <code class="docutils literal notranslate"><span class="pre">pos</span></code> in <code class="docutils literal notranslate"><span class="pre">buf</span></code>.<dl class="docutils">
@@ -365,32 +393,69 @@ Fetch the data stored at index <code class="docutils literal notranslate"><span 
 </p>
 </dd></dl>
 
-</div>
-<div class="section" id="functional-utilities">
-<h2>Functional Utilities<a class="headerlink" href="#functional-utilities" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
-<dt>
-<span class="target" id="ring__buffer_8h_1aa86313926aa17102239fb3bc24c4321a"></span><code class="descname">bool __nonulls rb_empty(const ring_buffer buf)</code></dt>
-<dd><p>Determine if a ring buffer is empty. </p>
-<p><dl class="docutils">
-<dt><strong>Return</strong></dt>
-<dd>This function shall return <code class="docutils literal notranslate"><span class="pre">true</span></code> if <code class="docutils literal notranslate"><span class="pre">buf</span></code> is empty, or <code class="docutils literal notranslate"><span class="pre">false</span></code> otherwise. </dd>
+<dt id="_CPPv39rb_delete11ring_bufferK6size_t">
+<span id="_CPPv29rb_delete11ring_bufferK6size_t"></span><span id="rb_delete__ring_buffer.sC"></span><span class="target" id="ring__buffer_8h_1a26001afad149a230b840fbd72dffeff3"></span>bool <code class="descname">rb_delete</code><span class="sig-paren">(</span>ring_buffer <em>buf</em>, <em class="property">const</em> size_t <em>pos</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv39rb_delete11ring_bufferK6size_t" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Delete a data element from a given index of a ring buffer. </p>
+<p>
+Delete the copy of <code class="docutils literal notranslate"><span class="pre">data</span></code> stored in <code class="docutils literal notranslate"><span class="pre">buf</span></code> at the index indicated by <code class="docutils literal notranslate"><span class="pre">pos</span></code>.<dl class="docutils">
 <dt><strong>Parameters</strong></dt>
 <dd><ul class="breatheparameterlist first last simple">
-<li><code class="docutils literal notranslate"><span class="pre">buf</span></code>: The ring buffer to check (non-NULL)</li>
+<li><code class="docutils literal notranslate"><span class="pre">buf</span></code>: The ring buffer to delete from </li>
+<li><code class="docutils literal notranslate"><span class="pre">pos</span></code>: The index to delete the element at</li>
+</ul>
+</dd>
+</dl>
+</p>
+<p><dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd>Upon successful completion, this function shall return <code class="docutils literal notranslate"><span class="pre">true</span></code>; otherwise, <code class="docutils literal notranslate"><span class="pre">false</span></code> shall be returned and <code class="docutils literal notranslate"><span class="pre">errno</span></code> set appropriately.. </dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv39rb_remove11ring_bufferK6size_t">
+<span id="_CPPv29rb_remove11ring_bufferK6size_t"></span><span id="rb_remove__ring_buffer.sC"></span><span class="target" id="ring__buffer_8h_1ae0ebe0b87743fdb92b4e60cbefc24306"></span>void *<code class="descname">rb_remove</code><span class="sig-paren">(</span>ring_buffer <em>buf</em>, <em class="property">const</em> size_t <em>pos</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv39rb_remove11ring_bufferK6size_t" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Delete and return a data element from a given index of a ring buffer. </p>
+<p>
+Delete the copy of <code class="docutils literal notranslate"><span class="pre">data</span></code> stored in <code class="docutils literal notranslate"><span class="pre">buf</span></code> at the index indicated by <code class="docutils literal notranslate"><span class="pre">pos</span></code>.<dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">buf</span></code>: The ring buffer to delete from </li>
+<li><code class="docutils literal notranslate"><span class="pre">pos</span></code>: The index to delete the element at</li>
+</ul>
+</dd>
+</dl>
+</p>
+<p><dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd>A pointer to the data removed from <code class="docutils literal notranslate"><span class="pre">buf</span></code>, or <code class="docutils literal notranslate"><span class="pre">NULL</span></code> on failure. This pointer must be explicitly freed with free() when it is no longer needed. It is <strong>not</strong> equivalent to the pointer which was used to insert the data into <code class="docutils literal notranslate"><span class="pre">buf</span></code>. </dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv310rb_reverse11ring_buffer">
+<span id="_CPPv210rb_reverse11ring_buffer"></span><span id="rb_reverse__ring_buffer"></span><span class="target" id="ring__buffer_8h_1a5dac9b5477498f39e4f8dc10236334d6"></span>bool <code class="descname">rb_reverse</code><span class="sig-paren">(</span>ring_buffer <em>buf</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv310rb_reverse11ring_buffer" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Reverse the contents of a ring buffer in-place. </p>
+<p>
+Reverses <code class="docutils literal notranslate"><span class="pre">buf</span></code> in-place so that the data blocks are in reverse order when enumerated from head to tail. <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">buf</span></code>: The ring buffer to reverse</li>
 </ul>
 </dd>
 </dl>
 </p>
 </dd></dl>
 
-<div class="admonition warning">
-<p class="first admonition-title">Warning</p>
-<p class="last">doxygenfunction: Cannot find function “rb_contains” in doxygen xml output for project “FOCS” from directory: ./xml</p>
 </div>
+<div class="section" id="higher-order-functions">
+<h2>Higher Order Functions<a class="headerlink" href="#higher-order-functions" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
-<dt>
-<span class="target" id="ring__buffer_8h_1a931ad29312e83d5055a611d7cf0bf047"></span><code class="descname">void __nonulls rb_map(const ring_buffer buf, const map_fn fn)</code></dt>
+<dt id="_CPPv36rb_map11ring_bufferK6map_fn">
+<span id="_CPPv26rb_map11ring_bufferK6map_fn"></span><span id="rb_map__ring_buffer.map_fnC"></span><span class="target" id="ring__buffer_8h_1a2fafe3f2d6ea979b93df7113829efa16"></span>void <code class="descname">rb_map</code><span class="sig-paren">(</span>ring_buffer <em>buf</em>, <em class="property">const</em> map_fn <em>fn</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv36rb_map11ring_bufferK6map_fn" title="Permalink to this definition">¶</a><br /></dt>
 <dd><p>Map a function over the contents of a ring buffer in-place. </p>
 <p>
 A map operation iterates over <code class="docutils literal notranslate"><span class="pre">buf</span></code> and transforms each data block using the function <code class="docutils literal notranslate"><span class="pre">fn</span></code>, replacing the old value with the result of the transformation. In pseudo-code: <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="n">from</span> <span class="mi">0</span> <span class="n">to</span> <span class="p">(</span><span class="n">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span><span class="o">:</span>
@@ -409,8 +474,8 @@ A map operation iterates over <code class="docutils literal notranslate"><span c
 </dd></dl>
 
 <dl class="function">
-<dt>
-<span class="target" id="ring__buffer_8h_1abe2d08611e568ac89d0e8141204affca"></span><code class="descname">void* __nonulls rb_foldr(const ring_buffer buf, const foldr_fn fn, const void * init)</code></dt>
+<dt id="_CPPv38rb_foldrK11ring_bufferK8foldr_fnPKv">
+<span id="_CPPv28rb_foldrK11ring_bufferK8foldr_fnPKv"></span><span id="rb_foldr__ring_bufferC.foldr_fnC.voidCP"></span><span class="target" id="ring__buffer_8h_1a869edbe969ca761aabf8e6c8285fcf84"></span>void *<code class="descname">rb_foldr</code><span class="sig-paren">(</span><em class="property">const</em> ring_buffer <em>buf</em>, <em class="property">const</em> foldr_fn <em>fn</em>, <em class="property">const</em> void *<em>init</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv38rb_foldrK11ring_bufferK8foldr_fnPKv" title="Permalink to this definition">¶</a><br /></dt>
 <dd><p>Right associative fold for ring buffers. </p>
 <p>
 A right associative fold uses the binary function <code class="docutils literal notranslate"><span class="pre">fn</span></code> to sequentially reduce a list of values to a single value, starting from some initial value <code class="docutils literal notranslate"><span class="pre">init</span></code>: <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">fn</span><span class="p">(</span><span class="n">init</span><span class="p">,</span> <span class="n">fn</span><span class="p">(</span><span class="n">buf</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">fn</span><span class="p">(</span><span class="n">buf</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">...)))</span>
@@ -434,8 +499,8 @@ A right associative fold uses the binary function <code class="docutils literal 
 </dd></dl>
 
 <dl class="function">
-<dt>
-<span class="target" id="ring__buffer_8h_1ae3e289e92491ce2b6cb5abefcdfd3735"></span><code class="descname">void* __nonulls rb_foldl(const ring_buffer buf, const foldl_fn fn, const void * init)</code></dt>
+<dt id="_CPPv38rb_foldlK11ring_bufferK8foldl_fnPKv">
+<span id="_CPPv28rb_foldlK11ring_bufferK8foldl_fnPKv"></span><span id="rb_foldl__ring_bufferC.foldl_fnC.voidCP"></span><span class="target" id="ring__buffer_8h_1a1229fa626caf3471f268801c43ce52cf"></span>void *<code class="descname">rb_foldl</code><span class="sig-paren">(</span><em class="property">const</em> ring_buffer <em>buf</em>, <em class="property">const</em> foldl_fn <em>fn</em>, <em class="property">const</em> void *<em>init</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv38rb_foldlK11ring_bufferK8foldl_fnPKv" title="Permalink to this definition">¶</a><br /></dt>
 <dd><p>Left associative fold for ring buffers. </p>
 <p>
 A left associative fold uses the binary function <code class="docutils literal notranslate"><span class="pre">fn</span></code> to sequentially reduce a list of values to a single value, starting from some initial value <code class="docutils literal notranslate"><span class="pre">init</span></code>: <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">fn</span><span class="p">(</span><span class="n">fn</span><span class="p">(</span><span class="n">fn</span><span class="p">(...,</span> <span class="n">init</span><span class="p">),</span> <span class="n">buf</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">buf</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
@@ -461,13 +526,13 @@ A left associative fold uses the binary function <code class="docutils literal n
 <dl class="function">
 <dt id="_CPPv36rb_anyK11ring_bufferK7pred_fn">
 <span id="_CPPv26rb_anyK11ring_bufferK7pred_fn"></span><span id="rb_any__ring_bufferC.pred_fnC"></span><span class="target" id="ring__buffer_8h_1aa9ff4ec1c753f85a5e7a6f03dca75044"></span>bool <code class="descname">rb_any</code><span class="sig-paren">(</span><em class="property">const</em> ring_buffer <em>buf</em>, <em class="property">const</em> pred_fn <em>pred</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv36rb_anyK11ring_bufferK7pred_fn" title="Permalink to this definition">¶</a><br /></dt>
-<dd><p>Determine if any value in a list satisifies some condition. </p>
+<dd><p>Determine if any value in a ring buffer satisifies some condition. </p>
 <p>
-Iterate over each value stored in <code class="docutils literal notranslate"><span class="pre">list</span></code>, and determine if any of them satisfies <code class="docutils literal notranslate"><span class="pre">p</span></code> (e.g. <code class="docutils literal notranslate"><span class="pre">p</span></code> returns <code class="docutils literal notranslate"><span class="pre">true</span></code> when passed that value).<dl class="docutils">
+Iterate over each value stored in <code class="docutils literal notranslate"><span class="pre">buf</span></code>, and determine if any of them satisfies <code class="docutils literal notranslate"><span class="pre">pred</span></code> (e.g. <code class="docutils literal notranslate"><span class="pre">pred</span></code> returns <code class="docutils literal notranslate"><span class="pre">true</span></code> when passed that value).<dl class="docutils">
 <dt><strong>Parameters</strong></dt>
 <dd><ul class="breatheparameterlist first last simple">
-<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: A list of values </li>
-<li><code class="docutils literal notranslate"><span class="pre">p</span></code>: The predicate function (representing a condition to be satisfied).</li>
+<li><code class="docutils literal notranslate"><span class="pre">buf</span></code>: A ring buffer to check </li>
+<li><code class="docutils literal notranslate"><span class="pre">pred</span></code>: The predicate function (representing a condition to be satisfied).</li>
 </ul>
 </dd>
 </dl>
@@ -482,13 +547,13 @@ Iterate over each value stored in <code class="docutils literal notranslate"><sp
 <dl class="function">
 <dt id="_CPPv36rb_allK11ring_bufferK7pred_fn">
 <span id="_CPPv26rb_allK11ring_bufferK7pred_fn"></span><span id="rb_all__ring_bufferC.pred_fnC"></span><span class="target" id="ring__buffer_8h_1accae912416a33339035a1ddf0090b3fd"></span>bool <code class="descname">rb_all</code><span class="sig-paren">(</span><em class="property">const</em> ring_buffer <em>buf</em>, <em class="property">const</em> pred_fn <em>pred</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv36rb_allK11ring_bufferK7pred_fn" title="Permalink to this definition">¶</a><br /></dt>
-<dd><p>Determines if all values in a list satisify some condition. </p>
+<dd><p>Determines if all values in a ring buffer satisify some condition. </p>
 <p>
-Iterate over each value stored in <code class="docutils literal notranslate"><span class="pre">list</span></code>, and determine if all of them satisfy <code class="docutils literal notranslate"><span class="pre">p</span></code> (e.g. <code class="docutils literal notranslate"><span class="pre">p</span></code> returns true when passed that value).<dl class="docutils">
+Iterate over each value stored in <code class="docutils literal notranslate"><span class="pre">buf</span></code>, and determine if all of them satisfy <code class="docutils literal notranslate"><span class="pre">pred</span></code> (e.g. <code class="docutils literal notranslate"><span class="pre">pred</span></code> returns true when passed that value).<dl class="docutils">
 <dt><strong>Parameters</strong></dt>
 <dd><ul class="breatheparameterlist first last simple">
-<li><code class="docutils literal notranslate"><span class="pre">list</span></code>: A list of values </li>
-<li><code class="docutils literal notranslate"><span class="pre">p</span></code>: The predicate function (representing a condition to be satisfied).</li>
+<li><code class="docutils literal notranslate"><span class="pre">buf</span></code>: A list of values </li>
+<li><code class="docutils literal notranslate"><span class="pre">pred</span></code>: The predicate function (representing a condition to be satisfied).</li>
 </ul>
 </dd>
 </dl>
@@ -530,6 +595,24 @@ Filter <code class="docutils literal notranslate"><span class="pre">buf</span></
 <dd><p>Keep elements from the head of the buffer until the predicate is unsatisfied. </p>
 <p>Iterate over each element of <code class="docutils literal notranslate"><span class="pre">buf</span></code>, starting at the beginning, that satisfies the predicate <code class="docutils literal notranslate"><span class="pre">pred</span></code>. Once an element that does not satisfy the predicate <code class="docutils literal notranslate"><span class="pre">pred</span></code> is reached, drop the rest of the list including that element.</p>
 <p>This function is an in-place equivalent to Haskell’s takeWhile. </p>
+</dd></dl>
+
+</div>
+<div class="section" id="debugging">
+<h2>Debugging<a class="headerlink" href="#debugging" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="_CPPv37rb_dumpK11ring_buffer">
+<span id="_CPPv27rb_dumpK11ring_buffer"></span><span id="rb_dump__ring_bufferC"></span><span class="target" id="ring__buffer_8h_1a8fbae5a6a6ddf7e3e886b21bc5556a55"></span>void <code class="descname">rb_dump</code><span class="sig-paren">(</span><em class="property">const</em> ring_buffer <em>buf</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv37rb_dumpK11ring_buffer" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Dump the contents of a ring_buffer to standard output. </p>
+<p>
+Prints the contents of a ring buffer in nice format, byte by byte, including information on addresses, indices, and the locations of the head and tail pointers. <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">buf</span></code>: The buffer to display.</li>
+</ul>
+</dd>
+</dl>
+</p>
 </dd></dl>
 
 </div>

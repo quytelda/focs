@@ -2,7 +2,7 @@
 Ring Buffers
 ============
 
-To use the ring buffer implementation, create an instance of the ring_buffer type, and initialize it using ``rb_create()``.  You can then use the data management functions to add and remove data blocks from the buffer.  You can also use the functional data operations to transform, reduce, or filter the data in the buffer as if it were a list.
+To use the ring buffer implementation, create an instance of the ``ring_buffer`` type using ``rb_create()``.  You can then use the data management functions to add and remove data blocks from the buffer.  You can also use the functional data operations to transform, reduce, or filter the data in the buffer as if it were a list.
 
 Creation and Destruction
 ------------------------
@@ -11,19 +11,22 @@ Creation and Destruction
 
 Data Management
 ---------------
-.. doxygenfunction:: rb_push_head
-.. doxygenfunction:: rb_push_tail
+.. doxygenfunction:: rb_empty
+.. doxygenfunction:: rb_full
+.. doxygenfunction:: rb_size
 .. doxygenfunction:: rb_pop_head
 .. doxygenfunction:: rb_pop_tail
+.. doxygenfunction:: rb_push_head
+.. doxygenfunction:: rb_push_tail
+.. doxygenfunction:: rb_elem
 .. doxygenfunction:: rb_insert
+.. doxygenfunction:: rb_fetch
 .. doxygenfunction:: rb_delete
 .. doxygenfunction:: rb_remove
-.. doxygenfunction:: rb_fetch
+.. doxygenfunction:: rb_reverse
 
-Functional Utilities
---------------------
-.. doxygenfunction:: rb_empty
-.. doxygenfunction:: rb_contains
+Higher Order Functions
+----------------------
 .. doxygenfunction:: rb_map
 .. doxygenfunction:: rb_foldr
 .. doxygenfunction:: rb_foldl
@@ -32,3 +35,7 @@ Functional Utilities
 .. doxygenfunction:: rb_filter
 .. doxygenfunction:: rb_drop_while
 .. doxygenfunction:: rb_take_while
+
+Debugging
+---------
+.. doxygenfunction:: rb_dump
