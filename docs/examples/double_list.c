@@ -69,5 +69,6 @@ int main(int argc, char * argv[])
 
 	free(inputs);
 	free(outputs);
+	dl_destroy(&my_list);
 	return 0;
 }
