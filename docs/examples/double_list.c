@@ -1,5 +1,5 @@
-/* revabs_dll.h - Reverse and take the absolute value of a list of numbers
- *                using a doubly linked list as a stack.
+/* double_list.h - Reverse and take the absolute value of a list of numbers
+ *                 using a doubly linked list as a stack.
  * Copyright (C) 2018 Quytelda Kahja
  *
  * This file is part of focs.
