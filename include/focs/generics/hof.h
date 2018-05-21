@@ -59,13 +59,13 @@ struct hof_operations {
 	take_while_hof_fn take_while;
 };
 
-#define map(ds, fn)          (__DS_DOPS(ds)->map(ds, fn))
-#define foldr(ds, fn, init)  (__DS_DOPS(ds)->foldr(ds, fn, init))
-#define foldl(ds, fn, init)  (__DS_DOPS(ds)->foldl(ds, fn, init))
-#define any(ds, pred)        (__DS_DOPS(ds)->any(ds, pred))
-#define all(ds, pred)        (__DS_DOPS(ds)->all(ds, pred))
-#define filter(ds, pred)     (__DS_DOPS(ds)->filter(ds, pred))
-#define drop_while(ds, pred) (__DS_DOPS(ds)->drop_while(ds, pred))
-#define take_while(ds, pred) (__DS_DOPS(ds)->take_while(ds, pred))
+#define map(ds, fn)          (__DS_HOF_OPS(ds)->map(ds, fn))
+#define foldr(ds, fn, init)  (__DS_HOF_OPS(ds)->foldr(ds, fn, init))
+#define foldl(ds, fn, init)  (__DS_HOF_OPS(ds)->foldl(ds, fn, init))
+#define any(ds, pred)        (__DS_HOF_OPS(ds)->any(ds, pred))
+#define all(ds, pred)        (__DS_HOF_OPS(ds)->all(ds, pred))
+#define filter(ds, pred)     (__DS_HOF_OPS(ds)->filter(ds, pred))
+#define drop_while(ds, pred) (__DS_HOF_OPS(ds)->drop_while(ds, pred))
+#define take_while(ds, pred) (__DS_HOF_OPS(ds)->take_while(ds, pred))
 
 #endif /* __GENERICS_HOF_H */
