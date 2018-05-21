@@ -4,7 +4,7 @@ Singly Linked Lists
 
 To use the singly linked list implementation, create an instance of the ``single_list`` type using ``sl_create()``.  You can then use the data management functions to add and remove elements from the list.  You can also use the functional data operations to transform, reduce, or filter the data in the list.
 
-.. literalinclude:: ../../examples/revabs_sll.c
+.. literalinclude:: ../../examples/single_list.c
 
 .. doxygenstruct:: single_list
 

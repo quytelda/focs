@@ -4,7 +4,7 @@ Doubly Linked Lists
 
 To use the doubly linked list implementation, create an instance of the ``double_list`` type using ``dl_create()``.  You can then use the data management functions to add and remove elements from the list.  You can also use the functional data operations to transform, reduce, or filter the data in the list.
 
-.. literalinclude:: ../../examples/revabs_dll.c
+.. literalinclude:: ../../examples/double_list.c
 
 Creation and Destruction
 ------------------------
