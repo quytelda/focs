@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <list/double_list.h>
+#include <focs/generics/hof.h>
 
 static const struct ds_properties props = {
 	.data_size = sizeof(int),
@@ -56,7 +57,7 @@ int main(int argc, char * argv[])
 	}
 
 	/* Transform the list by mapping my_abs over the list. */
-	dl_map(my_list, my_abs_mappable);
+	map(my_list, my_abs_mappable);
 
 	/* Output each number popped from the stack. */
 	for(int i = 1; i < argc; i++) {
