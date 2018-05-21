@@ -44,6 +44,7 @@ install: $(BIN) $(LIB_PREFIX) $(INC_PREFIX)
 	ldconfig
 
 	cp $(INC_DIR)/focs.h $(INC_PREFIX)
+	cp $(INC_DIR)/hof.h  $(INC_PREFIX)
 	cp -R $(INC_DIR)/focs $(INC_PREFIX)
 	cp -R $(INC_DIR)/list $(INC_PREFIX)
 	cp -R $(INC_DIR)/sync $(INC_PREFIX)
@@ -53,6 +54,7 @@ uninstall: $(LIB_PREFIX)/$(BIN)
 	ldconfig
 
 	rm -f $(INC_PREFIX)/focs.h
+	rm -f $(INC_PREFIX)/hof.h
 	rm -rf $(INC_PREFIX)/focs
 	rm -rf $(INC_PREFIX)/list
 	rm -rf $(INC_PREFIX)/sync
