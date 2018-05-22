@@ -11,11 +11,8 @@ depends=('gcc' 'glibc')
 makedepends=('make' 'gcc')
 checkdepends=('check')
 provides=('libfocs.so')
-
-prepare() {
-	cd "$pkgname-$pkgver"
-	patch -p1 -i "$srcdir/$pkgname-$pkgver.patch"
-}
+source=('https://github.com/quytelda/focs/releases/download/v0.0.0-rc1/focs-0.0.0-rc1.tar.xz')
+md5sums=('63214cf48dd0ea86227839e2f58d855a')
 
 build() {
 	cd "$pkgname-$pkgver"
