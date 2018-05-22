@@ -40,11 +40,11 @@ docs: $(DOXYFILE)
 	$(MAKE) -C $(DOC_DIR) $(DOC_TYPE)
 
 install: $(BIN)
-	install --owner=0 --group=0 --mode=644 $(BIN) $(LIB_PREFIX)
+	install -D -m644 $(BIN) $(LIB_PREFIX)/$(BIN)
 	ldconfig
 
-	cp $(INC_DIR)/focs.h $(INC_PREFIX)
-	cp $(INC_DIR)/hof.h  $(INC_PREFIX)
+	install -D -m644 $(INC_DIR)/focs.h $(INC_PREFIX)/focs.h
+	install -D -m644 $(INC_DIR)/hof.h  $(INC_PREFIX)/hof.h
 	cp -R $(INC_DIR)/focs $(INC_PREFIX)
 	cp -R $(INC_DIR)/list $(INC_PREFIX)
 	cp -R $(INC_DIR)/sync $(INC_PREFIX)
