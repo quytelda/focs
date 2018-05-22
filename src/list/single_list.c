@@ -301,13 +301,13 @@ void sl_destroy(single_list * list)
 
 bool sl_empty(single_list list)
 {
-	bool null;
+	bool empty;
 
 	rwlock_reader_entry(DS_PRIV(list)->rwlock);
-	null = (DS_PRIV(list)->length == 0);
+	empty = __IS_EMPTY(list);
 	rwlock_reader_exit(DS_PRIV(list)->rwlock);
 
-	return null;
+	return empty;
 }
 
 size_t __nonulls sl_size(const single_list list)

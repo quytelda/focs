@@ -45,7 +45,8 @@ START_DS(single_list) {
 	struct rwlock * rwlock;
 } END_DS(single_list);
 
-#define __LENGTH(list) (DS_PRIV(list)->length)
+#define __LENGTH(list)   (DS_PRIV(list)->length)
+#define __IS_EMPTY(list) (__LENGTH(list) <= 0)
 
 /**
  * Allocate and initialize a new singly linked list.
