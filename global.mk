@@ -3,6 +3,7 @@ BIN=lib$(TGT).so
 
 CC=gcc
 RM=rm -f
+LDCONFIG=/sbin/ldconfig
 
 INC_DIR=include
 SRC_DIR=src

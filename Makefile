@@ -41,7 +41,7 @@ docs: $(DOXYFILE)
 
 install: $(BIN)
 	install -D -m644 $(BIN) $(LIB_PREFIX)/$(BIN)
-	ldconfig
+	$(LDCONFIG)
 
 	install -D -m644 $(INC_DIR)/focs.h $(INC_PREFIX)/focs.h
 	install -D -m644 $(INC_DIR)/hof.h  $(INC_PREFIX)/hof.h
@@ -51,7 +51,7 @@ install: $(BIN)
 
 uninstall:
 	rm -f $(LIB_PREFIX)/$(BIN)
-	ldconfig
+	$(LDCONFIG)
 
 	rm -f $(INC_PREFIX)/focs.h
 	rm -f $(INC_PREFIX)/hof.h
