@@ -39,7 +39,7 @@ docs: $(DOXYFILE)
 	doxygen $(DOXYFILE)
 	$(MAKE) -C $(DOC_DIR) $(DOC_TYPE)
 
-install: $(BIN) $(LIB_PREFIX) $(INC_PREFIX)
+install: $(BIN)
 	install --owner=0 --group=0 --mode=644 $(BIN) $(LIB_PREFIX)
 	ldconfig
 
@@ -49,7 +49,7 @@ install: $(BIN) $(LIB_PREFIX) $(INC_PREFIX)
 	cp -R $(INC_DIR)/list $(INC_PREFIX)
 	cp -R $(INC_DIR)/sync $(INC_PREFIX)
 
-uninstall: $(LIB_PREFIX)/$(BIN)
+uninstall:
 	rm -f $(LIB_PREFIX)/$(BIN)
 	ldconfig
 
