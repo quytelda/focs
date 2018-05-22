@@ -1,16 +1,10 @@
-# This is an example PKGBUILD file. Use this as a start to creating your own,
-# and remove these comments. For more information, see 'man PKGBUILD'.
-# NOTE: Please fill out the license field for your package! If it is unknown,
-# then please put 'unknown'.
-
-# Maintainer: Your Name <youremail@domain.com>
-pkgname=NAME
-pkgver=VERSION
+# Maintainer: Quytelda Kahja <quytelda@tamalin.org>
+pkgname=focs
+pkgver=0.0.0.rc1
 pkgrel=1
-epoch=
-pkgdesc=""
-arch=()
-url=""
+pkgdesc="A C data structures library with a functional bent."
+arch=('i686', 'x86_64')
+url="https://quytelda.github.io/focs"
 license=('GPL')
 groups=()
 depends=()
