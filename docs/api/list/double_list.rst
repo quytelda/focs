@@ -25,6 +25,13 @@ Data Management
 .. doxygenfunction:: dl_remove
 .. doxygenfunction:: dl_fetch
 
+Iterator Macros
+---------------
+.. doxygendefine:: double_list_foreach_rev
+.. doxygendefine:: double_list_foreach_rev_safe
+.. doxygendefine:: double_list_while_rev
+.. doxygendefine:: double_list_while_rev_safe
+
 Higher Order Functions
 ----------------------
 .. doxygenfunction:: dl_map

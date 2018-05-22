@@ -11,8 +11,8 @@ This part of the documentation is intended for individuals who want to contribut
    :maxdepth: 2
    :caption: Table of Contents:
 
-   dev/coding-style
-   dev/submit-patch
+   coding-style
+   submit-patch
 
 How Can I Contribute?
 ---------------------

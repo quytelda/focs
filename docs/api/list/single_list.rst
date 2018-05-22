@@ -14,6 +14,7 @@ Creation and Destruction
 Data Management
 ---------------
 .. doxygenfunction:: sl_empty
+.. doxygenfunction:: sl_size
 .. doxygenfunction:: sl_push_head
 .. doxygenfunction:: sl_push_tail
 .. doxygenfunction:: sl_pop_head

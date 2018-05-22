@@ -111,11 +111,13 @@ static inline __pure __nonulls void * __next(const ring_buffer buf,
  * @param index   An iteration counter
  * @param current A pointer that will point to the current data block
  *
- * ring_buffer_foreach() should be used like a for loop; for example:
+ * ring_buffer_foreach_i() should be used like a for loop; for example:
  * ```
+ * size_t i;
  * struct data_type * current;
- * ring_buffer_foreach(buf, current) {
- *         do_something(current);
+ * ring_buffer_foreach_i(buf, i, current) {
+ *         if(some_condition(i))
+ *                 do_something(current);
  * }
  * ```
  * The loop will work whether `current` is a void pointer or a pointer to a type
@@ -126,6 +128,21 @@ static inline __pure __nonulls void * __next(const ring_buffer buf,
 	    index < __LENGTH(buf);                   \
 	    index++, current = __next(buf, current))
 
+/**
+ * Advance through a ring buffer block by block.
+ * @param buf     The ring buffer to iterate over
+ * @param current A pointer that will point to the current data block
+ *
+ * ring_buffer_foreach() should be used like a for loop; for example:
+ * ```
+ * struct data_type * current;
+ * ring_buffer_foreach(buf, current) {
+ *         do_something(current);
+ * }
+ * ```
+ * The loop will work whether `current` is a void pointer or a pointer to a type
+ * with the same size as (or theoretically less than) the buffer's data blocks.
+ */
 #define ring_buffer_foreach(buf, current)       \
 	size_t _i;                              \
 	ring_buffer_foreach_i(buf, _i, current)
@@ -136,13 +153,21 @@ static inline __pure __nonulls void * __next(const ring_buffer buf,
  * @param index   An iteration counter
  * @param current A pointer that will point to the current data block
  *
- * The syntax of ring_buffer_foreach_rev() is the same as ring_buffer_foreach().
+ * The syntax of ring_buffer_foreach_i_rev() is the same as
+ * ring_buffer_foreach_i().
  */
 #define ring_buffer_foreach_i_rev(buf, index, current) \
 	for(index = 0, current = __TAIL(buf);          \
 	    index < __LENGTH(buf);                     \
 	    index++, current = __prev(buf, current))
 
+/**
+ * Advance through a ring buffer block by block in reverse.
+ * @param buf     The ring buffer to iterate over
+ * @param current A pointer that will point to the current data block
+ *
+ * The syntax of ring_buffer_foreach_rev() is the same as ring_buffer_foreach().
+ */
 #define ring_buffer_foreach_rev(buf, current)       \
 	size_t _i;                                  \
 	ring_buffer_foreach_i_rev(buf, _i, current)
