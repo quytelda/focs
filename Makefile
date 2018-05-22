@@ -53,11 +53,11 @@ uninstall:
 	rm -f $(LIB_PREFIX)/$(BIN)
 	$(LDCONFIG)
 
-	rm -f $(INC_PREFIX)/focs.h
-	rm -f $(INC_PREFIX)/hof.h
-	rm -rf $(INC_PREFIX)/focs
-	rm -rf $(INC_PREFIX)/list
-	rm -rf $(INC_PREFIX)/sync
+	$(RM) $(INC_PREFIX)/focs.h
+	$(RM) $(INC_PREFIX)/hof.h
+	$(RM) -r $(INC_PREFIX)/focs
+	$(RM) -r $(INC_PREFIX)/list
+	$(RM) -r $(INC_PREFIX)/sync
 
 clean:
 	-$(RM) $(BIN) $(OBJS)
