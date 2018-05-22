@@ -1,6 +1,7 @@
 # Maintainer: Quytelda Kahja <quytelda@tamalin.org>
 pkgname=focs
-pkgver=0.0.0.rc1
+pkgver='0.0.0.rc1'
+_focsver='0.0.0-rc1'
 pkgrel=1
 pkgdesc="A C data structures library with a functional bent."
 arch=('i686', 'x86_64')
