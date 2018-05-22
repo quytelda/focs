@@ -15,17 +15,16 @@ source=('https://github.com/quytelda/focs/releases/download/v0.0.0-rc1/focs-0.0.
 md5sums=('63214cf48dd0ea86227839e2f58d855a')
 
 build() {
-	cd "$pkgname-$pkgver"
-	./configure --prefix=/usr
-	make
+	cd "$pkgname-$_focsver"
+	CFLAGS=-DGENERICS make
 }
 
 check() {
-	cd "$pkgname-$pkgver"
-	make -k check
+	cd "$pkgname-$_focsver"
+	make check
 }
 
 package() {
-	cd "$pkgname-$pkgver"
-	make DESTDIR="$pkgdir/" install
+	cd "$pkgname-$_focsver"
+	PREFIX=$pkgdir make install
 }
