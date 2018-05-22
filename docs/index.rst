@@ -9,9 +9,9 @@
 
    installation/obtaining
    installation/makefile
-   api/list
-   api/sync
-   dev
+   api/list/index
+   api/sync/index
+   dev/index
 
 Indices and tables
 ==================
