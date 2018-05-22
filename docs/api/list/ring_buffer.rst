@@ -25,6 +25,13 @@ Data Management
 .. doxygenfunction:: rb_remove
 .. doxygenfunction:: rb_reverse
 
+Iterator Macros
+---------------
+.. doxygendefine:: ring_buffer_foreach_i
+.. doxygendefine:: ring_buffer_foreach
+.. doxygendefine:: ring_buffer_foreach_i_rev
+.. doxygendefine:: ring_buffer_foreach_rev
+
 Higher Order Functions
 ----------------------
 .. doxygenfunction:: rb_map
