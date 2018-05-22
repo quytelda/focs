@@ -7,23 +7,10 @@ pkgdesc="A C data structures library with a functional bent."
 arch=('i686', 'x86_64')
 url="https://quytelda.github.io/focs"
 license=('GPL')
-groups=()
-depends=()
-makedepends=()
-checkdepends=()
-optdepends=()
-provides=()
-conflicts=()
-replaces=()
-backup=()
-options=()
-install=
-changelog=
-source=("$pkgname-$pkgver.tar.gz"
-        "$pkgname-$pkgver.patch")
-noextract=()
-md5sums=()
-validpgpkeys=()
+depends=('gcc' 'glibc')
+makedepends=('make' 'gcc')
+checkdepends=('check')
+provides=('libfocs.so')
 
 prepare() {
 	cd "$pkgname-$pkgver"
