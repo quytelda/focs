@@ -85,7 +85,7 @@ static inline __pure __nonulls void * __prev(const ring_buffer buf,
 
 	start = mark - data;
 	offset = mod((ssize_t) (start - DS_DATA_SIZE(buf)),
-		     (ssize_t) DS_ENTRIES(buf));
+		     (ssize_t) __SPACE(buf));
 	return (void *) (data + offset);
 }
 
@@ -101,7 +101,7 @@ static inline __pure __nonulls void * __next(const ring_buffer buf,
 	size_t mark = (size_t) addr;
 
 	start = mark - data;
-	offset = (start + DS_DATA_SIZE(buf)) % DS_ENTRIES(buf);
+	offset = (start + DS_DATA_SIZE(buf)) % __SPACE(buf);
 	return (void *) (data + offset);
 }
 
