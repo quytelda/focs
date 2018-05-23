@@ -641,7 +641,7 @@ void rb_dump(const ring_buffer buf)
 	else
 		puts("\n");
 
-	for(size_t i = 0; i < DS_ENTRIES(buf); i++) {
+	for(size_t i = 0; i < __SPACE(buf); i++) {
 		uint8_t * addr;
 		size_t pos;
 
