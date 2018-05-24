@@ -7,8 +7,8 @@
    :maxdepth: 2
    :caption: Contents:
 
-   installation/obtaining
-   installation/makefile
+   install/obtaining
+   install/makefile
    api/list/index
    api/sync/index
    dev/index
