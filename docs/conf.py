@@ -51,6 +51,10 @@ extensions = [
 # Tell breathe about the projects
 breathe_projects = { "FOCS": "./xml" }
 breathe_default_project = "FOCS"
+breathe_domain_by_extension = {
+    "c" : "c",
+    "h" : "c",
+}
 
 # Add any paths that contain templates here, relative to this directory.
 # templates_path = ['_templates']
