@@ -30,6 +30,8 @@
 #define __pure    __attribute__((pure))
 #define __unused  __attribute__((unused))
 
+#define __immutable(type) const type * const
+
 /**
  * Pick the minimum of two comparable values.
  * @param m First comparable value
