@@ -18,6 +18,7 @@
  * along with focs.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <errno.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -33,38 +34,6 @@
 #define __immutable(type) const type * const
 
 /**
- * Pick the minimum of two comparable values.
- * @param m First comparable value
- * @param n Second comparable value
- *
- * @return the the lesser of two comparable parameters `m` and `n`.
- * In the case that `m` and `n` are compared and found to be equal,
- * then `m` is returned.
- */
-#define MIN(m, n)				\
-	({					\
-		typeof(m) m_ = m;		\
-		typeof(n) n_ = n;		\
-		((m_ <= n_) ? m_ : n_);		\
-	})
-
-/**
- * Pick the maximum of two comparable values.
- * @param m First comparable value
- * @param n Second comparable value
- *
- * @return the the greater of two comparable parameters `m` and `n`.
- * In the case that `m` and `n` are compared and found to be equal,
- * then `m` is returned.
- */
-#define MAX(m, n)				\
-	({					\
-		typeof(m) m_ = m;		\
-		typeof(n) n_ = n;		\
-		((m_ >= n_) ? m_ : n_);		\
-	})
-
-/**
  * Set errno and return from the current function with some value.
  * @param err The error number to set errno to
  * @param val The optional value to return
@@ -72,10 +41,10 @@
  * Set errno to `err`, then return from the current function.  The value
  * supplied as the second argument will be the return value of the function.
  */
-#define return_with_errno(err, val)		\
-	({					\
-		errno = err;			\
-		return val;			\
+#define return_with_errno(err, val) \
+	({                          \
+		errno = err;        \
+		return val;         \
 	})
 
 /**
@@ -86,10 +55,10 @@
  * Set errno to `err`, then execute `goto label` inside the function,
  * effectively jumping to `label`.
  */
-#define goto_with_errno(err, label)		\
-	({					\
-		errno = err;			\
-		goto label;			\
+#define goto_with_errno(err, label) \
+	({                          \
+		errno = err;        \
+		goto label;         \
 	})
 
 /**
@@ -132,10 +101,42 @@
  *
  * If `ptr` is NULL already, this macro has no effect.
  */
-#define free_null(ptr)				\
-	({					\
-		free(ptr);			\
-		ptr = NULL;			\
+#define free_null(ptr)      \
+	({                  \
+		free(ptr)   \
+		ptr = NULL; \
+	})
+
+/**
+ * Pick the minimum of two comparable values.
+ * @param m First comparable value
+ * @param n Second comparable value
+ *
+ * @return the the lesser of two comparable parameters `m` and `n`.
+ * In the case that `m` and `n` are compared and found to be equal,
+ * then `m` is returned.
+ */
+#define MIN(m, n)                      \
+	({                             \
+		typeof(m) m_ = m;      \
+		typeof(n) n_ = n;      \
+		((m_ <= n_) ? m_ : n_) \
+	})
+
+/**
+ * Pick the maximum of two comparable values.
+ * @param m First comparable value
+ * @param n Second comparable value
+ *
+ * @return the the greater of two comparable parameters `m` and `n`.
+ * In the case that `m` and `n` are compared and found to be equal,
+ * then `m` is returned.
+ */
+#define MAX(m, n)                      \
+	({                             \
+		typeof(m) m_ = m;      \
+		typeof(n) n_ = n;      \
+		((m_ >= n_) ? m_ : n_) \
 	})
 
 /**
@@ -154,20 +155,20 @@
  *
  * @return The remainder of the quotient `(a / n)`.
  */
-#define mod(a, n)				\
-	({					\
-		typeof(a) a_ = (a);		\
-		typeof(n) n_ = (n);		\
-		((a_ % n_) + n_) % n_;		\
+#define mod(a, n)                      \
+	({                             \
+		typeof(a) a_ = (a)     \
+		typeof(n) n_ = (n)     \
+		((a_ % n_) + n_) % n_; \
 	})
 
 /**
- * Check if a memory address is block aligned.
+ * Check if an address is aligned to a block.
  * @param addr   The address or address span to check
  * @param size   The block size in bytes
  * @param offset The offset for the beginning of the block list
  *
- * @return `true` if `addr` is aligned to `size` with `offset`.
+ * @return `true` if `addr` is aligned to `size` with `offset`; false otherwise.
  */
 #define aligned(addr, size, offset) (((addr) - (offset)) % (size) == 0)
 
@@ -180,7 +181,8 @@
  * @param char The character to print
  * @param len  The number of characters to print
  *
- * `PUT_HR()` prints `len` characters (which are `char`) followed by a newline.
+ * Print `len` characters (which are `char`) followed by a newline.
+ * Useful for "drawing" a horizontal line in a terminal.
  */
 #define PUT_HR(char, len)                       \
 	({                                      \
