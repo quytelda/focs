@@ -110,6 +110,23 @@
 	})
 
 /**
+ * Malloc: Goto on Failure
+ * @param ptr   A pointer to the newly allocated memory, if any
+ * @param size  The amount of memory to allocate in bytes
+ * @param label A label to jump to if the allocation fails
+ *
+ * Calls malloc to try and allocate `size` bytes, and assigns a pointer to the
+ * newly allocated memory to `ptr`.  If `malloc()` fails and returns `NULL`,
+ * this macro will jump to the label passed to it as `label`.
+ */
+#define malloc_gof(ptr, size, label)                     \
+	({                                               \
+		ptr = malloc(size);                      \
+		if(!ptr)                                 \
+			goto_with_errno(ENOMEM, label);  \
+	})
+
+/**
  * Free a pointer, then set it's value to NULL.
  * @param ptr A pointer to allocated memory to free
  *
