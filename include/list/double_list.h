@@ -138,7 +138,7 @@ struct dl_element {
  * double_list.  Otherwise, `NULL` shall be returned and `errno` set to
  * indicate the error.
  */
-double_list dl_create(const struct ds_properties * props);
+__nonulls double_list dl_create(__immutable(struct ds_properties) props);
 
 /**
  * Destroy and deallocate a doubly linked list.
@@ -147,7 +147,7 @@ double_list dl_create(const struct ds_properties * props);
  * De-allocates the doubly linked list at the structure pointer pointed to by
  * `list`, as well as de-allocating all data elements contained within `list`.
  */
-void dl_destroy(double_list * list);
+__nonulls void dl_destroy(double_list * list);
 
 /**
  * Determine the number of data elements stored in a doubly linked list.
@@ -156,7 +156,7 @@ void dl_destroy(double_list * list);
  * @return This function shall return the number of data elements stored in
  * `list`.
  */
-size_t dl_size(const double_list list);
+__nonulls size_t dl_size(const double_list list);
 
 /**
  * Determine if a list is empty.
@@ -164,7 +164,7 @@ size_t dl_size(const double_list list);
  *
  * @return `true` if `list` is empty, `false` otherwise.
  */
-bool dl_empty(const double_list list);
+__nonulls bool dl_empty(const double_list list);
 
 /**
  * Push a new data element to the head of the list.
@@ -173,7 +173,7 @@ bool dl_empty(const double_list list);
  *
  * Push a newly allocated copy of `data` onto the head of `list`.
  */
-void dl_push_head(double_list list, void * data);
+void dl_push_head(double_list list, __immutable(void) data);
 
 /**
  * Push a new data element to the tail of the list.
@@ -182,7 +182,7 @@ void dl_push_head(double_list list, void * data);
  *
  * Push a newly allocated copy of `data` onto the tail of `list`.
  */
-void dl_push_tail(double_list list, void * data);
+void dl_push_tail(double_list list, __immutable(void) data);
 
 /**
  * Pop a data element from the head of a list.
@@ -196,7 +196,7 @@ void dl_push_tail(double_list list, void * data);
  * **not** equivalent to the pointer which was used to insert the data into
  * `list`.
  */
-void * dl_pop_head(double_list list);
+__nonulls void * dl_pop_head(double_list list);
 
 /**
  * Pop a data element from the tail of a list.
@@ -210,7 +210,7 @@ void * dl_pop_head(double_list list);
  * **not** equivalent to the pointer which was used to insert the data into
  * `list`.
  */
-void * dl_pop_tail(double_list list);
+__nonulls void * dl_pop_tail(double_list list);
 
 /**
  * Insert a new data element to a given position in a list.
@@ -224,7 +224,9 @@ void * dl_pop_tail(double_list list);
  *
  * @return `true` if the insertion succeeds, otherwise `false`.
  */
-bool dl_insert(double_list list, void * data, size_t pos);
+__nonnull((1)) bool dl_insert(double_list list,
+                              __immutable(void) data,
+                              const size_t pos);
 
 /**
  * Delete a data element from a given position in a list.
@@ -236,7 +238,7 @@ bool dl_insert(double_list list, void * data, size_t pos);
  *
  * @return `true` if the deletion succeeds, otherwise `false`.
  */
-bool dl_delete(double_list list, size_t pos);
+__nonulls bool dl_delete(double_list list, const size_t pos);
 
 /**
  * Delete and return a data element from a given position in a list.
@@ -252,7 +254,20 @@ bool dl_delete(double_list list, size_t pos);
  * needed.  It is **not** equivalent to the pointer which was used to insert
  * the data into `list`.
  */
-void * dl_remove(double_list list, size_t pos);
+__nonulls void * dl_remove(double_list list, const size_t pos);
+
+/**
+ * Determine if a list contains a value.
+ * @param list The list to search
+ * @param data The data to search for in the list
+ *
+ * Determines if `list` contains an entry matching `data`.
+ * The operation compares the contents of the memory pointed to by `data`, and
+ * not the memory addresses of the data pointers.
+ *
+ * @return `true` if a matching entry is found, otherwise `false`
+ */
+__nonnull((1)) bool dl_elem(const double_list list, __immutable(void) data);
 
 /**
  * Fetch a data element from a given position in a list.
@@ -268,7 +283,7 @@ void * dl_remove(double_list list, size_t pos);
  * the data is needed after the list is destroyed, make a copy of it, or make
  * sure to call dl_remove() on the data's index before destroying the list.
  */
-void * dl_fetch(double_list list, size_t pos);
+__nonulls void * dl_fetch(const double_list list, const size_t pos);
 
 /**
  * Reverse a list in place.
@@ -277,7 +292,7 @@ void * dl_fetch(double_list list, size_t pos);
  * Reverses a list in place so that the elements are in reverse order and the
  * head and tail are switched.
  */
-void dl_reverse(double_list list);
+__nonulls void dl_reverse(double_list list);
 
 /* ########################## *
  * # Higher Order Functions # *
@@ -296,7 +311,7 @@ void dl_reverse(double_list list);
  * 	list[i] = fn(list[i])
  * ```
  */
-void dl_map(double_list list, map_fn fn);
+__nonulls void dl_map(double_list list, const map_fn fn);
 
 /**
  * Right associative fold for doubly linked lists.
@@ -311,11 +326,12 @@ void dl_map(double_list list, map_fn fn);
  * ```
  *
  * @return The result of a right associate fold over `list`.  If `list` is
- * empty, the fold will be equal to the value of `init`.
+ * empty, the fold will be equal to the value of `init`.  Note that the result
+ * pointer must be free()d explicitly.
  */
-void * dl_foldr(const double_list list,
-		foldr_fn fn,
-		const void * init);
+__nonnull((1, 2)) void * dl_foldr(const double_list list,
+		                 const foldr_fn fn,
+		                 __immutable(void) init);
 
 /**
  * Left associative fold for doubly linked lists.
@@ -332,22 +348,9 @@ void * dl_foldr(const double_list list,
  * @return The result of a left associate fold over `list`.  If `list` is
  * empty, the fold will be equal to the value of `init`.
  */
-void * dl_foldl(const double_list list,
-		foldl_fn fn,
-		const void * init);
-
-/**
- * Determine if a list contains a value.
- * @param list The list to search
- * @param data The data to search for in the list
- *
- * Determines if `list` contains an entry matching `data`.
- * The operation compares the contents of the memory pointed to by `data`, and
- * not the memory addresses of the data pointers.
- *
- * @return `true` if a matching entry is found, otherwise `false`
- */
-bool dl_elem(double_list list, void * data);
+__nonnull((1, 2)) void * dl_foldl(const double_list list,
+		                  const foldl_fn fn,
+		                  __immutable(void) init);
 
 /**
  * Determine if any value in a list satisifies some condition.
@@ -360,7 +363,7 @@ bool dl_elem(double_list list, void * data);
  * @return `true` if there is at least one value that satisfies the predicate.
  * Otherwise, it returns `false`.
  */
-bool dl_any(double_list list, pred_fn p);
+__nonulls bool dl_any(const double_list list, const pred_fn p);
 
 /**
  * Determines if all values in a list satisify some condition
@@ -373,7 +376,7 @@ bool dl_any(double_list list, pred_fn p);
  * @return `false` if there is at least one value that does not satisfy the
  * predicate.  Otherwise, it returns `true`.
  */
-bool dl_all(double_list list, pred_fn p);
+__nonulls bool dl_all(const double_list list, const pred_fn p);
 
 /**
  * Filter a list to contain only values that satisfy some predicate.
@@ -384,7 +387,7 @@ bool dl_all(double_list list, pred_fn p);
  * predicate `p`.  Elements that do satisfy the predicate `p` are not removed
  * from the list.
  */
-bool dl_filter(double_list list, pred_fn p);
+__nonulls bool dl_filter(double_list list, const pred_fn p);
 
 /**
  * Drop elements from the head of the list until the predicate is unsatisfied.
@@ -395,7 +398,7 @@ bool dl_filter(double_list list, pred_fn p);
  *
  * This function is an in-place equivalent of Haskell's dropWhile.
  */
-bool dl_drop_while(double_list list, pred_fn p);
+__nonulls bool dl_drop_while(double_list list, const pred_fn p);
 
 /**
  * Keep elements from the head of the list until the predicate is unsatisfied.
@@ -406,7 +409,7 @@ bool dl_drop_while(double_list list, pred_fn p);
  *
  * This function is an in-place equivalent of Haskell's takeWhile.
  */
-bool dl_take_while(double_list list, pred_fn p);
+__nonulls bool dl_take_while(double_list list, const pred_fn p);
 
 #ifdef GENERICS
 
