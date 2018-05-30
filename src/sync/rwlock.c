@@ -20,7 +20,7 @@
 
 #include "sync/rwlock.h"
 
-int rwlock_alloc(struct rwlock ** rwlock)
+int rwlock_create(struct rwlock ** rwlock)
 {
 	int err;
 
