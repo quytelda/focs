@@ -43,8 +43,8 @@
  */
 #define return_with_errno(err, val) \
 	({                          \
-		errno = err;        \
-		return val;         \
+		errno = (err);      \
+		return (val);       \
 	})
 
 /**
@@ -57,7 +57,7 @@
  */
 #define goto_with_errno(err, label) \
 	({                          \
-		errno = err;        \
+		errno = (err);      \
 		goto label;         \
 	})
 
@@ -103,7 +103,7 @@
  */
 #define free_null(ptr)      \
 	({                  \
-		free(ptr)   \
+		free(ptr);  \
 		ptr = NULL; \
 	})
 
@@ -116,11 +116,11 @@
  * In the case that `m` and `n` are compared and found to be equal,
  * then `m` is returned.
  */
-#define MIN(m, n)                      \
-	({                             \
-		typeof(m) m_ = m;      \
-		typeof(n) n_ = n;      \
-		((m_ <= n_) ? m_ : n_) \
+#define MIN(m, n)                       \
+	({                              \
+		typeof(m) m_ = (m);     \
+		typeof(n) n_ = (n);     \
+		((m_ <= n_) ? m_ : n_); \
 	})
 
 /**
@@ -132,11 +132,11 @@
  * In the case that `m` and `n` are compared and found to be equal,
  * then `m` is returned.
  */
-#define MAX(m, n)                      \
-	({                             \
-		typeof(m) m_ = m;      \
-		typeof(n) n_ = n;      \
-		((m_ >= n_) ? m_ : n_) \
+#define MAX(m, n)                       \
+	({                              \
+		typeof(m) m_ = (m);     \
+		typeof(n) n_ = (n);     \
+		((m_ >= n_) ? m_ : n_); \
 	})
 
 /**
@@ -157,8 +157,8 @@
  */
 #define mod(a, n)                      \
 	({                             \
-		typeof(a) a_ = (a)     \
-		typeof(n) n_ = (n)     \
+		typeof(a) a_ = (a);    \
+		typeof(n) n_ = (n);    \
 		((a_ % n_) + n_) % n_; \
 	})
 
@@ -184,11 +184,11 @@
  * Print `len` characters (which are `char`) followed by a newline.
  * Useful for "drawing" a horizontal line in a terminal.
  */
-#define PUT_HR(char, len)                       \
-	({                                      \
-		for(size_t i = 0; i < len; i++) \
-			putchar(char);          \
-		putchar('\n');                  \
+#define PUT_HR(char, len)                         \
+	({                                        \
+		for(size_t i = 0; i < (len); i++) \
+			putchar(char);            \
+		putchar('\n');                    \
 	})
 
 #endif
