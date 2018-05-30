@@ -399,7 +399,7 @@ void rb_destroy(ring_buffer * buf)
 {
 	/* Destroy the private data section. */
 	free_null(DS_PRIV(*buf)->data);
-	rwlock_free(&DS_PRIV(*buf)->rwlock);
+	rwlock_destroy(&DS_PRIV(*buf)->rwlock);
 
 	/* Deallocate the data structure. */
 	DS_FREE(buf);

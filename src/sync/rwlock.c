@@ -49,7 +49,7 @@ exit:
 	return err;
 }
 
-void rwlock_free(struct rwlock ** rwlock)
+void rwlock_destroy(struct rwlock ** rwlock)
 {
 	pthread_mutex_destroy(&(*rwlock)->lock);
 	pthread_cond_destroy(&(*rwlock)->cond);

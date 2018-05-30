@@ -269,7 +269,7 @@ void dl_destroy(double_list * list)
 	}
 
 	rwlock_writer_exit(DS_PRIV(*list)->rwlock);
-	rwlock_free(&DS_PRIV(*list)->rwlock);
+	rwlock_destroy(&DS_PRIV(*list)->rwlock);
 
 	DS_FREE(list);
 }
