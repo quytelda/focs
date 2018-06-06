@@ -247,7 +247,8 @@ double_list dl_create(__immutable(struct ds_properties) props)
 	priv->tail = NULL;
 	priv->length = 0;
 
-	if(rwlock_create(&priv->rwlock) < 0)
+        priv->rwlock = rwlock_create();
+	if(!priv->rwlock)
 		goto exit;
 
 	return list;

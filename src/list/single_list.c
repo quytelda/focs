@@ -272,8 +272,9 @@ single_list sl_create(const struct ds_properties * props)
 	priv->tail = NULL;
 	priv->length = 0;
 
-	if(rwlock_create(&priv->rwlock) < 0)
-		goto exit;
+        priv->rwlock = rwlock_create();
+        if(!priv->rwlock)
+                goto exit;
 
 	return list;
 

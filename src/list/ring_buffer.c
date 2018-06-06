@@ -385,8 +385,9 @@ ring_buffer rb_create(const struct ds_properties * props)
 	priv->tail = priv->data;
 	priv->length = 0;
 
-	if(rwlock_create(&priv->rwlock) < 0)
-		goto_with_errno(errno, exit);
+        priv->rwlock = rwlock_create();
+	if(!priv->rwlock)
+		goto exit;
 
 	return buf;
 

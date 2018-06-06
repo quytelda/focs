@@ -34,7 +34,7 @@ struct rwlock {
 	bool writing;
 };
 
-int rwlock_create(struct rwlock ** rwlock);
+struct rwlock * rwlock_create(void);
 void rwlock_destroy(struct rwlock ** rwlock);
 void rwlock_writer_entry(struct rwlock * rwlock);
 void rwlock_writer_exit(struct rwlock * rwlock);

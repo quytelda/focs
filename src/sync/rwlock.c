@@ -20,33 +20,33 @@
 
 #include "sync/rwlock.h"
 
-int rwlock_create(struct rwlock ** rwlock)
+struct rwlock * rwlock_create(void)
 {
-	int err;
+        int err;
+        struct rwlock * lock;
 
-	*rwlock = malloc(sizeof(**rwlock));
-	if(!*rwlock)
-		return -ENOMEM;
+        malloc_rof(lock, sizeof(*lock), NULL);
 
-	err = pthread_mutex_init(&(*rwlock)->lock, NULL);
+	err = pthread_mutex_init(&(lock->lock), NULL);
 	if(err)
-		goto exit;
+		goto_with_errno(err, exit);
 
-	err = pthread_cond_init(&(*rwlock)->cond, NULL);
+	err = pthread_cond_init(&(lock->cond), NULL);
 	if(err)
-		goto exit;
+		goto_with_errno(err, exit_mutex_destroy);
 
-	(*rwlock)->readers = 0;
-	(*rwlock)->writers = 0;
-	(*rwlock)->writing = false;
+	lock->readers = 0;
+	lock->writers = 0;
+	lock->writing = false;
 
-	return 0;
+	return lock;
+
+exit_mutex_destroy:
+        pthread_mutex_destroy(&lock->lock);
 
 exit:
-	pthread_mutex_destroy(&(*rwlock)->lock);
-	pthread_cond_destroy(&(*rwlock)->cond);
-
-	return err;
+        free(lock);
+	return NULL;
 }
 
 void rwlock_destroy(struct rwlock ** rwlock)
