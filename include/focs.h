@@ -18,14 +18,14 @@
  * along with focs.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef __FOCS_H
+#define __FOCS_H
+
 #include <errno.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-
-#ifndef __FOCS_H
-#define __FOCS_H
 
 #define __nonulls __attribute__((nonnull))
 #define __pure    __attribute__((pure))
@@ -173,7 +173,6 @@
 #define aligned(addr, size, offset) (((addr) - (offset)) % (size) == 0)
 
 #ifdef DEBUG
-
 #include <stdio.h>
 
 /**
@@ -190,7 +189,6 @@
 			putchar(char);            \
 		putchar('\n');                    \
 	})
-
-#endif
+#endif /* DEBUG */
 
 #endif /* __FOCS_H */

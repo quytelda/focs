@@ -17,8 +17,8 @@
  * along with focs.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __SINGLE_LIST_H
-#define __SINGLE_LIST_H
+#ifndef __LIST_SINGLE_LIST_H
+#define __LIST_SINGLE_LIST_H
 
 #include "focs.h"
 #include "focs/ds.h"
@@ -344,4 +344,4 @@ void __nonulls sl_dump(const single_list list);
 
 #endif /* DEBUG */
 
-#endif /* __SINGLE_LIST_H */
+#endif /* __LIST_SINGLE_LIST_H */

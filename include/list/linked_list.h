@@ -17,6 +17,9 @@
  * along with focs.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef __LIST_LINKED_LIST_H
+#define __LIST_LINKED_LIST_H
+
 #define __HEAD(list) (DS_PRIV(list)->head)
 #define __TAIL(list) (DS_PRIV(list)->tail)
 
@@ -157,3 +160,5 @@
  * ```
  */
 #define otherwise(current) if(!current)
+
+#endif /* __LIST_LINKED_LIST_H */

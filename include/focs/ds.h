@@ -18,13 +18,13 @@
  * along with focs.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef __FOCS_DS_H
+#define __FOCS_DS_H
+
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-
-#ifndef __DATA_STRUCTURE_H
-#define __DATA_STRUCTURE_H
 
 struct ds_properties {
 	size_t data_size;
@@ -54,4 +54,4 @@ struct ds_properties {
 
 #define DS_DATA_EQ(ds, s1, s2) (memcmp(s1, s2, DS_DATA_SIZE(ds)) == 0)
 
-#endif /* __DATA_STRUCTURE_H */
+#endif /* __FOCS_DS_H */

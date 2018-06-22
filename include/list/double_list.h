@@ -17,8 +17,8 @@
  * along with focs.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __LINKED_LIST_H
-#define __LINKED_LIST_H
+#ifndef __LIST_DOUBLE_LIST_H
+#define __LIST_DOUBLE_LIST_H
 
 #include "focs.h"
 #include "focs/ds.h"
@@ -437,4 +437,4 @@ void __nonulls dl_dump(const double_list list);
 
 #endif
 
-#endif /* __LINKED_LIST_H */
+#endif /* __LIST_DOUBLE_LIST_H */

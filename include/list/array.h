@@ -17,6 +17,9 @@
  * along with focs.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef __LIST_ARRAY_H
+#define __LIST_ARRAY_H
+
  /**
   * Determine the number of elements stored in a C array.
   * @param array The array to check (must be statically sized)
@@ -69,3 +72,5 @@
 #define array_foreach(array, current)       \
 	size_t _i;                          \
 	array_foreach_i(array, current, _i)
+
+#endif /* __LIST_ARRAY_H */

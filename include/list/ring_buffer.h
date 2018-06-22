@@ -17,6 +17,9 @@
  * along with focs.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef __RING_BUFFER_H
+#define __RING_BUFFER_H
+
 #include "focs.h"
 #include "hof.h"
 #include "focs/ds.h"
@@ -483,3 +486,5 @@ void rb_take_while(ring_buffer buf, const pred_fn pred);
 void rb_dump(const ring_buffer buf);
 
 #endif /* DEBUG */
+
+#endif /* __RING_BUFFER_H */
