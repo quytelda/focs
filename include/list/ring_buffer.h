@@ -19,7 +19,7 @@
 
 #include "focs.h"
 #include "hof.h"
-#include "focs/data_structure.h"
+#include "focs/ds.h"
 #include "sync/rwlock.h"
 
 START_DS(ring_buffer) {

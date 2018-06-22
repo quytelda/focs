@@ -21,7 +21,7 @@
 #define __LINKED_LIST_H
 
 #include "focs.h"
-#include "focs/data_structure.h"
+#include "focs/ds.h"
 #include "hof.h"
 #include "list/linked_list.h"
 #include "sync/rwlock.h"

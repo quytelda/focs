@@ -1,4 +1,4 @@
-/* hof_operations.h - Higher Order Functions Emulation
+/* ds.h - Generic Data Structure API
  * Copyright (C) 2018 Quytelda Kahja
  *
  * This file is part of focs.
