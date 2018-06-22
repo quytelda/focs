@@ -31,41 +31,25 @@ static bool __nonulls __elem(const ring_buffer buf, const void * data)
 	return false;
 }
 
-static __nonulls bool __push_head(ring_buffer buf, const void * data)
+static __nonulls void __push_head(ring_buffer buf, __immutable(void) data)
 {
-	if(!DS_OVERWRITE(buf) && __IS_FULL(buf))
-		return_with_errno(ENOBUFS, false);
-
 	DS_PRIV(buf)->head = __prev(buf, DS_PRIV(buf)->head);
 	memcpy(DS_PRIV(buf)->head, data, DS_DATA_SIZE(buf));
 	DS_PRIV(buf)->length = MIN(DS_PRIV(buf)->length + 1, DS_ENTRIES(buf));
-
-	return true;
 }
 
-static __nonulls bool __push_tail(ring_buffer buf, const void * data)
+static __nonulls void __push_tail(ring_buffer buf, __immutable(void) data)
 {
-	if(!DS_OVERWRITE(buf) && __IS_FULL(buf))
-		return_with_errno(ENOBUFS, false);
-
 	memcpy(DS_PRIV(buf)->tail, data, DS_DATA_SIZE(buf));
 	DS_PRIV(buf)->tail = __next(buf, DS_PRIV(buf)->tail);
 	DS_PRIV(buf)->length = MIN(DS_PRIV(buf)->length + 1, DS_ENTRIES(buf));
-
-	return true;
 }
 
 static __nonulls void * __pop_head(ring_buffer buf)
 {
 	void * data;
 
-	if(__IS_EMPTY(buf))
-		return_with_errno(EFAULT, NULL);
-
-	data = malloc(DS_DATA_SIZE(buf));
-	if(!data)
-		return_with_errno(ENOMEM, NULL);
-
+	malloc_rof(data, DS_DATA_SIZE(buf), NULL);
 	memcpy(data, DS_PRIV(buf)->head, DS_DATA_SIZE(buf));
 	DS_PRIV(buf)->head = __next(buf, DS_PRIV(buf)->head);
 	DS_PRIV(buf)->length--;
@@ -77,13 +61,7 @@ static __nonulls void * __pop_tail(ring_buffer buf)
 {
 	void * data;
 
-	if(__IS_EMPTY(buf))
-		return_with_errno(EFAULT, NULL);
-
-	data = malloc(DS_DATA_SIZE(buf));
-	if(!data)
-		return_with_errno(ENOMEM, NULL);
-
+	malloc_rof(data, DS_DATA_SIZE(buf), NULL);
 	DS_PRIV(buf)->tail = __prev(buf, DS_PRIV(buf)->tail);
 	memcpy(data, DS_PRIV(buf)->tail, DS_DATA_SIZE(buf));
 	DS_PRIV(buf)->length--;
@@ -160,24 +138,17 @@ static __nonulls void __close_gap(ring_buffer buf, const size_t index)
 	(DS_PRIV(buf)->length)--;
 }
 
-static __nonulls bool __insert(ring_buffer buf,
-			       const void * data,
-			       const ssize_t relative)
+static __nonulls void __insert(ring_buffer buf,
+	                       const void * data,
+	                       const size_t index)
 {
-	size_t absolute;
 	void * addr;
 
-	if(!DS_OVERWRITE(buf) && __IS_FULL(buf))
-		return_with_errno(ENOBUFS, false);
-
-	absolute = __INDEX_ABS(buf, relative);
 	if(!DS_OVERWRITE(buf))
-		__open_gap(buf, absolute);
+		__open_gap(buf, index);
 
-	addr = __index_to_addr(buf, absolute);
+	addr = __index_to_addr(buf, index);
 	memcpy(addr, data, DS_DATA_SIZE(buf));
-
-	return true;
 }
 
 static __nonulls void * __remove(ring_buffer buf,
@@ -185,40 +156,29 @@ static __nonulls void * __remove(ring_buffer buf,
 				 const bool keep)
 {
 	void * addr;
-	void * data;
+	void * data = NULL;
 
-	if(__IS_EMPTY(buf))
-		return_with_errno(EFAULT, NULL);
-
-	addr = __index_to_addr(buf, index);
 	if(keep) {
-		data = malloc(DS_DATA_SIZE(buf));
-		if(!data)
-			return_with_errno(ENOMEM, NULL);
-
+		addr = __index_to_addr(buf, index);
+		malloc_rof(data, DS_DATA_SIZE(buf), NULL);
 		memcpy(data, addr, DS_DATA_SIZE(buf));
 	}
 
 	__close_gap(buf, index);
 
-	return keep ? data : addr;
+	return data;
 }
 
 static __pure __nonulls void * __fetch(const ring_buffer buf,
-	                               const ssize_t relative)
+	                               const size_t index)
 {
 	void * addr;
 	void * data;
 
-	if(__IS_EMPTY(buf))
-		return_with_errno(EFAULT, NULL);
-
-	data = malloc(DS_DATA_SIZE(buf));
-	if(!data)
-		return_with_errno(ENOMEM, NULL);
-
-	addr = __index_to_addr(buf, __INDEX_ABS(buf, relative));
+	malloc_rof(data, DS_DATA_SIZE(buf), NULL);
+	addr = __index_to_addr(buf, index);
 	memcpy(data, addr, DS_DATA_SIZE(buf));
+
 	return data;
 }
 
@@ -431,10 +391,13 @@ bool rb_elem(const ring_buffer buf, const void * data)
 
 bool rb_push_head(ring_buffer buf, const void * data)
 {
-	bool success;
+	bool success = false;
 
 	rwlock_writer_entry(DS_PRIV(buf)->rwlock);
-	success = __push_head(buf, data);
+	if(!__IS_FULL(buf) || DS_OVERWRITE(buf)) {
+		__push_head(buf, data);
+		success = true;
+	}
 	rwlock_writer_exit(DS_PRIV(buf)->rwlock);
 
 	return success;
@@ -442,10 +405,13 @@ bool rb_push_head(ring_buffer buf, const void * data)
 
 bool rb_push_tail(ring_buffer buf, const void * data)
 {
-	bool success;
+	bool success = false;
 
 	rwlock_writer_entry(DS_PRIV(buf)->rwlock);
-	success = __push_tail(buf, data);
+	if(!__IS_FULL(buf) || DS_OVERWRITE(buf)) {
+		__push_tail(buf, data);
+		success = true;
+	}
 	rwlock_writer_exit(DS_PRIV(buf)->rwlock);
 
 	return success;
@@ -453,10 +419,11 @@ bool rb_push_tail(ring_buffer buf, const void * data)
 
 void * rb_pop_head(ring_buffer buf)
 {
-	void * data;
+	void * data = NULL;
 
 	rwlock_writer_entry(DS_PRIV(buf)->rwlock);
-	data = __pop_head(buf);
+	if(!__IS_EMPTY(buf))
+		data = __pop_head(buf);
 	rwlock_writer_exit(DS_PRIV(buf)->rwlock);
 
 	return data;
@@ -464,10 +431,11 @@ void * rb_pop_head(ring_buffer buf)
 
 void * rb_pop_tail(ring_buffer buf)
 {
-	void * data;
+	void * data = NULL;
 
 	rwlock_writer_entry(DS_PRIV(buf)->rwlock);
-	data = __pop_tail(buf);
+	if(!__IS_EMPTY(buf))
+		data = __pop_tail(buf);
 	rwlock_writer_exit(DS_PRIV(buf)->rwlock);
 
 	return data;
@@ -475,32 +443,39 @@ void * rb_pop_tail(ring_buffer buf)
 
 bool rb_insert(ring_buffer buf, const void * data, const ssize_t pos)
 {
-	bool success;
+	bool success = false;
 
 	rwlock_writer_entry(DS_PRIV(buf)->rwlock);
-	success = __insert(buf, data, pos);
+	if(!__IS_FULL(buf) || DS_OVERWRITE(buf)) {
+		__insert(buf, data, __INDEX_ABS(buf, pos));
+		success = true;
+	}
 	rwlock_writer_exit(DS_PRIV(buf)->rwlock);
 
 	return success;
 }
 
-bool rb_delete(ring_buffer buf, const size_t pos)
+bool rb_delete(ring_buffer buf, const ssize_t pos)
 {
-	void * addr;
+	bool success = false;
 
 	rwlock_writer_entry(DS_PRIV(buf)->rwlock);
-	addr = __remove(buf, pos, false);
+	if(!__IS_EMPTY(buf)) {
+		__remove(buf, __INDEX_ABS(buf, pos), false);
+		success = true;
+	}
 	rwlock_writer_exit(DS_PRIV(buf)->rwlock);
 
-	return (addr != NULL);
+	return success;
 }
 
-void * rb_remove(ring_buffer buf, const size_t pos)
+void * rb_remove(ring_buffer buf, const ssize_t pos)
 {
-	void * data;
+	void * data = NULL;
 
 	rwlock_writer_entry(DS_PRIV(buf)->rwlock);
-	data = __remove(buf, pos, true);
+	if(!__IS_EMPTY(buf))
+		data = __remove(buf, __INDEX_ABS(buf, pos), true);
 	rwlock_writer_exit(DS_PRIV(buf)->rwlock);
 
 	return data;
@@ -508,10 +483,11 @@ void * rb_remove(ring_buffer buf, const size_t pos)
 
 void * rb_fetch(const ring_buffer buf, const ssize_t pos)
 {
-	void * data;
+	void * data = NULL;
 
 	rwlock_writer_entry(DS_PRIV(buf)->rwlock);
-	data = __fetch(buf, pos);
+	if(__IS_EMPTY(buf))
+		data = __fetch(buf, __INDEX_ABS(buf, pos));
 	rwlock_writer_exit(DS_PRIV(buf)->rwlock);
 
 	return data;
@@ -537,24 +513,24 @@ void rb_map(ring_buffer buf, const map_fn fn)
 
 void * rb_foldr(const ring_buffer buf, const foldr_fn fn, const void * init)
 {
-	void * data;
+	void * result;
 
 	rwlock_reader_entry(DS_PRIV(buf)->rwlock);
-	data = __foldr(buf, fn, init);
+	result = __foldr(buf, fn, init);
 	rwlock_reader_exit(DS_PRIV(buf)->rwlock);
 
-	return data;
+	return result;
 }
 
 void * rb_foldl(const ring_buffer buf, const foldl_fn fn, const void * init)
 {
-	void * data;
+	void * result;
 
 	rwlock_reader_entry(DS_PRIV(buf)->rwlock);
-	data = __foldl(buf, fn, init);
+	result = __foldl(buf, fn, init);
 	rwlock_reader_exit(DS_PRIV(buf)->rwlock);
 
-	return data;
+	return result;
 }
 
 bool rb_any(const ring_buffer buf, const pred_fn pred)

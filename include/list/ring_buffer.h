@@ -327,7 +327,7 @@ void * __nonulls rb_fetch(const ring_buffer buf, const ssize_t pos);
  * @return Upon successful completion, this function shall return `true`;
  * otherwise, `false` shall be returned and `errno` set appropriately..
  */
-bool __nonulls rb_delete(ring_buffer buf, const size_t pos);
+bool __nonulls rb_delete(ring_buffer buf, const ssize_t pos);
 
 /**
  * Delete and return a data element from a given index of a ring buffer.
@@ -341,7 +341,7 @@ bool __nonulls rb_delete(ring_buffer buf, const size_t pos);
  * needed.  It is **not** equivalent to the pointer which was used to insert
  * the data into `buf`.
  */
-void * __nonulls rb_remove(ring_buffer buf, const size_t pos);
+void * __nonulls rb_remove(ring_buffer buf, const ssize_t pos);
 
 /**
  * Reverse the contents of a ring buffer in-place.
