@@ -565,23 +565,11 @@ bool dl_take_while(double_list list, const pred_fn p)
 
 void dl_map(double_list list, const map_fn fn)
 {
-	void * result;
 	struct dl_element * current;
 
 	rwlock_writer_entry(DS_PRIV(list)->rwlock);
-	linked_list_foreach(list, current) {
-		result = fn(current->data);
-
-		/* Check if the user allocated a new variable.
-		 * If so, it's value must be copied into current->data so that
-		 * the newly allocated variable can be freed before it's
-		 * reference is lost in the next iteration.
-		 */
-		if(result != current->data) {
-			memcpy(current->data, result, DS_DATA_SIZE(list));
-			free(result);
-		}
-	}
+	linked_list_foreach(list, current)
+		fn(current->data);
 	rwlock_writer_exit(DS_PRIV(list)->rwlock);
 }
 
@@ -589,7 +577,6 @@ void * dl_foldr(const double_list list,
 	        const foldr_fn fn,
 	        __immutable(void) init)
 {
-	void * result;
 	void * accumulator;
 	struct dl_element * current;
 
@@ -597,19 +584,8 @@ void * dl_foldr(const double_list list,
 	memcpy(accumulator, init, DS_DATA_SIZE(list));
 
 	rwlock_reader_entry(DS_PRIV(list)->rwlock);
-	linked_list_foreach(list, current) {
-		result = fn(current->data, accumulator);
-
-		/* Check if the user allocated a new variable.
-		 * If so, it's value must be copied into the accumulator so that
-		 * the newly allocated variable can be freed before it's
-		 * reference is lost in the next iteration.
-		 */
-		if(result != accumulator) {
-			memcpy(accumulator, result, DS_DATA_SIZE(list));
-			free(result);
-		}
-	}
+	linked_list_foreach(list, current)
+		fn(current->data, accumulator);
 	rwlock_reader_exit(DS_PRIV(list)->rwlock);
 
 	return accumulator;
@@ -617,7 +593,6 @@ void * dl_foldr(const double_list list,
 
 void * dl_foldl(const double_list list, const foldl_fn fn, const void * init)
 {
-	void * result;
 	void * accumulator;
 	struct dl_element * current;
 
@@ -625,19 +600,8 @@ void * dl_foldl(const double_list list, const foldl_fn fn, const void * init)
 	memcpy(accumulator, init, DS_DATA_SIZE(list));
 
 	rwlock_reader_entry(DS_PRIV(list)->rwlock);
-	linked_list_foreach(list, current) {
-		result = fn(accumulator, current->data);
-
-		/* Check if the user allocated a new variable.
-		 * If so, it's value must be copied into the accumulator so that
-		 * the newly allocated variable can be freed before it's
-		 * reference is lost in the next iteration.
-		 */
-		if(result != accumulator) {
-			memcpy(accumulator, result, DS_DATA_SIZE(list));
-			free(result);
-		}
-	}
+	linked_list_foreach(list, current)
+		fn(accumulator, current->data);
 	rwlock_reader_exit(DS_PRIV(list)->rwlock);
 
 	return accumulator;

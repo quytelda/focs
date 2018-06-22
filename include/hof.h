@@ -22,11 +22,11 @@
 #define __HOF_H
 
 /* Generic function types for use in higher order functions. */
-typedef void * (* map_fn)  (void * data);
-typedef bool   (* comp_fn) (const void * a, const void * b);
-typedef bool   (* pred_fn) (const void * data);
-typedef void * (* foldr_fn)(const void * c, void * acc);
-typedef void * (* foldl_fn)(void * acc, const void * c);
+typedef void (* map_fn)  (void * data);
+typedef bool (* comp_fn) (const void * a, const void * b);
+typedef bool (* pred_fn) (const void * data);
+typedef void (* foldr_fn)(const void * c, void * acc);
+typedef void (* foldl_fn)(void * acc, const void * c);
 
 /**
  * Create a mappable wrapper for a function.

@@ -246,16 +246,9 @@ static __nonulls bool __reverse(ring_buffer buf)
 static __nonulls void __map(const ring_buffer buf, const map_fn fn)
 {
 	void * current;
-	void * result;
 
-	ring_buffer_foreach(buf, current) {
-		result = fn(current);
-
-		if(result != current) {
-			memcpy(current, result, DS_DATA_SIZE(buf));
-			free(result);
-		}
-	}
+	ring_buffer_foreach(buf, current)
+		fn(current);
 }
 
 static __pure __nonulls void * __foldr(const ring_buffer buf,
@@ -264,19 +257,12 @@ static __pure __nonulls void * __foldr(const ring_buffer buf,
 {
 	void * accumulator;
 	void * current;
-	void * result;
 
 	malloc_rof(accumulator, DS_DATA_SIZE(buf), NULL);
 	memcpy(accumulator, init, DS_DATA_SIZE(buf));
 
-	ring_buffer_foreach(buf, current) {
-		result = fn(current, accumulator);
-
-		if(result != accumulator) {
-			memcpy(accumulator, result, DS_DATA_SIZE(buf));
-			free(result);
-		}
-	}
+	ring_buffer_foreach(buf, current)
+		fn(current, accumulator);
 
 	return accumulator;
 }
@@ -287,19 +273,12 @@ static __pure __nonulls void * __foldl(const ring_buffer buf,
 {
 	void * accumulator;
 	void * current;
-	void * result;
 
 	malloc_rof(accumulator, DS_DATA_SIZE(buf), NULL);
 	memcpy(accumulator, init, DS_DATA_SIZE(buf));
 
-	ring_buffer_foreach(buf, current) {
-		result = fn(accumulator, current);
-
-		if(result != accumulator) {
-			memcpy(accumulator, result, DS_DATA_SIZE(buf));
-			free(result);
-		}
-	}
+	ring_buffer_foreach(buf, current)
+		fn(accumulator, current);
 
 	return accumulator;
 }
