@@ -483,30 +483,3 @@ void rb_take_while(ring_buffer buf, const pred_fn pred);
 void rb_dump(const ring_buffer buf);
 
 #endif /* DEBUG */
-
-#ifdef GENERICS
-
-static const struct mgmt_operations mgmt_ops = {
-	.elem  = (elem_mgmt_fn)  rb_elem,
-	.empty = (empty_mgmt_fn) rb_empty,
-	.full  = (full_mgmt_fn)  rb_full,
-	.size  = (size_mgmt_fn)  rb_size,
-};
-
-static const struct hof_operations hof_ops = {
-	.map        = (map_hof_fn)        rb_map,
-	.foldr      = (foldr_hof_fn)      rb_foldr,
-	.foldl      = (foldl_hof_fn)      rb_foldl,
-	.any        = (any_hof_fn)        rb_any,
-	.all        = (all_hof_fn)        rb_all,
-	.filter     = (filter_hof_fn)     rb_filter,
-	.drop_while = (drop_while_hof_fn) rb_drop_while,
-	.take_while = (take_while_hof_fn) rb_take_while,
-};
-
-#else /* GENERICS */
-
-static const __unused void * mgmt_ops = NULL;
-static const __unused void * hof_ops  = NULL;
-
-#endif /* GENERICS */

@@ -264,7 +264,7 @@ single_list sl_create(const struct ds_properties * props)
 	if(!list)
 		return_with_errno(ENOMEM, NULL);
 
-	DS_INIT(list, props, &mgmt_ops, &hof_ops);
+	DS_INIT(list, props);
 
 	/* Private Area Initialization */
 	priv = DS_PRIV(list);

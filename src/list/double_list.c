@@ -240,7 +240,7 @@ double_list dl_create(__immutable(struct ds_properties) props)
 
 	malloc_rof(list, sizeof(*list), NULL);
 
-	DS_INIT(list, props, &mgmt_ops, &hof_ops);
+	DS_INIT(list, props);
 
 	priv = DS_PRIV(list);
 	priv->head = NULL;

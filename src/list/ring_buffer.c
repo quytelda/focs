@@ -373,7 +373,7 @@ ring_buffer rb_create(const struct ds_properties * props)
 	if(!buf)
 		return_with_errno(ENOMEM, NULL);
 
-	DS_INIT(buf, props, &mgmt_ops, &hof_ops);
+	DS_INIT(buf, props);
 
 	/* Set up private data section. */
 	priv = DS_PRIV(buf);
