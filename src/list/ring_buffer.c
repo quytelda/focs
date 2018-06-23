@@ -70,8 +70,8 @@ static __nonulls void * __pop_tail(ring_buffer buf)
 }
 
 static __nonulls void * __shift_forward(const ring_buffer buf,
-			                const size_t start,
-			                const size_t end)
+	                                const size_t start,
+	                                const size_t end)
 {
 	void * dest;
 	void * front;
@@ -88,8 +88,8 @@ static __nonulls void * __shift_forward(const ring_buffer buf,
 }
 
 static __nonulls void * __shift_backward(const ring_buffer buf,
-			                 const size_t start,
-			                 const size_t end)
+	                                 const size_t start,
+	                                 const size_t end)
 {
 	void * back;
 	void * dest;
@@ -153,7 +153,7 @@ static __nonulls void __insert(ring_buffer buf,
 
 static __nonulls void * __remove(ring_buffer buf,
 	                         const size_t index,
-				 const bool keep)
+	                         const bool keep)
 {
 	void * addr;
 	void * data = NULL;
@@ -324,7 +324,7 @@ ring_buffer rb_create(const struct ds_properties * props)
 	priv->tail = priv->data;
 	priv->length = 0;
 
-        priv->rwlock = rwlock_create();
+	priv->rwlock = rwlock_create();
 	if(!priv->rwlock)
 		goto exit;
 
