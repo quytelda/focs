@@ -486,7 +486,7 @@ void * rb_fetch(const ring_buffer buf, const ssize_t pos)
 	void * data = NULL;
 
 	rwlock_writer_entry(DS_PRIV(buf)->rwlock);
-	if(__IS_EMPTY(buf))
+	if(!__IS_EMPTY(buf))
 		data = __fetch(buf, __INDEX_ABS(buf, pos));
 	rwlock_writer_exit(DS_PRIV(buf)->rwlock);
 
