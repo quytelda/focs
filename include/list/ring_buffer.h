@@ -25,7 +25,7 @@
 #include "focs/ds.h"
 #include "sync/rwlock.h"
 
-START_DS(ring_buffer) {
+DS_START(ring_buffer) {
 	void * head;
 	void * tail;
 
@@ -33,7 +33,7 @@ START_DS(ring_buffer) {
 	size_t length;
 
 	struct rwlock * rwlock;
-} END_DS(ring_buffer);
+} DS_END(ring_buffer);
 
 #define __SPACE(buf)  (DS_DATA_SIZE(buf) * DS_ENTRIES(buf))
 #define __LENGTH(buf) (DS_PRIV(buf)->length)
