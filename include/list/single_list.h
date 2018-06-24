@@ -37,13 +37,13 @@ struct sl_element {
 	void * data;
 };
 
-START_DS(single_list) {
+DS_START(single_list) {
 	struct sl_element * head;
 	struct sl_element * tail;
 	size_t length;
 
 	struct rwlock * rwlock;
-} END_DS(single_list);
+} DS_END(single_list);
 
 #define __LENGTH(list)   (DS_PRIV(list)->length)
 #define __IS_EMPTY(list) (__LENGTH(list) <= 0)

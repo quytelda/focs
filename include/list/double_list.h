@@ -39,14 +39,14 @@ struct dl_element {
 	void * data;
 };
 
- START_DS(double_list) {
+ DS_START(double_list) {
 	struct dl_element * head;
 	struct dl_element * tail;
 	size_t length;
 	size_t data_size;
 
 	struct rwlock * rwlock;
-} END_DS(double_list);
+} DS_END(double_list);
 
 #define __LENGTH(list) (DS_PRIV(list)->length)
 
