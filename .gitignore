@@ -1,7 +1,11 @@
 # normal rules
 .*
 *.bz2
+*.cache
 *.gz
+*.in
+*.la
+*.lo
 *.lz4
 *.lzma
 *.lzo
@@ -11,6 +15,19 @@
 *.so
 *.tar
 *.xz
+
+# autotools generated files and directories
+autoscan.log
+aclocal.m4
+build-aux
+config.h
+config.log
+config.status
+configure
+configure.scan
+libtool
+Makefile
+stamp-h1
 
 # tests
 test/single_list

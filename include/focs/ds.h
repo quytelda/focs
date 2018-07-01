@@ -41,6 +41,8 @@ struct ds_properties {
 	typedef struct {                                           \
 		const struct ds_properties   * __DS_PROPS_NAME;    \
 		struct ds_name##_priv
+#define DS_END(ds_name) __DS_PRIV_NAME; } * ds_name
+
 #define DS_ALLOC(ds)       (ds = malloc(sizeof(*ds)))
 #define DS_INIT(ds, props) (DS_PROPS(ds) = props)
 #define DS_FREE(ds)        (free_null(*ds))
