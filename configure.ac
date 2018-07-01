@@ -35,7 +35,7 @@ AC_CHECK_LIB([pthread], [
 	pthread_cond_wait,
 	pthread_cond_broadcast
 ])
-PKG_CHECK_MODULES([CHECK], [check >= 0.10.0], []
+PKG_CHECK_MODULES([CHECK], [check >= 0.10.0], [],
 	[AC_MSG_WARN("Install 'check' if you intend to use 'make check'.")])
 
 # Check for header files.
