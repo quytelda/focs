@@ -1136,21 +1136,9 @@ START_TEST(test_dl_take_while_multiple)
 }
 END_TEST
 
-uint8_t * map_fn_inplace(uint8_t * data)
+void increment(void * data)
 {
-	(*data)++;
-	return data;
-}
-
-uint8_t * map_fn_newptr(uint8_t * data)
-{
-	uint8_t * n;
-
-	n = malloc(sizeof(*data));
-	memcpy(n, data, sizeof(*data));
-	(*n)++;
-
-	return n;
+	(*(uint8_t *) data)++;
 }
 
 START_TEST(test_dl_map_empty)
@@ -1159,8 +1147,7 @@ START_TEST(test_dl_map_empty)
 
 	list = dl_create(&props);
 
-	dl_map(list, (map_fn) map_fn_inplace);
-	dl_map(list, (map_fn) map_fn_newptr);
+	dl_map(list, increment);
 
 	ck_assert(!DS_PRIV(list)->head);
 	ck_assert(!DS_PRIV(list)->tail);
@@ -1180,16 +1167,15 @@ START_TEST(test_dl_map_single)
 	list = dl_create(&props);
 	dl_push_head(list, &in);
 
-	/* Map two increment functions over the list. */
-	dl_map(list, (map_fn) map_fn_inplace); /* [1] -> [2] */
-	dl_map(list, (map_fn) map_fn_newptr); /* [2] -> [3] */
+	/* [1] -> [2] */
+	dl_map(list, increment);
 	out = dl_fetch(list, 0);
 
 	ck_assert(DS_PRIV(list)->head);
 	ck_assert(DS_PRIV(list)->tail);
 	ck_assert_int_eq(DS_PRIV(list)->length, 1);
 
-	ck_assert_int_eq(*out, in + 2);
+	ck_assert_int_eq(*out, in + 1);
 
 	dl_destroy(&list);
 }
@@ -1213,9 +1199,7 @@ START_TEST(test_dl_map_multiple)
 	dl_push_tail(list, &in3);
 
 	/* [1, 2, 3] -> [2, 3, 4] */
-	dl_map(list, (map_fn) map_fn_inplace);
-	/* [2, 3, 4] -> [3, 4, 5] */
-	dl_map(list, (map_fn) map_fn_newptr);
+	dl_map(list, increment);
 
 	out1 = dl_fetch(list, 0);
 	out2 = dl_fetch(list, 1);
@@ -1225,9 +1209,9 @@ START_TEST(test_dl_map_multiple)
 	ck_assert(DS_PRIV(list)->tail);
 	ck_assert_int_eq(DS_PRIV(list)->length, 3);
 
-	ck_assert_int_eq(*out1, in1 + 2);
-	ck_assert_int_eq(*out2, in2 + 2);
-	ck_assert_int_eq(*out3, in3 + 2);
+	ck_assert_int_eq(*out1, in1 + 1);
+	ck_assert_int_eq(*out2, in2 + 1);
+	ck_assert_int_eq(*out3, in3 + 1);
 
 	dl_destroy(&list);
 }
@@ -1310,81 +1294,48 @@ START_TEST(test_dl_reverse_multiple)
 END_TEST
 
 /**
- * foldr_fn_inplace() - Right folding function for testing.
- * @c: A constant byte integer
- * @acc: The byte integer currently in the accumulator
+ * substract_right() - Right folding function for testing.
+ * @c:   A pointer to a constant byte integer
+ * @acc: A pointer to the current fold accumulator
  *
- * Subtract the value of *@acc from *@c.  Store the result in @acc, since we
- * know this is the fold accumulator in right folds.  The data structure will
- * know that since the addresses match, the accumulator has already been
- * updated.
+ * Subtract the value of `*acc` from `*c`.  Store the result in `acc`, since we
+ * know this is the fold accumulator in right folds.
  */
-int8_t * foldr_fn_inplace(const int8_t * c, int8_t * acc)
+void subtract_right(const void * c, void * acc)
 {
-	*acc = (*c) - (*acc);
-	return acc;
+	*(uint8_t *) acc = (*(uint8_t *) c) - (*(uint8_t *) acc);
 }
 
 /**
- * foldl_fn_inplace() - Left folding function for testing.
- * @acc: The byte integer currently in the accumulator
- * @c: A constant byte integer
+ * subtract_left() - Left folding function for testing.
+ * @acc: A pointer to the current fold accumulator
+ * @c:   A pointer to a constant byte integer
  *
- * Subtract the value of *@c from *@acc.  Store the result in @acc, since we
- * know this is the fold accumulator in left folds.  The data structure will
- * know that since the addresses match, the accumulator has already been
- * updated.
+ * Subtract the value of `*acc` from *c.  Store the result in `acc`, since we
+ * know this is the fold accumulator in left folds.
  */
-int8_t * foldl_fn_inplace(int8_t * acc, const int8_t * c)
+void subtract_left(void * acc, const void * c)
 {
-	*acc = (*acc) - (*c);
-	return acc;
-}
-
-/**
- * generic_fold_fn() - Generic folding function for testing.
- * @a: A constant byte integer
- * @b: A constant byte integer
- *
- * Subtract the value of *@b from *@a.  Store the result in a new pointer, since
- * we do not know ahead of time whether the function will be used in a left or a
- * right fold.  The data structure will know that since the addresses don't
- * match, the accumulator has not been updated, and it will update it and free
- * our new variable automatically.
- */
-int8_t * generic_fold_fn(const int8_t * a, const int8_t * b)
-{
-	int8_t * n;
-
-	n = malloc(sizeof(n));
-	*n = (*a) - (*b);
-
-	return n;
+	*(uint8_t *) acc = (*(uint8_t *) acc) - (*(uint8_t *) c);
 }
 
 START_TEST(test_dl_foldr_empty)
 {
 	int8_t init = 0;
-	int8_t * out1;
-	int8_t * out2;
+	int8_t * out;
 	double_list list;
 
 	list = dl_create(&props);
 
-	out1 = dl_foldr(list, (foldr_fn) foldr_fn_inplace, &init);
-	out2 = dl_foldr(list, (foldr_fn) generic_fold_fn, &init);
+	out = dl_foldr(list, subtract_right, &init);
 
-	ck_assert(out1);
-	ck_assert(out2);
-	ck_assert_int_eq(*out1, init);
-	ck_assert_int_eq(*out2, init);
-
+	ck_assert(out);
+	ck_assert_int_eq(*out, init);
 	ck_assert(!DS_PRIV(list)->head);
 	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_empty(list));
 
-	free(out1);
-	free(out2);
+	free(out);
 	dl_destroy(&list);
 }
 END_TEST
@@ -1393,26 +1344,21 @@ START_TEST(test_dl_foldr_single)
 {
 	int8_t in = 1;
 	int8_t init = 0;
-	int8_t * out1;
-	int8_t * out2;
+	int8_t * out;
 	double_list list;
 
 	list = dl_create(&props);
 	dl_push_head(list, &in);
 
-	out1 = dl_foldr(list, (foldr_fn) foldr_fn_inplace, &init);
-	out2 = dl_foldr(list, (foldr_fn) generic_fold_fn, &init);
+	out = dl_foldr(list, subtract_right, &init);
 
-	ck_assert(out1);
-	ck_assert_int_eq(*out1, 1);
-	ck_assert_int_eq(*out2, 1);
-
+	ck_assert(out);
+	ck_assert_int_eq(*out, 1);
 	ck_assert(DS_PRIV(list)->head);
 	ck_assert(DS_PRIV(list)->tail);
 	ck_assert_int_eq(DS_PRIV(list)->length, 1);
 
-	free(out1);
-	free(out2);
+	free(out);
 	dl_destroy(&list);
 }
 END_TEST
@@ -1423,8 +1369,7 @@ START_TEST(test_dl_foldr_multiple)
 	int8_t in2 = 2;
 	int8_t in3 = 3;
 	int8_t init = 0;
-	int8_t * out1;
-	int8_t * out2;
+	int8_t * out;
 	double_list list;
 
 	list = dl_create(&props);
@@ -1434,20 +1379,15 @@ START_TEST(test_dl_foldr_multiple)
 	dl_push_tail(list, &in3);
 
 	/* foldr (-) 0 [1, 2, 3] -> 2 */
-	out1 = dl_foldr(list, (foldr_fn) foldr_fn_inplace, &init);
-	out2 = dl_foldr(list, (foldr_fn) generic_fold_fn, &init);
+	out = dl_foldr(list, subtract_right, &init);
 
-	ck_assert(out1);
-	ck_assert(out2);
-	ck_assert_int_eq(*out1, 2);
-	ck_assert_int_eq(*out2, 2);
-
+	ck_assert(out);
+	ck_assert_int_eq(*out, 2);
 	ck_assert(DS_PRIV(list)->head);
 	ck_assert(DS_PRIV(list)->tail);
 	ck_assert_int_eq(DS_PRIV(list)->length, 3);
 
-	free(out1);
-	free(out2);
+	free(out);
 	dl_destroy(&list);
 }
 END_TEST
@@ -1455,26 +1395,20 @@ END_TEST
 START_TEST(test_dl_foldl_empty)
 {
 	int8_t init = 0;
-	int8_t * out1;
-	int8_t * out2;
+	int8_t * out;
 	double_list list;
 
 	list = dl_create(&props);
 
-	out1 = dl_foldl(list, (foldl_fn) foldl_fn_inplace, &init);
-	out2 = dl_foldl(list, (foldl_fn) generic_fold_fn, &init);
+	out = dl_foldl(list, subtract_left, &init);
 
-	ck_assert(out1);
-	ck_assert(out2);
-	ck_assert_int_eq(*out1, init);
-	ck_assert_int_eq(*out2, init);
-
+	ck_assert(out);
+	ck_assert_int_eq(*out, init);
 	ck_assert(!DS_PRIV(list)->head);
 	ck_assert(!DS_PRIV(list)->tail);
 	ck_assert(dl_empty(list));
 
-	free(out1);
-	free(out2);
+	free(out);
 	dl_destroy(&list);
 }
 END_TEST
@@ -1483,28 +1417,22 @@ START_TEST(test_dl_foldl_single)
 {
 	int8_t in = 1;
 	int8_t init = 0;
-	int8_t * out1;
-	int8_t * out2;
+	int8_t * out;
 	double_list list;
 
 	list = dl_create(&props);
 	dl_push_head(list, &in);
 
 	/* foldl (-) 0 [1] -> -1 */
-	out1 = dl_foldl(list, (foldl_fn) foldl_fn_inplace, &init);
-	out2 = dl_foldl(list, (foldl_fn) generic_fold_fn, &init);
+	out = dl_foldl(list, subtract_left, &init);
 
-	ck_assert(out1);
-	ck_assert(out2);
-	ck_assert_int_eq(*out1, -1);
-	ck_assert_int_eq(*out2, -1);
-
+	ck_assert(out);
+	ck_assert_int_eq(*out, -1);
 	ck_assert(DS_PRIV(list)->head);
 	ck_assert(DS_PRIV(list)->tail);
 	ck_assert_int_eq(DS_PRIV(list)->length, 1);
 
-	free(out1);
-	free(out2);
+	free(out);
 	dl_destroy(&list);
 }
 END_TEST
@@ -1515,8 +1443,7 @@ START_TEST(test_dl_foldl_multiple)
 	int8_t in2 = 2;
 	int8_t in3 = 3;
 	int8_t init = 0;
-	int8_t * out1;
-	int8_t * out2;
+	int8_t * out;
 	double_list list;
 
 	list = dl_create(&props);
@@ -1526,20 +1453,15 @@ START_TEST(test_dl_foldl_multiple)
 	dl_push_tail(list, &in3);
 
 	/* foldl (-) 0 [1, 2, 3] -> -6 */
-	out1 = dl_foldl(list, (foldl_fn) foldl_fn_inplace, &init);
-	out2 = dl_foldl(list, (foldl_fn) generic_fold_fn, &init);
+	out = dl_foldl(list, subtract_left, &init);
 
-	ck_assert(out1);
-	ck_assert(out2);
-	ck_assert_int_eq(*out1, -6);
-	ck_assert_int_eq(*out2, -6);
-
+	ck_assert(out);
+	ck_assert_int_eq(*out, -6);
 	ck_assert(DS_PRIV(list)->head);
 	ck_assert(DS_PRIV(list)->tail);
 	ck_assert_int_eq(DS_PRIV(list)->length, 3);
 
-	free(out1);
-	free(out2);
+	free(out);
 	dl_destroy(&list);
 }
 END_TEST

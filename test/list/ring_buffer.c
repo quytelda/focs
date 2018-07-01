@@ -446,16 +446,15 @@ START_TEST(test_rb_reverse)
 }
 END_TEST
 
-uint8_t increment(uint8_t n)
+void increment(void * n)
 {
-	return n + 1;
+	(*(uint8_t *) n)++;
 }
-WRAP_MAPPABLE(increment, uint8_t, transform);
 
 START_TEST(test_rb_map_empty)
 {
 	/* `buffer` is initially empty. */
-	rb_map(buffer, transform);
+	rb_map(buffer, increment);
 
 	ck_assert(rb_empty(buffer));
 }
@@ -469,7 +468,7 @@ START_TEST(test_rb_map)
 	for(size_t i = 0; i < array_size(in); i++)
 		rb_push_head(buffer, &in[i]);
 
-	rb_map(buffer, transform);
+	rb_map(buffer, increment);
 
 	ck_assert_int_eq(rb_size(buffer), array_size(in));
 
@@ -482,19 +481,26 @@ START_TEST(test_rb_map)
 }
 END_TEST
 
-int8_t subtract(const int8_t a, const int8_t b)
+void subtract_right(const void * c, void * acc)
 {
-	return a - b;
+	uint8_t * accumulator = acc;
+
+	*accumulator = (*(uint8_t *) c) - (*accumulator);
 }
-WRAP_RFOLDABLE(subtract, int8_t, reduce_right);
-WRAP_LFOLDABLE(subtract, int8_t, reduce_left);
+
+void subtract_left(void * acc, const void * c)
+{
+	uint8_t * accumulator = acc;
+
+	*accumulator = (*accumulator) - (*(uint8_t *) c);
+}
 
 START_TEST(test_rb_foldr_empty)
 {
 	int8_t init = 0;
 	int8_t * out;
 
-	out = rb_foldr(buffer, reduce_right, &init);
+	out = rb_foldr(buffer, subtract_right, &init);
 
 	ck_assert(out);
 	ck_assert_int_eq(*out, init);
@@ -511,7 +517,7 @@ START_TEST(test_rb_foldr)
 	for(size_t i = 0; i < array_size(in); i++)
 		rb_push_head(buffer, &in[i]);
 
-	out = rb_foldr(buffer, reduce_right, &init);
+	out = rb_foldr(buffer, subtract_right, &init);
 
 	ck_assert(out);
 	ck_assert_int_eq(*out, 2);
@@ -524,7 +530,7 @@ START_TEST(test_rb_foldl_empty)
 	int8_t init = 0;
 	int8_t * out;
 
-	out = rb_foldl(buffer, reduce_left, &init);
+	out = rb_foldl(buffer, subtract_left, &init);
 
 	ck_assert(out);
 	ck_assert_int_eq(*out, init);
@@ -541,7 +547,7 @@ START_TEST(test_rb_foldl)
 	for(size_t i = 0; i < array_size(in); i++)
 		rb_push_head(buffer, &in[i]);
 
-	out = rb_foldl(buffer, reduce_left, &init);
+	out = rb_foldl(buffer, subtract_left, &init);
 
 	ck_assert(out);
 	ck_assert_int_eq(*out, -6);
@@ -549,23 +555,21 @@ START_TEST(test_rb_foldl)
 }
 END_TEST
 
-bool gte0(int8_t data)
+bool gte0(const void * data)
 {
-	return data >= 0;
+	return (*(uint8_t *) data) >= 0;
 }
-WRAP_PREDICATE(gte0, int8_t, pred_gte0);
 
-bool lt0(int8_t data)
+bool lt0(const void * data)
 {
-	return data < 0;
+	return (*(uint8_t *) data) < 0;
 }
-WRAP_PREDICATE(lt0, int8_t, pred_lt0);
 
 START_TEST(test_rb_any_empty)
 {
 	bool any;
 
-	any = rb_any(buffer, pred_gte0);
+	any = rb_any(buffer, gte0);
 
 	ck_assert(!any);
 	ck_assert(rb_empty(buffer));
@@ -580,8 +584,8 @@ START_TEST(test_rb_any)
 	for(size_t i = 0; i < array_size(in); i++)
 		rb_push_head(buffer, &in[i]);
 
-	any[0] = rb_any(buffer, pred_gte0);
-	any[1] = rb_any(buffer, pred_lt0);
+	any[0] = rb_any(buffer, gte0);
+	any[1] = rb_any(buffer, lt0);
 
 	ck_assert(any[0]);
 	ck_assert(!any[1]);
@@ -593,7 +597,7 @@ START_TEST(test_rb_all_empty)
 {
 	bool all;
 
-	all = rb_all(buffer, pred_gte0);
+	all = rb_all(buffer, gte0);
 
 	ck_assert(!all);
 	ck_assert(rb_empty(buffer));
@@ -608,8 +612,8 @@ START_TEST(test_rb_all)
 	for(size_t i = 0; i < array_size(in); i++)
 		rb_push_head(buffer, &in[i]);
 
-	all[0] = rb_all(buffer, pred_gte0);
-	all[1] = rb_all(buffer, pred_lt0);
+	all[0] = rb_all(buffer, gte0);
+	all[1] = rb_all(buffer, lt0);
 
 	ck_assert(all[0]);
 	ck_assert(!all[1]);
