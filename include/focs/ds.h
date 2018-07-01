@@ -26,6 +26,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "focs.h"
+
 struct ds_properties {
 	size_t data_size;
 	size_t entries;
